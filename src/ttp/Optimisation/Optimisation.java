@@ -129,13 +129,12 @@ public class Optimisation {
         int[] result = new int[instance.numberOfNodes+1];
         
         boolean debugPrint = !true;
-        
-        String temp = instance.file.getAbsolutePath();
+
+        String temp = instance.file.getPath();
         int index = temp.indexOf("_");
         String tspfilename = temp;//.substring(0,index)+".tsp";
         if (index==-1) index = tspfilename.indexOf(".");
-        String tspresultfilename = temp.substring(0,index)+".linkern.tour";
-        
+        String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
         if (debugPrint) System.out.println("LINKERN: "+tspfilename);
     
         File tspresultfile = new File(tspresultfilename);
