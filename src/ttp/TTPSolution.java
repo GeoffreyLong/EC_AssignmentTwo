@@ -107,7 +107,7 @@ public class TTPSolution {
     	for (int i = 0; i < packingPlanList.size(); i++){
     		packingOut[i] = packingPlanList.get(i);
     	}
-        return Arrays.toString(tourOut) + "\n" + Arrays.toString(packingOut) +  "\n";
+        return Arrays.toString(tourOut) + "\r\n" + Arrays.toString(packingOut) +  "\r\n";
     }
     
     public void writeResult(String title){

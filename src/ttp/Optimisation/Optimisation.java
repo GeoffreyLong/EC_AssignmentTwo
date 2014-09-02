@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
@@ -128,7 +130,7 @@ public class Optimisation {
     public static int[] linkernTour(TTPInstance instance) {
         int[] result = new int[instance.numberOfNodes+1];
         
-        boolean debugPrint = !true;
+        boolean debugPrint = true;
 
         String temp = instance.file.getPath();
         int index = temp.indexOf("_");
@@ -148,7 +150,7 @@ public class Optimisation {
                 command.add(tspresultfilename);
                 command.add(tspfilename);
 //                printListOfStrings(command);
-
+                
                 ProcessBuilder builder = new ProcessBuilder(command);
                 builder.redirectErrorStream(true);
                 final Process process = builder.start();
@@ -164,9 +166,13 @@ public class Optimisation {
                 if (debugPrint) System.out.println("Program terminated!");
             }
 
+            
+            /*
+            System.out.println("START");
             List<String> command = new ArrayList<String>();
             command.add("cat");
             command.add(tspresultfilename);
+            System.out.println(tspresultfilename);
 //            printListOfStrings(command);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.redirectErrorStream(true);
@@ -174,21 +180,31 @@ public class Optimisation {
             InputStream is = process.getInputStream();
             InputStreamReader isr = new InputStreamReader(is);
             BufferedReader br = new BufferedReader(isr);
+            String s = null;
+            while ((s = br.readLine()) != null) {
+            	System.out.println(s);
+            }
+            */
+           
+            
+            BufferedReader br = new BufferedReader( new FileReader(tspresultfilename));
             // discard the first line
-            String line = br.readLine();                    
-            for (int i=0; i<result.length; i++) {
+            br.readLine();
+            String line = null; 
+            System.out.println(result.length);
+            for (int i=0; i<result.length-1; i++) {
+            	System.out.println(i);
                 line = br.readLine();
                 if (debugPrint) System.out.println("<TOUR> "+line);
                 index = line.indexOf(" ");
-                int number = Integer.parseInt(line.substring(0,index));
-                result[i] = number;
-                if (debugPrint) System.out.println(Arrays.toString(result));
+                int number = Integer.parseInt(line.split("\\s+")[0]);
+                result[i] = number; 
             }
-            if (debugPrint) System.out.println("Program terminated?");    
-            int rc = process.waitFor();
-            if (debugPrint) System.out.println("Program terminated!");
+            //if (debugPrint) System.out.println(Arrays.toString(result));
+          
             
             } catch (Exception ex) {
+            	ex.printStackTrace();
             }
         return result;
     }
