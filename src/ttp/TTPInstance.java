@@ -258,13 +258,17 @@ public class TTPInstance {
                     
                     int currentWC = this.items[itemIndex][2];
                     wc=wc+currentWC;
-                    
+                   //System.out.printf("ItemID: %d\n", this.items[itemIndex][0]);
                     int currentFP=this.items[itemIndex][1];
                     solution.fp=solution.fp+currentFP;
                     
                     if (debugPrint) System.out.print("[fp="+currentFP+",wc="+currentWC+"] ");
+                   
                 }
+                
             }
+            
+     
             if (debugPrint) System.out.println();
             
             int h= (i+1)%(tour.length-1); //h: next tour city index
@@ -273,7 +277,7 @@ public class TTPInstance {
             long distance = (long)Math.ceil(distances(tour[i],tour[h]));
             
             
-            
+          
             // compute the raw distance
             solution.ftraw += distance;
             
@@ -284,7 +288,7 @@ public class TTPInstance {
             
             if (debugPrint) System.out.println("i="+i+" tour[i]="+tour[i]+" tour[h]="+tour[h]+" distance="+distance+" fp="+solution.fp + " ft=" + solution.ft);
         }
-        
+        System.out.println("wc:" + wc);
         solution.wendUsed = wc;
         solution.wend=weightofKnapsack-wc;
         solution.ob=solution.fp-solution.ft*rentRate;

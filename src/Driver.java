@@ -28,9 +28,9 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-//            args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_", // to do all 10 instances (several files match the pattern)
+            args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_01", // to do all 10 instances (several files match the pattern)
 //            args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_10.ttp", // to do just this 1 instance
-            args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01.ttp", // to do just this 1 instance
+//            args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01.ttp", // to do just this 1 instance
 //            args = new String[]{"instances", "pla33810_n338090_uncorr_10.ttp", // to do just this 1 instance
             "2", "10000", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
@@ -64,18 +64,19 @@ public class Driver {
             System.out.print(f.getName()+": ");
             
             // do the optimisation
-            TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm, 
-                    durationWithoutImprovement, maxRuntime);
+            //TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm, 
+             //       durationWithoutImprovement, maxRuntime);
+            TTPSolution solution = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
             
             // print to file
             solution.writeResult(resultTitle);
             
             // print to screen
-            solution.println();
+            //solution.println();
             
             
-//            solution.printFull();
+            solution.printFull();
         }
     }
     
