@@ -95,28 +95,28 @@ public class TTPInstance {
                 }
                 if (line.startsWith("NODE_COORD_SECTION")) {
                     this.nodes = new double[this.numberOfNodes][3];
-                    for (int i=0; i<this.numberOfNodes; i++) {
+                    for (int i = 0; i < this.numberOfNodes; i++) {
                         line = br.readLine();
                         String[] splittedLine = line.split("\\s+");
-                        for (int j=0; j<splittedLine.length; j++) {
+                        for (int j = 0; j < splittedLine.length; j++) {
                             double temp = Double.parseDouble(splittedLine[j]);
 //                            int temp = Integer.parseInt(splittedLine[j]);
                             // adjust city number by 1
-                            if (j==0) temp =  temp-1;
+                            if (j==0) temp =  temp - 1;
                             this.nodes[i][j] = temp;
                         }
                     }
                 }
                 if (line.startsWith("ITEMS SECTION")) {
                     this.items = new int[this.numberOfItems][4];
-                    for (int i=0; i<this.numberOfItems; i++) {
+                    for (int i = 0; i < this.numberOfItems; i++) {
                         line = br.readLine();
                         String[] splittedLine = line.split("\\s+");
-                        for (int j=0; j<splittedLine.length; j++) {
+                        for (int j = 0; j < splittedLine.length; j++) {
                             int temp = Integer.parseInt(splittedLine[j]);
                             // adjust city number by 1
-                            if (j==0) temp =  temp-1;  // item numbers start here with 0 --> in TTP files with 1
-                            if (j==3) temp =  temp-1;  // city numbers start here with 0 --> in TTP files with 1
+                            if (j==0) temp =  temp - 1;  // item numbers start here with 0 --> in TTP files with 1
+                            if (j==3) temp =  temp - 1;  // city numbers start here with 0 --> in TTP files with 1
                             this.items[i][j] = temp;
                         }
                     }
@@ -182,15 +182,16 @@ public class TTPInstance {
             return;
         }
         
-        double wc=0;
-        solution.ft=0;
-        solution.fp=0;
+        double wc = 0;
+        solution.ft = 0;
+        solution.fp = 0;
         
         /* the following is used for a different interpretation of "packingPlan"
          * 
          */
         int itemsPerCity = solution.packingPlan.length / (solution.tspTour.length-2);
-        if (debugPrint) System.out.println("itemsPerCity="+itemsPerCity+" solution.tspTour.length="+solution.tspTour.length);
+        if (debugPrint) 
+        	System.out.println("itemsPerCity="+itemsPerCity+" solution.tspTour.length="+solution.tspTour.length);
        
 //        for (int i=0; i<tour.length; i++) {
         for (int i=0; i<tour.length-1; i++) {
@@ -232,43 +233,52 @@ public class TTPInstance {
 //            }
             
             // important: nothing to be picked at the first city!
-            if (debugPrint) System.out.print("\ni="+i+" checking packing: ");
+            if (debugPrint) 
+            	System.out.print("\ni="+i+" checking packing: ");
             
             int currentCityTEMP = tour[i]; // what's the current city? --> but the items start at city 2 in the TTP file, so I have to take another 1 off!
             
-            int currentCity = currentCityTEMP-1;
-            
-            if (i>0) if (debugPrint) System.out.print("city "+currentCityTEMP+" cityIndexForItem[][] "+currentCity+" (this.numberOfNodes="+this.numberOfNodes+"): ");
+            int currentCity = currentCityTEMP - 1;
             
             if (i>0) 
-                for (int itemNumber=0; itemNumber<itemsPerCity; itemNumber++) {
-                int indexOfPackingPlan = (i-1)*itemsPerCity+itemNumber;
-                if (debugPrint) System.out.print("indexOfPackingPlan="+indexOfPackingPlan+" ");
-                
-                // what is the next item's index in items-array?
-                int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
-                if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
-                
-                if (z[indexOfPackingPlan]==1) {
-                    // pack item
-//                    int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
-//                    int itemIndex = (i-1)+itemNumber* (this.numberOfNodes-1); // GECCO incorrect
-                    
-//                    if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
-                    
-                    int currentWC = this.items[itemIndex][2];
-                    wc=wc+currentWC;
-                    
-                    int currentFP=this.items[itemIndex][1];
-                    solution.fp=solution.fp+currentFP;
-                    
-                    if (debugPrint) System.out.print("[fp="+currentFP+",wc="+currentWC+"] ");
-                }
+            	if (debugPrint) 
+            		System.out.print("city "+currentCityTEMP+" cityIndexForItem[][] "+currentCity+" (this.numberOfNodes="+this.numberOfNodes+"): ");
+            
+            if (i>0){ 
+                for (int itemNumber = 0; itemNumber < itemsPerCity; itemNumber++) {
+	                int indexOfPackingPlan = (i-1)*itemsPerCity + itemNumber;
+	                if (debugPrint) 
+	                	System.out.print("indexOfPackingPlan="+indexOfPackingPlan+" ");
+	                
+	                // what is the next item's index in items-array?
+	                int itemIndex = currentCity + itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
+	                if (debugPrint) 
+	                	System.out.print("itemIndex="+itemIndex+" ");
+	                
+	                if (z[indexOfPackingPlan]==1) {
+	                    // pack item
+	//                    int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
+	//                    int itemIndex = (i-1)+itemNumber* (this.numberOfNodes-1); // GECCO incorrect
+	                    
+	//                    if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
+	                    
+	                    int currentWC = this.items[itemIndex][2];
+	                    wc = wc + currentWC;
+	                    
+	                    int currentFP = this.items[itemIndex][1];
+	                    solution.fp = solution.fp+currentFP;
+	                    
+	                    if (debugPrint) 
+	                    	System.out.print("[fp="+currentFP+",wc="+currentWC+"] ");
+	                }
+	            }
             }
-            if (debugPrint) System.out.println();
+            if (debugPrint) 
+            	System.out.println();
             
             int h= (i+1)%(tour.length-1); //h: next tour city index
-            if (debugPrint) System.out.println("  i="+i+" h="+h + " tour[i]="+tour[i]+" tour[h]="+tour[h]);
+            if (debugPrint) 
+            	System.out.println("  i="+i+" h="+h + " tour[i]="+tour[i]+" tour[h]="+tour[h]);
             
             long distance = (long)Math.ceil(distances(tour[i],tour[h]));
             
@@ -278,16 +288,16 @@ public class TTPInstance {
             solution.ftraw += distance;
             
             // compute the adjusted (effective) distance
-            solution.ft=solution.ft+
-              (distance / (1-wc*(vmax-vmin)/weightofKnapsack));
+            solution.ft = solution.ft + (distance / (1-wc*(vmax-vmin)/weightofKnapsack));
 //              (distances[tour[i]][tour[h]] / (1-wc*(vmax-vmin)/weightofKnapsack));
             
-            if (debugPrint) System.out.println("i="+i+" tour[i]="+tour[i]+" tour[h]="+tour[h]+" distance="+distance+" fp="+solution.fp + " ft=" + solution.ft);
+            if (debugPrint) 
+            	System.out.println("i="+i+" tour[i]="+tour[i]+" tour[h]="+tour[h]+" distance="+distance+" fp="+solution.fp + " ft=" + solution.ft);
         }
         
         solution.wendUsed = wc;
-        solution.wend=weightofKnapsack-wc;
-        solution.ob=solution.fp-solution.ft*rentRate;
+        solution.wend = weightofKnapsack - wc;
+        solution.ob = solution.fp - solution.ft * rentRate;
         
         
         
