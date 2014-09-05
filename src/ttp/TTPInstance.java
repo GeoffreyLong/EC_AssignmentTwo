@@ -4,21 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author wagner
  */
 public class TTPInstance {
-
-    public static void main(String[] args) {
-        TTPInstance test = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
-    }
-    
     public String problemName;
     public String knapsackDataType;
     public int numberOfNodes;
@@ -33,7 +25,8 @@ public class TTPInstance {
     
     public File file;
     
-    /* Constructor 
+    /* 
+     * Constructor 
      * reads the instance from the file
      */
     public TTPInstance(File file) {
@@ -58,7 +51,6 @@ public class TTPInstance {
                     this.knapsackDataType = line;
                 }
                 if (line.startsWith("DIMENSION")) {
-//                if (line.startsWith("NUMBER OF NODES")) {
                     line = line.substring(line.indexOf(":")+1);
                     line = line.replaceAll("\\s+","");
                     this.numberOfNodes=Integer.parseInt(line);
@@ -100,7 +92,6 @@ public class TTPInstance {
                         String[] splittedLine = line.split("\\s+");
                         for (int j = 0; j < splittedLine.length; j++) {
                             double temp = Double.parseDouble(splittedLine[j]);
-//                            int temp = Integer.parseInt(splittedLine[j]);
                             // adjust city number by 1
                             if (j==0) temp =  temp - 1;
                             this.nodes[i][j] = temp;
@@ -163,17 +154,6 @@ public class TTPInstance {
         double vmin = this.minSpeed;
         double vmax = this.maxSpeed;
         solution.ftraw = 0;
-//            double[][] distances, 
-//            double[] weights, 
-//            double[] values,
-//            int[][] av,
-//            int[] tour,
-//            int[] z,
-//            double weightofKnapsack,
-//            double vmax,
-//            double vmin,
-//            double rentRate
-//            ) {
         
         // correctness check: does the tour start and end in the same city
         if(tour[0]!=tour[tour.length-1]) {
@@ -186,14 +166,11 @@ public class TTPInstance {
         solution.ft = 0;
         solution.fp = 0;
         
-        /* the following is used for a different interpretation of "packingPlan"
-         * 
-         */
+        // the following is used for a different interpretation of "packingPlan"
         int itemsPerCity = solution.packingPlan.length / (solution.tspTour.length-2);
         if (debugPrint) 
         	System.out.println("itemsPerCity="+itemsPerCity+" solution.tspTour.length="+solution.tspTour.length);
        
-//        for (int i=0; i<tour.length; i++) {
         for (int i=0; i<tour.length-1; i++) {
             
 //            // determine all the items that are picked up in the current city
@@ -251,17 +228,11 @@ public class TTPInstance {
 	                	System.out.print("indexOfPackingPlan="+indexOfPackingPlan+" ");
 	                
 	                // what is the next item's index in items-array?
-	                int itemIndex = currentCity + itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
+	                int itemIndex = currentCity + itemNumber*(this.numberOfNodes-1);
 	                if (debugPrint) 
 	                	System.out.print("itemIndex="+itemIndex+" ");
 	                
 	                if (z[indexOfPackingPlan]==1) {
-	                    // pack item
-	//                    int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
-	//                    int itemIndex = (i-1)+itemNumber* (this.numberOfNodes-1); // GECCO incorrect
-	                    
-	//                    if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
-	                    
 	                    int currentWC = this.items[itemIndex][2];
 	                    wc = wc + currentWC;
 	                    
@@ -276,7 +247,7 @@ public class TTPInstance {
             if (debugPrint) 
             	System.out.println();
             
-            int h= (i+1)%(tour.length-1); //h: next tour city index
+            int h = (i+1)%(tour.length-1); //h: next tour city index
             if (debugPrint) 
             	System.out.println("  i="+i+" h="+h + " tour[i]="+tour[i]+" tour[h]="+tour[h]);
             
@@ -289,7 +260,6 @@ public class TTPInstance {
             
             // compute the adjusted (effective) distance
             solution.ft = solution.ft + (distance / (1-wc*(vmax-vmin)/weightofKnapsack));
-//              (distances[tour[i]][tour[h]] / (1-wc*(vmax-vmin)/weightofKnapsack));
             
             if (debugPrint) 
             	System.out.println("i="+i+" tour[i]="+tour[i]+" tour[h]="+tour[h]+" distance="+distance+" fp="+solution.fp + " ft=" + solution.ft);
@@ -297,10 +267,7 @@ public class TTPInstance {
         
         solution.wendUsed = wc;
         solution.wend = weightofKnapsack - wc;
-        solution.ob = solution.fp - solution.ft * rentRate;
-        
-        
-        
+        solution.ob = solution.fp - solution.ft * rentRate;       
     }
     
     
@@ -324,16 +291,15 @@ public class TTPInstance {
     
     // used to simulate the distance matrix
     public double distances(int i, int j) {
+    	boolean debugPrint = false;
         double result = 0;
         result = Math.sqrt(
-                            (this.nodes[i][1]-this.nodes[j][1]) *
-                            (this.nodes[i][1]-this.nodes[j][1]) + 
-                            (this.nodes[i][2]-this.nodes[j][2]) *
-                            (this.nodes[i][2]-this.nodes[j][2]) 
+                            (this.nodes[i][1]-this.nodes[j][1]) * (this.nodes[i][1]-this.nodes[j][1]) 
+                            + (this.nodes[i][2]-this.nodes[j][2]) * (this.nodes[i][2]-this.nodes[j][2]) 
                         );
         
-        if (!true) System.out.println(" distance="+this.nodes[i][1]+ " "
-                +this.nodes[j][1]+" "+this.nodes[i][2]+" "+this.nodes[j][2]+"->"+result);
+        if (debugPrint) 
+        	System.out.println(" distance="+this.nodes[i][1]+ " " +this.nodes[j][1]+" "+this.nodes[i][2]+" "+this.nodes[j][2]+"->"+result);
         
         return result;
     }
@@ -342,7 +308,8 @@ public class TTPInstance {
         printInstance(true);
     }
     
-    /* prints the details
+    /* 
+     * prints the details
      * shortSummary: 
      *   true   prints a short version in one line
      *   false  prints the node and item data as well
@@ -354,14 +321,16 @@ public class TTPInstance {
             System.out.println("---- TTP Instance START ----");
         }
         
-        System.out.println(this.problemName+
-                " "+this.knapsackDataType+
-                " "+this.numberOfNodes+
-                " "+this.numberOfItems+
-                " "+this.capacityOfKnapsack+
-                " "+this.minSpeed+
-                " "+this.maxSpeed+
-                " "+this.rentingRatio);
+        System.out.println(
+    		this.problemName +
+            " " + this.knapsackDataType +
+            " " + this.numberOfNodes +
+            " " + this.numberOfItems +
+            " " + this.capacityOfKnapsack +
+            " " + this.minSpeed +
+            " " + this.maxSpeed +
+            " " + this.rentingRatio
+        );
         
         if (shortSummary) {
         } else {
