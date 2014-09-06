@@ -74,6 +74,7 @@ public class Driver {
             
             // print to screen
             //solution.println();
+            solution.altPrint();
             
             
             solution.printFull();

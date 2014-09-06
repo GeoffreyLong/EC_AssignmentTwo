@@ -205,11 +205,11 @@ public class Optimisation {
     public static int[] linkernTour(TTPInstance instance) {
         int[] result = new int[instance.numberOfNodes+1];
         
-        boolean debugPrint = true;
+        boolean debugPrint = !true;
 
         String temp = instance.file.getPath();
         int index = temp.indexOf("_");
-        String tspfilename = temp;//.substring(0,index)+".tsp";
+        String tspfilename = temp;
         if (index==-1) index = tspfilename.indexOf(".");
         String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
         if (debugPrint) System.out.println("LINKERN: "+tspfilename);
@@ -236,46 +236,25 @@ public class Optimisation {
                 while ((line = br.readLine()) != null) {
                     if (debugPrint) System.out.println("<LINKERN> "+line);
                 }
+                
                 if (debugPrint) System.out.println("Program terminated?");    
                 int rc = process.waitFor();
                 if (debugPrint) System.out.println("Program terminated!");
             }
-
-            
-            /*
-            System.out.println("START");
-            List<String> command = new ArrayList<String>();
-            command.add("cat");
-            command.add(tspresultfilename);
-            System.out.println(tspresultfilename);
-//            printListOfStrings(command);
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.redirectErrorStream(true);
-            final Process process = builder.start();
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String s = null;
-            while ((s = br.readLine()) != null) {
-            	System.out.println(s);
-            }
-            */
-           
             
             BufferedReader br = new BufferedReader( new FileReader(tspresultfilename));
             // discard the first line
             br.readLine();
             String line = null; 
-            System.out.println(result.length);
             for (int i=0; i<result.length-1; i++) {
-            	System.out.println(i);
                 line = br.readLine();
                 if (debugPrint) System.out.println("<TOUR> "+line);
                 index = line.indexOf(" ");
                 int number = Integer.parseInt(line.split("\\s+")[0]);
                 result[i] = number; 
             }
-            //if (debugPrint) System.out.println(Arrays.toString(result));
+            
+            if (debugPrint) System.out.println(Arrays.toString(result));
           
             
             } catch (Exception ex) {
@@ -289,7 +268,6 @@ public class Optimisation {
         boolean debugPrint = false;
         
         File f = new File("instances/tsplibCEIL");
-//        File f = new File("instances/");
         try {
             if (debugPrint) System.out.println(f.getCanonicalPath());
         } catch (IOException ex) {
