@@ -2,6 +2,7 @@ package ttp.Optimisation;
 
 
 import java.io.*;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -27,11 +28,85 @@ import ttp.Utils.DeepCopy;
  */
 public class Optimisation {
     
+
+    public static TTPSolution simpleHeuristic(TTPInstance instance, int[] tour, int maxRuntime) {
+    	double[] D = new double[instance.numberOfNodes];
+    	double dSum = 0;
+    	D[instance.numberOfNodes-1] = 0; 
+    	for (int i = instance.numberOfNodes-2; i >= 0; i--) {
+    		dSum += instance.distances(tour[i+1], tour[i]);
+    		D[tour[i]] = dSum;
+    	}
+    	double noItemTime = dSum/instance.maxSpeed;
+    	double v = (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack;
+    	
+    	double[] score = new double[instance.numberOfItems];
+    	double[] threshScore = new double[instance.numberOfItems];
+    	for (int i = 0; i < instance.numberOfItems; i++) {
+    		int cityIdx = instance.items[i][3];
+    		double itemCarryTime = D[cityIdx] / (instance.maxSpeed - v*instance.items[i][2]);
+    		double itemCycleTime = noItemTime - D[cityIdx] + itemCarryTime;
+    		score[i] = instance.items[i][1] - instance.rentingRatio * itemCarryTime;
+    		threshScore[i] = instance.rentingRatio*noItemTime 
+    				+ (instance.items[i][1] - instance.rentingRatio * itemCycleTime);
+    	}
+    	
+    	// Form array of item indexes to sort
+    	Integer[] itemIdx = new Integer[instance.numberOfItems];
+    	for (int i = 0; i < itemIdx.length; i++) {
+    		itemIdx[i] = instance.items[i][0];
+    	}
+    	
+    	
+    	// Heuristic sort
+    	Arrays.sort(itemIdx, new Comparator<Integer>() {
+    		@Override
+    		public int compare(Integer o1, Integer o2) {
+    			double diff = score[o1] - score[o2];
+    			return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
+    		}
+    	});
+    	
+    	// Construct solution
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	int Wc = 0;
+    	
+    	
+    	for (int i = 0; i < instance.numberOfItems; i++) {
+    		// If we're not full
+    		if ( ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) && threshScore[itemIdx[i]] > 0) {
+    			//packingPlan[itemIdx[i]] = 1;
+    			
+    			int itemsPCity=(int)Math.round((double)instance.numberOfItems/(instance.numberOfNodes-1));
+    			int cityIndex=instance.items[itemIdx[i]][3];
+    			int itemNumber=(int)Math.floor((double)(instance.items[itemIdx[i]][0])/(instance.numberOfNodes-1));
+    			
+    			int ppIndex = ((cityIndex-1)*itemsPCity)+itemNumber;
+    			if(cityIndex<5)
+    			System.out.println(ppIndex + " CI " + (cityIndex+1) + " id: " + (instance.items[itemIdx[i]][0]));
+    			packingPlan[ppIndex] = 1;
+    			
+    			Wc += instance.items[itemIdx[i]][2];
+    			//System.out.printf("ItemID: %d\n", itemIdx[i]);
+    		}
+    		if (Wc == instance.capacityOfKnapsack) {
+    			break;
+    		}
+    			//System.out.println(Wc);
+    	}
+    	System.out.println("Our wc: " +Wc);
+    	
+    	
+   
+    	System.out.println(Arrays.toString(packingPlan));
+    	TTPSolution s = new TTPSolution(tour, packingPlan);
+    	instance.evaluate(s);	
+        return s;
+    }
     
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
             int mode, 
             int durationWithoutImprovement, int maxRuntime) {
-        
         ttp.Utils.Utils.startTiming();
         
         TTPSolution s = null;
@@ -130,11 +205,11 @@ public class Optimisation {
     public static int[] linkernTour(TTPInstance instance) {
         int[] result = new int[instance.numberOfNodes+1];
         
-        boolean debugPrint = true;
+        boolean debugPrint = !true;
 
         String temp = instance.file.getPath();
         int index = temp.indexOf("_");
-        String tspfilename = temp;//.substring(0,index)+".tsp";
+        String tspfilename = temp;
         if (index==-1) index = tspfilename.indexOf(".");
         String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
         if (debugPrint) System.out.println("LINKERN: "+tspfilename);
@@ -161,46 +236,25 @@ public class Optimisation {
                 while ((line = br.readLine()) != null) {
                     if (debugPrint) System.out.println("<LINKERN> "+line);
                 }
+                
                 if (debugPrint) System.out.println("Program terminated?");    
                 int rc = process.waitFor();
                 if (debugPrint) System.out.println("Program terminated!");
             }
-
-            
-            /*
-            System.out.println("START");
-            List<String> command = new ArrayList<String>();
-            command.add("cat");
-            command.add(tspresultfilename);
-            System.out.println(tspresultfilename);
-//            printListOfStrings(command);
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.redirectErrorStream(true);
-            final Process process = builder.start();
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String s = null;
-            while ((s = br.readLine()) != null) {
-            	System.out.println(s);
-            }
-            */
-           
             
             BufferedReader br = new BufferedReader( new FileReader(tspresultfilename));
             // discard the first line
             br.readLine();
             String line = null; 
-            System.out.println(result.length);
             for (int i=0; i<result.length-1; i++) {
-            	System.out.println(i);
                 line = br.readLine();
                 if (debugPrint) System.out.println("<TOUR> "+line);
                 index = line.indexOf(" ");
                 int number = Integer.parseInt(line.split("\\s+")[0]);
                 result[i] = number; 
             }
-            //if (debugPrint) System.out.println(Arrays.toString(result));
+            
+            if (debugPrint) System.out.println(Arrays.toString(result));
           
             
             } catch (Exception ex) {
@@ -214,7 +268,6 @@ public class Optimisation {
         boolean debugPrint = false;
         
         File f = new File("instances/tsplibCEIL");
-//        File f = new File("instances/");
         try {
             if (debugPrint) System.out.println(f.getCanonicalPath());
         } catch (IOException ex) {

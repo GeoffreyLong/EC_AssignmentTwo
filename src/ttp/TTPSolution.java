@@ -41,13 +41,22 @@ public class TTPSolution {
     }
     
     public void print() {
-        System.out.print(wend+" "+wendUsed+" "+fp+" "+ftraw+" "+ft+" "+ob +" "+computationTime);
+    	System.out.print(wend+" "+wendUsed+" "+fp+" "+ftraw+" "+ft+" "+ob +" "+computationTime);
     }
     public void println() {
         this.print();
         System.out.println();
     }
-    
+    public void altPrint(){
+    	System.out.println();
+    	System.out.println(String.format("%-30s= %.2f" , "Leftover Knapsack Capacity", wend));
+    	System.out.println(String.format("%-30s= %.2f" , "Total weight of items", wendUsed));
+    	System.out.println(String.format("%-30s= %.2f" , "Total Profit", fp));
+    	System.out.println(String.format("%-30s= %d" , "ftRaw", ftraw));
+    	System.out.println(String.format("%-30s= %.2f" , "ft", ft));
+    	System.out.println(String.format("%-30s= %.2f" , "ob", ob));
+    	System.out.println(String.format("%-30s= %d" , "Computation time", computationTime));
+    }
     public void printFull() {
         this.println();
         System.out.println("tspTour "+Arrays.toString(tspTour));
