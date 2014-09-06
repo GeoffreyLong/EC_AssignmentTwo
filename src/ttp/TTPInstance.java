@@ -287,6 +287,7 @@ public class TTPInstance {
             // compute the raw distance
             solution.ftraw += distance;
             
+            
             // compute the adjusted (effective) distance
             solution.ft = solution.ft + (distance / (1-wc*(vmax-vmin)/weightofKnapsack));
             

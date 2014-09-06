@@ -61,6 +61,7 @@ public class Driver {
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
 
+            
             System.out.print(f.getName()+": ");
             
             // do the optimisation
