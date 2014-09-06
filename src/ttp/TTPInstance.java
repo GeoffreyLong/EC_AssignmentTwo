@@ -216,35 +216,6 @@ public class TTPInstance {
             int currentCityTEMP = tour[i]; // what's the current city? --> but the items start at city 2 in the TTP file, so I have to take another 1 off!
             
             int currentCity = currentCityTEMP - 1;
-            
-            if (i>0) 
-                for (int itemNumber=0; itemNumber<itemsPerCity; itemNumber++) {
-                int indexOfPackingPlan = (i-1)*itemsPerCity+itemNumber;
-                if (debugPrint) System.out.print("indexOfPackingPlan="+indexOfPackingPlan+" ");
-                
-                // what is the next item's index in items-array?
-                int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
-                if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
-                
-                if (z[indexOfPackingPlan]==1) {
-                    // pack item
-//                    int itemIndex = currentCity+itemNumber*(this.numberOfNodes-1);//* (this.numberOfNodes-1); 
-//                    int itemIndex = (i-1)+itemNumber* (this.numberOfNodes-1); // GECCO incorrect
-                    
-//                    if (debugPrint) System.out.print("itemIndex="+itemIndex+" ");
-                    
-                    int currentWC = this.items[itemIndex][2];
-                    wc=wc+currentWC;
-                   //System.out.printf("ItemID: %d\n", this.items[itemIndex][0]);
-                    int currentFP=this.items[itemIndex][1];
-                    solution.fp=solution.fp+currentFP;
-                    
-                    if (debugPrint) System.out.print("[fp="+currentFP+",wc="+currentWC+"] ");
-                   
-                }
-                
-            }
-            
      
             if (debugPrint) System.out.println();
             	if (debugPrint) 
@@ -253,18 +224,22 @@ public class TTPInstance {
             if (i>0){ 
                 for (int itemNumber = 0; itemNumber < itemsPerCity; itemNumber++) {
 	                int indexOfPackingPlan = (i-1)*itemsPerCity + itemNumber;
+
 	                if (debugPrint) 
 	                	System.out.print("indexOfPackingPlan="+indexOfPackingPlan+" ");
 	                
 	                // what is the next item's index in items-array?
 	                int itemIndex = currentCity + itemNumber*(this.numberOfNodes-1);
+	                if(i<3)
+	        			System.out.println(indexOfPackingPlan + " CI " + (i) + " id: " + itemIndex);
 	                if (debugPrint) 
 	                	System.out.print("itemIndex="+itemIndex+" ");
 	                
 	                if (z[indexOfPackingPlan]==1) {
+	                	
 	                    int currentWC = this.items[itemIndex][2];
 	                    wc = wc + currentWC;
-	                    
+	                    System.out.println(indexOfPackingPlan + " CI " + currentCity + " id: " + itemIndex+ " IN: "+itemNumber+" WTC: "+currentWC+" WT: "+wc);
 	                    int currentFP = this.items[itemIndex][1];
 	                    solution.fp = solution.fp+currentFP;
 	                    
@@ -294,7 +269,7 @@ public class TTPInstance {
             if (debugPrint) 
             	System.out.println("i="+i+" tour[i]="+tour[i]+" tour[h]="+tour[h]+" distance="+distance+" fp="+solution.fp + " ft=" + solution.ft);
         }
-        System.out.println("wc:" + wc);
+        //System.out.println("wc:" + wc);
         solution.wendUsed = wc;
         solution.wend = weightofKnapsack - wc;
         solution.ob = solution.fp - solution.ft * rentRate;       

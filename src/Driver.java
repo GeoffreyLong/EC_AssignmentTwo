@@ -64,24 +64,31 @@ public class Driver {
             int[] tour = Optimisation.linkernTour(instance);
 
             
-            System.out.print(f.getName()+": ");
+            System.out.println(f.getName()+": ");
             
             // do the optimisation
-
-           //TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
-            
-            TTPSolution solution = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
+            System.out.println("RIGHT SOLUTION --------------------------------------");
+          // TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
+           
+           //solution.println();
+           //solution.printFull();
+           
+           System.out.println("OUR SOLUTION -------------------------------------");
+            TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
             
             // print to file
-            solution.writeResult(resultTitle);
+            //solution.writeResult(resultTitle);
             
             // print to screen
-            //solution.println();
-            solution.altPrint();
+
+            
+            solution2.println();
+            solution2.printFull();
             
             
-            solution.printFull();
+            //solution.altPrint();
+
         }
     }
     
