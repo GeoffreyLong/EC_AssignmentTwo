@@ -231,7 +231,7 @@ public class TTPInstance {
 	                // what is the next item's index in items-array?
 	                int itemIndex = currentCity + itemNumber*(this.numberOfNodes-1);
 	                if(i<3)
-	        			System.out.println(indexOfPackingPlan + " CI " + (i) + " id: " + itemIndex);
+	        			// System.out.println(indexOfPackingPlan + " CI " + (i) + " id: " + itemIndex);
 	                if (debugPrint) 
 	                	System.out.print("itemIndex="+itemIndex+" ");
 	                
@@ -239,7 +239,7 @@ public class TTPInstance {
 	                	
 	                    int currentWC = this.items[itemIndex][2];
 	                    wc = wc + currentWC;
-	                    System.out.println(indexOfPackingPlan + " CI " + currentCity + " id: " + itemIndex+ " IN: "+itemNumber+" WTC: "+currentWC+" WT: "+wc);
+	                    //System.out.println(indexOfPackingPlan + " CI " + currentCity + " id: " + itemIndex+ " IN: "+itemNumber+" WTC: "+currentWC+" WT: "+wc);
 	                    int currentFP = this.items[itemIndex][1];
 	                    solution.fp = solution.fp+currentFP;
 	                    

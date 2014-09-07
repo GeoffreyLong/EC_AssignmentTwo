@@ -72,7 +72,7 @@ public class Driver {
            
            //solution.println();
            //solution.printFull();
-           
+           /*
            System.out.println("OUR SOLUTION -------------------------------------");
             TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
@@ -88,7 +88,9 @@ public class Driver {
             
             
             //solution.altPrint();
-
+*/
+            TTPSolution solution3 = Optimisation.secondSol(instance,tour,0,0);
+            solution3.altPrint();
         }
     }
     

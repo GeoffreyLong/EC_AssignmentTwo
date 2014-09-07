@@ -1,6 +1,7 @@
 package ttp.Optimisation;
 
 
+import java.awt.Point;
 import java.io.*;
 import java.util.Comparator;
 import java.util.ArrayList;
@@ -106,6 +107,75 @@ public class Optimisation {
     	TTPSolution s = new TTPSolution(tour, packingPlan);
     	instance.evaluate(s);	
         return s;
+    }
+    
+    public static TTPSolution secondSol(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+		List<Integer> items = new LinkedList<Integer>();
+		double tourDistance = 0;
+		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[0][1], instance.nodes[0][2]);
+		double distanceCost = (instance.maxSpeed - instance.minSpeed)/instance.capacityOfKnapsack;
+		
+    	for (int i : tour){
+    		java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[i][1], instance.nodes[i][2]);
+    		tourDistance += point.distance(lastPoint);
+    		// For multi item cities will need a map from node to items
+    		double cost = tourDistance + instance.rentingRatio * tourDistance*(instance.items[i][2]*distanceCost);
+    		double profitCostRatio = instance.items[i][1] / cost;
+    		addValue(items, i, profitCostRatio);
+    		lastPoint = point;
+		}
+    	
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
+    	TTPSolution solution = null;
+        instance.evaluate(newSolution);
+    	double lastSolution = Double.MAX_VALUE;
+    	double weight = 0;
+        
+    	while(newSolution.ob < lastSolution && items.size() > 0){
+    		int index = items.get(0);
+    		packingPlan[index] = 1;
+    		items.remove(0);
+    		
+    		/*
+    		weight += instance.items[index][2];
+    		System.out.println(instance.capacityOfKnapsack);
+    		System.out.println(weight);
+    		System.out.println();
+    		if (instance.capacityOfKnapsack - weight < 0){
+    			break;
+    		}
+    		*/
+    		newSolution = new TTPSolution(tour, packingPlan);
+            instance.evaluate(newSolution);
+            if (newSolution.wend >= 0){
+            	solution = newSolution;
+            }
+            else{
+            	break;
+            }
+            //System.out.println(newSolution.ob);
+    	}
+    	
+    	return solution;
+    }
+    
+    private static List<Integer> addValue(List<Integer> llist, int index, double val) {
+
+        if (llist.size() == 0) {
+            llist.add(index);
+        } else if (llist.get(0) > val) {
+            llist.add(0, index);
+        } else if (llist.get(llist.size() - 1) < val) {
+            llist.add(llist.size(), index);
+        } else {
+            int i = 0;
+            while (llist.get(i) < val) {
+                i++;
+            }
+            llist.add(i, index);
+        }
+        return llist;
     }
     
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
