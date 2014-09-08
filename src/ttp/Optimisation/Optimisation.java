@@ -77,33 +77,35 @@ public class Optimisation {
     		// If we're not full
     		if ( ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) && threshScore[itemIdx[i]] > 0) {
 
-                //THE CITY INDEX USED BY MARCUS IS NOT THE ACTUAL CITY INDEX WHEN ORDERING THE PP, IT'S THE TOUR INDEX
-    			//IE: THE TOUR IS: [0, 1, 241, 242, ...
-    			//SO IF (tour[i]-1)==(instance.items[itemIdx[i]][3]) then we want ppIndex = ((i-1)*itemsPCity)+itemNumber;
-    			// think it's -1 ^ (might not be though...)
-    			
+    			int arrIndex=-1;
     			int itemsPCity=(int)Math.round((double)instance.numberOfItems/(instance.numberOfNodes-1));
     			int cityIndex=instance.items[itemIdx[i]][3];
     			int itemNumber=(int)Math.floor((double)(instance.items[itemIdx[i]][0])/(instance.numberOfNodes-1));
     			
-    			int ppIndex = ((cityIndex-1)*itemsPCity)+itemNumber;
-    			//if(cityIndex<5)
-    			
+    			for (int j = 1; j<tour.length; j++){
+    				if (tour[j]==cityIndex){
+    					arrIndex=j-1;    					
+    					break;
+    				}	
+    			}
+
+    			int ppIndex = (arrIndex*itemsPCity)+itemNumber;
+
     			packingPlan[ppIndex] = 1;
     			
     			Wc += instance.items[itemIdx[i]][2];
-    			System.out.println(ppIndex + " CI " + (cityIndex) + " id: " + (instance.items[itemIdx[i]][0])+" WGC: "+ instance.items[itemIdx[i]][2] +" WGT: "+Wc);
+    			//System.out.println("i: "+arrIndex+" ppI: "+ppIndex + " CI " + (cityIndex) + " id: " + (instance.items[itemIdx[i]][0])+" IN: "+itemNumber+" WGC: "+ instance.items[itemIdx[i]][2] +" WGT: "+Wc);
     			//System.out.printf("ItemID: %d\n", itemIdx[i]);
     		}
     		if (Wc == instance.capacityOfKnapsack) {
     			break;
     		}
     	}
-    	System.out.println("Our wc: " +Wc);
+    	//System.out.println("Our wc: " +Wc);
     	
     	
    
-    	System.out.println(Arrays.toString(packingPlan));
+    	//System.out.println(Arrays.toString(packingPlan));
     	TTPSolution s = new TTPSolution(tour, packingPlan);
     	instance.evaluate(s);	
         return s;

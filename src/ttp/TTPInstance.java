@@ -239,7 +239,7 @@ public class TTPInstance {
 	                	
 	                    int currentWC = this.items[itemIndex][2];
 	                    wc = wc + currentWC;
-	                    //System.out.println(indexOfPackingPlan + " CI " + currentCity + " id: " + itemIndex+ " IN: "+itemNumber+" WTC: "+currentWC+" WT: "+wc);
+	                    //System.out.println("i: "+i+" ppI: "+indexOfPackingPlan + " CI " + (currentCity+1) + " id: " + itemIndex+ " IN: "+itemNumber+" WTC: "+currentWC+" WT: "+wc);
 	                    int currentFP = this.items[itemIndex][1];
 	                    solution.fp = solution.fp+currentFP;
 	                    
