@@ -112,30 +112,70 @@ public class Optimisation {
     }
     
     public static TTPSolution secondSol(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-		List<Integer> items = new LinkedList<Integer>();
+		List<double[]> items = new LinkedList<double[]>();
 		double tourDistance = 0;
 		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[0][1], instance.nodes[0][2]);
-		double distanceCost = (instance.maxSpeed - instance.minSpeed)/instance.capacityOfKnapsack;
+		//System.out.println(tour);
 		
-    	for (int i : tour){
-    		java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[i][1], instance.nodes[i][2]);
+    	for (int i = tour.length-1; i>=0; i--){
+    		int index = tour[i];
+    		
+    		double[] nodeArray = new double[2];
+    		java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
     		tourDistance += point.distance(lastPoint);
     		// For multi item cities will need a map from node to items
-    		double cost = tourDistance + instance.rentingRatio * tourDistance*(instance.items[i][2]*distanceCost);
-    		double profitCostRatio = instance.items[i][1] / cost;
-    		addValue(items, i, profitCostRatio);
+    		//double cost = instance.rentingRatio * tourDistance *(instance.items[i][2]*distanceCost);
+    		double speedLossWithItem = (instance.maxSpeed - instance.minSpeed) * instance.items[index][2] / instance.capacityOfKnapsack;
+    		double costOfItem = tourDistance / (1-speedLossWithItem);
+    		
+    		double profitCostRatio = instance.items[index][1] / costOfItem;
+    		
+    		nodeArray[0] = index;
+    		nodeArray[1] = profitCostRatio;
+    		
+    		
+    		for (int j = 0; j <= items.size(); j++){
+    			if (j == items.size()){
+    				/*
+    				System.out.println(items.size());
+    				System.out.println(profitCostRatio);
+    				System.out.println(j);
+    				System.out.println();
+    				*/
+    				items.add(nodeArray);
+    				break;
+    			}
+    			else{
+	    			if (profitCostRatio >= items.get(j)[1]){
+	    				/*
+	    				System.out.println(items.size());
+	    				System.out.println(profitCostRatio);
+	    				System.out.println(items.get(j)[1]);
+	    				System.out.println(j);
+	    				System.out.println();
+	    				*/
+	    				items.add(j, nodeArray);
+	    				break;
+	    			}
+    			}
+    		}
+    		
     		lastPoint = point;
 		}
+    	
+    	System.out.println(items);
     	
     	int[] packingPlan = new int[instance.numberOfItems];
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
     	TTPSolution solution = null;
         instance.evaluate(newSolution);
-    	double lastSolution = Double.MAX_VALUE;
-    	double weight = 0;
-        
-    	while(newSolution.ob < lastSolution && items.size() > 0){
-    		int index = items.get(0);
+    	double lastSolution = - Double.MAX_VALUE;
+
+    	while(newSolution.ob >= lastSolution && items.size() > 0){
+    		lastSolution = newSolution.ob;
+    		System.out.println(newSolution.ob);
+    		int index = (int) items.get(0)[0];
+    		//System.out.println(index+ ", " + instance.items[index][1] + ", " + instance.items[index][2]);
     		packingPlan[index] = 1;
     		items.remove(0);
     		
@@ -160,24 +200,6 @@ public class Optimisation {
     	}
     	
     	return solution;
-    }
-    
-    private static List<Integer> addValue(List<Integer> llist, int index, double val) {
-
-        if (llist.size() == 0) {
-            llist.add(index);
-        } else if (llist.get(0) > val) {
-            llist.add(0, index);
-        } else if (llist.get(llist.size() - 1) < val) {
-            llist.add(llist.size(), index);
-        } else {
-            int i = 0;
-            while (llist.get(i) < val) {
-                i++;
-            }
-            llist.add(i, index);
-        }
-        return llist;
     }
     
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
