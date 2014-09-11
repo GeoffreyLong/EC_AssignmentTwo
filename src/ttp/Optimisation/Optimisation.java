@@ -218,6 +218,75 @@ public class Optimisation {
     	return solution;
     }
     
+    public static TTPSolution thirdSol(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	
+    	/*
+    	for (int i = 0; i<instance.numberOfItems; i++){
+    		System.out.println(instance.items[i][0] + "  " + instance.items[i][1] + "  " + instance.items[i][2] + "  " + instance.items[i][3] + "  ");
+    	}
+    	*/
+    	
+    	double [] distances = new double[tour.length];
+		double tourDistance = 0;
+		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[tour[0]][1], instance.nodes[tour[0]][2]);
+		for (int i = tour.length-1; i>=1; i--){
+			int index = tour[i];
+			java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
+    		tourDistance += point.distance(lastPoint);
+    		
+    		distances[index] = tourDistance;
+		}
+    	
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
+    	TTPSolution solution = null;
+        instance.evaluate(newSolution);
+    	double lastSolutionOb = - Double.MAX_VALUE;
+    	int totalWeight = 0;
+		
+    	while(newSolution.ob >= lastSolutionOb && newSolution.wend >= 0){
+    		solution = newSolution;
+    		lastSolutionOb = newSolution.ob;
+    		System.out.println(lastSolutionOb);
+    		int bestItemIndex = 0;
+    		double bestVal = 0;
+    		
+    		for (int i = 0; i < instance.numberOfItems; i++){
+    			int[] item = instance.items[i];
+    			int cityIndex = item[3];
+    			int itemWeight = item[2];
+    			int itemProfit = item[1];
+    			int curWeight = totalWeight;
+    			
+    			if (packingPlan[i] == 0) curWeight += itemWeight;
+    			
+    			double speedWithItem = instance.maxSpeed - curWeight * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack;
+    			double costWithoutItem = instance.rentingRatio * distances[cityIndex] / speedWithItem;
+    			double costWithItem = instance.rentingRatio * distances[cityIndex] / instance.maxSpeed;
+    			
+    			double itemVal = itemProfit - (costWithoutItem - costWithItem);
+    			//System.out.println(speedWithItem + " " + costWithItem + " " + costWithoutItem + " " + itemVal);
+    			
+    			// if (curWeight >= instance.capacityOfKnapsack) continue;
+    			if (packingPlan[i] == 0){
+    				if (itemVal > bestVal){
+	    				bestVal = itemVal;
+						bestItemIndex = i;
+    				}
+    			}
+    			if (itemVal < 0 && packingPlan[i] == 1){
+    				packingPlan[i] = 0;
+    				totalWeight = totalWeight - itemWeight;
+    			}
+    		}
+    		packingPlan[bestItemIndex] = 1;
+    		
+    		newSolution = new TTPSolution(tour, packingPlan);
+            instance.evaluate(newSolution);
+    	}
+    	return solution;
+    }
+    
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
             int mode, 
             int durationWithoutImprovement, int maxRuntime) {
