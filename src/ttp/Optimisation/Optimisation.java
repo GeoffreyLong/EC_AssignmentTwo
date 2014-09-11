@@ -143,9 +143,9 @@ public class Optimisation {
 		    		double profitWithoutItem = 0 - instance.rentingRatio * (tourDistance / instance.maxSpeed);
 		    		
 		    		nodeArray[0] = index*j-1;
-		    		nodeArray[1] = profit - profitWithoutItem;
+		    		nodeArray[1] = profitWithoutItem - profit;
 	
-		    		
+		    		System.out.println(nodeArray[1]);
 		    		
 		    		for (int k = 0; k <= items.size(); k++){
 		    			if (k == items.size()){
