@@ -114,56 +114,72 @@ public class Optimisation {
     public static TTPSolution secondSol(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
 		List<double[]> items = new LinkedList<double[]>();
 		double tourDistance = 0;
-		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[0][1], instance.nodes[0][2]);
+		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[tour[0]][1], instance.nodes[tour[0]][2]);
 		//System.out.println(tour);
 		
-    	for (int i = tour.length-1; i>=0; i--){
+		//int[][] stuff = instance.items;
+		//double[][] stuff = instance.nodes;
+		int[] stuff = tour;
+		for (int j = 0; j<stuff.length; j++){
+			//System.out.println(stuff[j]);
+			//System.out.println(stuff[j][0] + "  " + stuff[j][1] + "  " + stuff[j][2] + "  " + stuff[j][3] + "  " );
+			//System.out.println(stuff[j][0] + "  " + stuff[j][1] + "  " + stuff[j][2] + "  ");
+		}
+		
+    	for (int i = tour.length-1; i>=1; i--){
     		int index = tour[i];
     		
-    		double[] nodeArray = new double[2];
     		java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
     		tourDistance += point.distance(lastPoint);
-    		// For multi item cities will need a map from node to items
-    		//double cost = instance.rentingRatio * tourDistance *(instance.items[i][2]*distanceCost);
-    		double speedLossWithItem = (instance.maxSpeed - instance.minSpeed) * instance.items[index][2] / instance.capacityOfKnapsack;
-    		double costOfItem = tourDistance / (1-speedLossWithItem);
     		
-    		double profitCostRatio = instance.items[index][1] / costOfItem;
-    		
-    		nodeArray[0] = index;
-    		nodeArray[1] = profitCostRatio;
-    		
-    		
-    		for (int j = 0; j <= items.size(); j++){
-    			if (j == items.size()){
-    				/*
-    				System.out.println(items.size());
-    				System.out.println(profitCostRatio);
-    				System.out.println(j);
-    				System.out.println();
-    				*/
-    				items.add(nodeArray);
-    				break;
-    			}
-    			else{
-	    			if (profitCostRatio >= items.get(j)[1]){
-	    				/*
-	    				System.out.println(items.size());
-	    				System.out.println(profitCostRatio);
-	    				System.out.println(items.get(j)[1]);
-	    				System.out.println(j);
-	    				System.out.println();
-	    				*/
-	    				items.add(j, nodeArray);
-	    				break;
-	    			}
-    			}
+    		if (index != 0){
+	    		for (int j = 1; j <= instance.numberOfItems / (instance.numberOfNodes-1); j++){
+	        		double[] nodeArray = new double[2];
+		    		// For multi item cities will need a map from node to items
+		    		//double cost = instance.rentingRatio * tourDistance *(instance.items[i][2]*distanceCost);
+		    		double speedWithItem = instance.maxSpeed - (instance.maxSpeed - instance.minSpeed) * instance.items[index*j-1][2] / instance.capacityOfKnapsack;
+		  		
+		    		double profit = instance.items[index*j-1][1] - instance.rentingRatio * (tourDistance / speedWithItem);
+		    		double profitWithoutItem = 0 - instance.rentingRatio * (tourDistance / instance.maxSpeed);
+		    		
+		    		nodeArray[0] = index*j-1;
+		    		nodeArray[1] = profit - profitWithoutItem;
+	
+		    		
+		    		
+		    		for (int k = 0; k <= items.size(); k++){
+		    			if (k == items.size()){
+		    				/*
+		    				System.out.println(items.size());
+		    				System.out.println(profitCostRatio);
+		    				System.out.println(j);
+		    				System.out.println();
+		    				*/
+		    				items.add(nodeArray);
+		    				break;
+		    			}
+		    			else{
+			    			if (nodeArray[1] >= items.get(k)[1]){
+			    				/*
+			    				System.out.println(items.size());
+			    				System.out.println(profitCostRatio);
+			    				System.out.println(items.get(j)[1]);
+			    				System.out.println(j);
+			    				System.out.println();
+			    				*/
+			    				items.add(k, nodeArray);
+			    				break;
+			    			}
+		    			}
+		    		}
+		    	}
     		}
-    		
     		lastPoint = point;
 		}
     	
-    	System.out.println(items);
+    	System.out.println(items.size());
+    	System.out.println(instance.numberOfItems);
+    	System.out.println(instance.numberOfNodes);
     	
     	int[] packingPlan = new int[instance.numberOfItems];
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
