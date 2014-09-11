@@ -65,8 +65,9 @@ public class Driver {
 
             
             System.out.println(f.getName()+": ");
-            /*
+            
             // do the optimisation
+            /*
             System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
            TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
            
@@ -87,7 +88,7 @@ public class Driver {
             
             //solution.altPrint();
             System.out.println("SECOND SOLUTION -------------------------------------");
-            TTPSolution solution3 = Optimisation.thirdSol(instance,tour,0,0);
+            TTPSolution solution3 = Optimisation.fourthSol(instance,tour,10,0);
             solution3.printFull();
             solution3.altPrint();
         }
