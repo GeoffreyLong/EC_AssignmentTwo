@@ -87,10 +87,12 @@ public class Driver {
             */
             
             //solution.altPrint();
+            
             System.out.println("SECOND SOLUTION -------------------------------------");
-            TTPSolution solution3 = Optimisation.fourthSol(instance,tour,10,0);
+            TTPSolution solution3 = Optimisation.fifthSol(instance,tour,10,0);
             solution3.printFull();
             solution3.altPrint();
+            
         }
     }
     
