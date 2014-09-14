@@ -1,10 +1,14 @@
 package ttp;
 
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+
+import ttp.newrep.City;
+import ttp.newrep.Individual;
 
 /**
  *
@@ -117,6 +121,51 @@ public class TTPInstance {
         } catch (IOException ex) {
         }
 //        if (debugPrint || true) printInstance(false);
+    }
+    
+    public Individual createIndividual(int tour[]){
+    	int itemsPerCity = this.numberOfItems / (tour.length - 2);
+    	return new Individual(this.nodes, this.items, tour, itemsPerCity);
+    }
+    
+    public double evaluate(Individual individual){
+    	double fitness = 0;
+    	//double distance = 0;
+    	double totalWeight = 0;
+    	double totalProfit = 0;
+
+    	
+    	Point2D lastPoint = individual.startingCity.location;
+    	for (City city : individual.tour){
+    		double distance = Math.ceil(lastPoint.distance(city.location));
+    		totalProfit += city.getProfit();
+    		
+    		fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
+    		
+    		totalWeight += city.getWeight();
+    		lastPoint = city.location;
+    	}
+    	
+    	double distance = Math.ceil(lastPoint.distance(individual.startingCity.location));
+    	fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
+    	fitness *= this.rentingRatio;
+    	fitness += totalProfit;
+    	
+    	/*
+    	for (City city : individual.tour){
+    		totalWeight += city.getWeight();
+    	}
+    	for (int i = individual.tour.length -1; i>=0; i--){
+    		City city = individual.tour[i];
+    		distance += city.location.distance(lastPoint);
+
+    		fitness += city.getProfit() - distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
+
+    		lastPoint = city.location;
+    		totalWeight -= city.getWeight();
+    	}
+    	*/
+    	return fitness;
     }
     
     /**
