@@ -439,10 +439,6 @@ public class Optimisation {
             
         }
         
-        
-        Individual ind = instance.createIndividual(tour, packingPlan);
-        System.out.println("individual" + instance.evaluate(ind));
-        
         long duration = ttp.Utils.Utils.stopTiming();
         s.computationTime = duration;
         return s;
