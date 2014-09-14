@@ -250,6 +250,17 @@ public class Optimisation {
         return s;
     }
     
+    /**
+     * Sorts the items by profit over cost ratio
+     * It then selects items greedily (highest profit cost ratio first)
+     * It changes the packing plan for the corresponding object as long as the fitness increases
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	double [] distances = new double[tour.length];
 		double tourDistance = 0;
@@ -393,6 +404,16 @@ public class Optimisation {
     	return solution;
     }
     
+    /**
+     * Swaps random two random nodes and mutates the packing plans on these nodes stochastically
+     * If the fitness of the new tour and plan is better than the last, this tour/plan will be used in future mutations
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionOne(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	int[] packingPlan = new int[instance.numberOfItems];
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
@@ -458,6 +479,15 @@ public class Optimisation {
     	return newSolution;
     }
     
+    /**
+     * Same as the last algorithm, except it uses only adjacent nodes
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	int[] packingPlan = new int[instance.numberOfItems];
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
@@ -515,6 +545,15 @@ public class Optimisation {
     	return newSolution;
     } 
     
+    /**
+     * Same as last algorithm, but uses the object oriented approach
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionTwoNew(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
         Individual individual = instance.createIndividual(tour);
         int didNotImprove = 0;
@@ -572,6 +611,14 @@ public class Optimisation {
     	return solution;
     } 
     
+    /**
+     * Might actually be the exact same as TwoNew
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
         Individual individual = instance.createIndividual(tour);
         int didNotImprove = 0;
@@ -644,6 +691,20 @@ public class Optimisation {
     } 
     
     
+    /**
+     * Unfinished Algorithm.  Will use crossover to mutate the tours
+     * 	Then it will use hill climber to evaluate the new tour
+     * 	if the result of this hill climber is greater than the previous, this tour is the new one
+     * 	else re-iterate
+     * 
+     * This version will have 10 individuals per iteration
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
         Individual individual = instance.createIndividual(tour);
         int didNotImprove = 0;
@@ -699,6 +760,14 @@ public class Optimisation {
     	return solution;
     } 
     
+    /**
+     * Basically the same as ex 3 sol 3
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseThreeSolutionThreeAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
         Individual individual = instance.createIndividual(tour);
         int didNotImprove = 0;
