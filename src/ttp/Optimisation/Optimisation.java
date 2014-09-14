@@ -269,12 +269,14 @@ public class Optimisation {
 		// List will store the index and profit/cost ratio of all items
 		List<double[]> items = new LinkedList<double[]>();
 
+		int itemsPerCity = instance.numberOfItems / (tour.length - 2);
+		
     	for (int i = tour.length-1; i >= 0; i--){
     		int cityIndex = tour[i];
     		// Do not want cityIndex of 0, 
     		// this node has no items and will cause array out of bounds on itemIndex lookup
     		if (cityIndex != 0){
-				for (int j = 0; j < instance.numberOfItems / (tour.length - 2); j++){
+				for (int j = 0; j < itemsPerCity; j++){
 					int itemIndex = (tour.length-2) * j + cityIndex-1;
 	    			int[] item = instance.items[itemIndex];
 	    			int itemWeight = item[2];
@@ -293,7 +295,7 @@ public class Optimisation {
 	    			// Save the itemIndex and the ratio into a double array
 	    			// Both of these pieces of data are necessary in the sort
 	    			double[] nodeArray = new double[2];
-	    			nodeArray[0] = itemIndex;
+	    			nodeArray[0] = i*itemsPerCity + j - 1;
 		    		nodeArray[1] = ratio;
 		    		
 		    		// Add item to the list according to its ratio (descending)
