@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.List;
 import java.util.Map;
 
+import ttp.TTPInstance;
 import ga.Selection.SelectionType;
 
 public class Config{
@@ -25,6 +26,8 @@ public class Config{
 	public double[] crossoverTypeChance = new double[4];
 	public double[] selectionTypeChance = new double[4];
 	
+	public TTPInstance ttpInstance = null;
+	public double[] tskpW = null;
 	
 	public void setMutationTypeChance(double insert, double swap, double invert, double scramble, double inverOver){
 		double probability = 0;
@@ -116,8 +119,14 @@ public class Config{
 	public Map getAlleleMap(){
 		return possibleAlleles;
 	}
-	
+	public void setTtpInstance(TTPInstance inst) {
+		this.ttpInstance = inst;
+	}
+	public void setTSKPw(double[] d) {
+		this.tskpW= d;
+	}
 	public double calculateFitness(Individual individual){
+		/*
 		double fitness = 0;
 		List<Object> chromosomes = individual.genotype;
 		
@@ -131,8 +140,22 @@ public class Config{
 			fitness += currentPoint.distance(lastPoint);
 			lastPoint = currentPoint;
 		}
-		
-		return 1/fitness;
+		*/
+		double obj = 0;
+		double totalWeight = 0;
+		double weightConst = (ttpInstance.maxSpeed - ttpInstance.minSpeed) / ttpInstance.capacityOfKnapsack;
+		int cityStart = 1;
+		obj += this.ttpInstance.distances(cityStart,(int)individual.genotype.get(0)) / ttpInstance.maxSpeed;
+		for (int i = 0; i < individual.genotype.size() - 1; i++) {
+			int cityA = (int)individual.genotype.get(i);
+			int cityB = (int)individual.genotype.get(i+1);
+			totalWeight += tskpW[i+1]; // pick up items at cityA
+			obj += ttpInstance.distances(cityA, cityB) / (ttpInstance.maxSpeed - totalWeight*weightConst);
+		}
+		int cityEnd = (int)individual.genotype.get(individual.genotype.size()-1);
+		totalWeight += tskpW[cityEnd+1];
+		obj += ttpInstance.distances(cityEnd, cityStart) / (ttpInstance.maxSpeed - totalWeight*weightConst);
+		return -ttpInstance.rentingRatio*obj;
 	}
 	
 	public double calculateMeanPathlength(Population population){
