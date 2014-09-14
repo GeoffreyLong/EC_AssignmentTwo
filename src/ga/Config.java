@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import ttp.TTPInstance;
+import ttp.TTPSolution;
 import ga.Selection.SelectionType;
 
 public class Config{
 	public int individualLength = -1;
-	public Map possibleAlleles;
 	public SelectionType selectionType = null;
 	public SelectionType parentSelectionType = null;
 	
@@ -28,6 +28,7 @@ public class Config{
 	
 	public TTPInstance ttpInstance = null;
 	public double[] tskpW = null;
+	private TTPInstance ttp;
 	
 	public void setMutationTypeChance(double insert, double swap, double invert, double scramble, double inverOver){
 		double probability = 0;
@@ -111,13 +112,38 @@ public class Config{
 	public int getIndividualLength(){
 		return individualLength;
 	}
-	
-	public void setAlleleMap(Map alleleMap){
-		possibleAlleles = alleleMap;
+	void setGenerationMix(boolean mixGenerations){
+		this.generationMix = mixGenerations;
+	}
+	public void setTournamentSize(int tournamentSize){
+		this.tournamentSize = tournamentSize;
 	}
 	
-	public Map getAlleleMap(){
-		return possibleAlleles;
+	public void setSelectionType(SelectionType type){
+		selectionType = type;
+	}
+	public SelectionType getSelectionType(){
+		return this.selectionType;
+	}
+	public void setMutationChance(double chance){
+		mutationChance = chance;
+	}
+	public void setCrossoverChance(double chance){
+		crossoverChance = chance;
+	}
+	public void setInverOverProbability(double chance){
+		this.inverOverProbability = chance;
+	}
+	public void setParentSelectionType(SelectionType parentSelectionType){
+		this.parentSelectionType = parentSelectionType;
+	}
+	public SelectionType getParentSelectionType(){
+		return this.parentSelectionType;
+	}
+
+	
+	public void setTTPInstance(TTPInstance ttp){
+		this.ttp = ttp;
 	}
 	public void setTtpInstance(TTPInstance inst) {
 		this.ttpInstance = inst;
@@ -157,37 +183,9 @@ public class Config{
 		obj += ttpInstance.distances(cityEnd, cityStart) / (ttpInstance.maxSpeed - totalWeight*weightConst);
 		return -ttpInstance.rentingRatio*obj;
 	}
-	
-	public double calculateMeanPathlength(Population population){
-		return 1/population.calculateMeanFitness();
+	public double calculateFitnessTwo(ttp.newrep.Individual individual){
+		TTPSolution solution = new TTPSolution(ttp.getTour(individual), ttp.getPackingPlan(individual));
+		ttp.evaluate(solution);
+		return solution.ob;
 	}
-	public void setGenerationMix(boolean mixGenerations){
-		this.generationMix = mixGenerations;
-	}
-	public void setTournamentSize(int tournamentSize){
-		this.tournamentSize = tournamentSize;
-	}
-	
-	public void setSelectionType(SelectionType type){
-		selectionType = type;
-	}
-	public SelectionType getSelectionType(){
-		return this.selectionType;
-	}
-	public void setMutationChance(double chance){
-		mutationChance = chance;
-	}
-	public void setCrossoverChance(double chance){
-		crossoverChance = chance;
-	}
-	public void setInverOverProbability(double chance){
-		this.inverOverProbability = chance;
-	}
-	public void setParentSelectionType(SelectionType parentSelectionType){
-		this.parentSelectionType = parentSelectionType;
-	}
-	public SelectionType getParentSelectionType(){
-		return this.parentSelectionType;
-	}
-
 }
