@@ -67,14 +67,14 @@ public class Driver {
             System.out.println(f.getName()+": ");
             
             // do the optimisation
-            
+            /*
             System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
            TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
            
            //solution.println();
            solution.altPrint();
            solution.printFull();
-           /*
+           
            System.out.println("SIMPLE HEURISTIC SOLUTION -------------------------------------");
             TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
@@ -84,15 +84,15 @@ public class Driver {
             
             solution2.altPrint();
             solution2.printFull();
-
+            */
             
             //solution.altPrint();
             
             System.out.println("SECOND SOLUTION -------------------------------------");
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance,tour,10,0);
+            TTPSolution solution3 = Optimisation.exerciseThreeSolutionTwoNew(instance,tour,10,0);
             solution3.printFull();
             solution3.altPrint();
-            */
+            
         }
     }
     
