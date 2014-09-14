@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
+import ttp.newrep.Individual;
 
 /*
  * To change this template, choose Tools | Templates
@@ -33,103 +34,51 @@ public class Optimisation {
 		
 		double[] d = new double[instance.numberOfNodes];
 		double[] W = new double[instance.numberOfNodes];
+		int[] tourRet = new int[tour.length];
 		int[] tourDash = new int[tour.length];
 		W[0]=0;
-		int[] packingPlan = new int[instance.numberOfItems];
+		int[] packingPlanRet = new int[instance.numberOfItems];
+		int[] packingPlanDash = new int[instance.numberOfItems];
 		double P = Double.NEGATIVE_INFINITY;
+		double PDash = Double.NEGATIVE_INFINITY;
 		int runtime = 0;
+		Individual individual = instance.createIndividual(tour);
 		
 		
 		while (runtime<maxRuntime){
-			packingPlan = solveKRP(instance.items,d,W);
+			packingPlanDash = solveKRP(instance.items,d,W);
 			
-			for (int i = 1; i < instance.numberOfNodes; i++){
-				W[i]=W[i-1]+
+			for(int i=0;i < individual.tour.length; i++){
+				W[i+1]=W[i]+individual.tour[i].getWeight();
 			}
 			
-			tourDash = solveTSKP(W,d);
+			tourDash = solveTSKP(d,W);
 			PDash = instance.evaluate(individual);
+			
+			if (PDash>P){
+				P=PDash;
+				tourRet=tourDash;
+				packingPlanRet=packingPlanDash;
+				
+				for(int i = 0; i < instance.numberOfNodes-1; i++){//check boundarys
+					d[i]=instance.distances(i, i+1);;
+				}
+			} else {
+				break;
+			}
 		}
-    	
-    	double dSum = 0;
-    	D[instance.numberOfNodes-1] = 0; 
-    	for (int i = instance.numberOfNodes-2; i >= 0; i--) {
-    		dSum += instance.distances(tour[i+1], tour[i]);
-    		D[tour[i]] = dSum;
-    	}
-    	double noItemTime = dSum/instance.maxSpeed;
-    	double v = (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack;
-    	
-    	final double[] score = new double[instance.numberOfItems];
-    	double[] threshScore = new double[instance.numberOfItems];
-    	for (int i = 0; i < instance.numberOfItems; i++) {
-    		int cityIdx = instance.items[i][3];
-    		double itemCarryTime = D[cityIdx] / (instance.maxSpeed - v*instance.items[i][2]);
-    		double itemCycleTime = noItemTime - D[cityIdx] + itemCarryTime;
-    		score[i] = instance.items[i][1] - instance.rentingRatio * itemCarryTime;
-    		threshScore[i] = instance.rentingRatio*noItemTime 
-    				+ (instance.items[i][1] - instance.rentingRatio * itemCycleTime);
-    	}
-    	
-    	// Form array of item indexes to sort
-    	Integer[] itemIdx = new Integer[instance.numberOfItems];
-    	for (int i = 0; i < itemIdx.length; i++) {
-    		itemIdx[i] = instance.items[i][0];
-    	}
-    	
-    	
-    	// Heuristic sort
-    	Arrays.sort(itemIdx, new Comparator<Integer>() {
-    		@Override
-    		public int compare(Integer o1, Integer o2) {
-    			double diff = score[o1] - score[o2];
-    			return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
-    		}
-    	});
-    	
-    	// Construct solution
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	int Wc = 0;
-    	
-    	
-    	for (int i = 0; i < instance.numberOfItems; i++) {
-    		// If we're not full
-    		if ( ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) && threshScore[itemIdx[i]] > 0) {
-
-    			int arrIndex=-1;
-    			int itemsPCity=(int)Math.round((double)instance.numberOfItems/(instance.numberOfNodes-1));
-    			int cityIndex=instance.items[itemIdx[i]][3];
-    			int itemNumber=(int)Math.floor((double)(instance.items[itemIdx[i]][0])/(instance.numberOfNodes-1));
-    			
-    			for (int j = 1; j<tour.length; j++){
-    				if (tour[j]==cityIndex){
-    					arrIndex=j-1;    					
-    					break;
-    				}	
-    			}
-
-    			int ppIndex = (arrIndex*itemsPCity)+itemNumber;
-
-    			packingPlan[ppIndex] = 1;
-    			
-    			Wc += instance.items[itemIdx[i]][2];
-    			//System.out.println("i: "+arrIndex+" ppI: "+ppIndex + " CI " + (cityIndex) + " id: " + (instance.items[itemIdx[i]][0])+" IN: "+itemNumber+" WGC: "+ instance.items[itemIdx[i]][2] +" WGT: "+Wc);
-    			//System.out.printf("ItemID: %d\n", itemIdx[i]);
-    		}
-    		if (Wc == instance.capacityOfKnapsack) {
-    			break;
-    		}
-    	}
-    	//System.out.println("Our wc: " +Wc);
-    	
-    	
-   
-    	//System.out.println(Arrays.toString(packingPlan));
-    	TTPSolution s = new TTPSolution(tour, packingPlan);
-    	instance.evaluate(s);	
+				
+		TTPSolution s = new TTPSolution(tourRet, packingPlanRet);
+    	instance.evaluate(s);
         return s;
     }
 	
+	private static int[] solveKRP(int[][] items, double[] d, double[] W){
+		
+		
+		
+		return null;
+	}
 	
     public static TTPSolution simpleHeuristic(TTPInstance instance, int[] tour, int maxRuntime) {
     	double[] D = new double[instance.numberOfNodes];
