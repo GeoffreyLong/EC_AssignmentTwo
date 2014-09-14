@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import ttp.newrep.City;
 import ttp.newrep.Individual;
+import ttp.newrep.Item;
 
 /**
  *
@@ -128,6 +129,11 @@ public class TTPInstance {
     	return new Individual(this.nodes, this.items, tour, itemsPerCity);
     }
     
+    public Individual createIndividual(int[] tour, int[] packingPlan){
+    	int itemsPerCity = this.numberOfItems / (tour.length - 2);
+    	return new Individual(this.nodes, this.items, tour, packingPlan, itemsPerCity);
+    }
+    
     public double evaluate(Individual individual){
     	double fitness = 0;
     	//double distance = 0;
@@ -141,11 +147,10 @@ public class TTPInstance {
     		totalProfit += city.getProfit();
     		
     		fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
-    		
     		totalWeight += city.getWeight();
     		lastPoint = city.location;
     	}
-    	
+
     	double distance = Math.ceil(lastPoint.distance(individual.startingCity.location));
     	fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
     	fitness *= this.rentingRatio;
@@ -324,7 +329,33 @@ public class TTPInstance {
         solution.ob = solution.fp - solution.ft * rentRate;       
     }
     
+    public int[] getTour(Individual individual){
+    	int[] tour = new int[individual.tour.length + 2];
+    	for (int i = 1; i < individual.tour.length; i++){
+    		tour[i] = individual.tour[i-1].cityId;
+    	}
+    	tour[tour.length-1] = individual.startingCity.cityId;
+    	tour[0] = individual.startingCity.cityId;
+    	
+    	return tour;
+    }
     
+    // Check this
+    public int[] getPackingPlan(Individual individual){
+    	int[] packingPlan = new int[this.numberOfItems];
+    	int itemsPerCity = this.numberOfItems / individual.tour.length;
+    	
+    	for (int i = 0; i < individual.tour.length; i++){
+    		int j = 0;
+    		for (Item item : individual.tour[i].items){
+    			int index = i * itemsPerCity + j;
+    			if (item.isSelected) packingPlan[index] = 1;
+    			j++;
+    		}
+    	}
+    	
+    	return packingPlan;
+    }
     
 //    public int av(int currentItem, int city) {
 ///*        int result = 1;

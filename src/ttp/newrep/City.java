@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class City {
-	List<Item> items = new LinkedList<Item>();
+	public List<Item> items = new LinkedList<Item>();
 	public Point2D location;
 	public int cityId;
 	
