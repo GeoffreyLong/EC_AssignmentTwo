@@ -89,7 +89,7 @@ public class Driver {
             //solution.altPrint();
             
             System.out.println("SECOND SOLUTION -------------------------------------");
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance,tour,10,0);
+            TTPSolution solution3 = Optimisation.getCuts(instance, tour);
             solution3.printFull();
             solution3.altPrint();
             

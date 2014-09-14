@@ -250,6 +250,166 @@ public class Optimisation {
         return s;
     }
     
+    
+    public static TTPSolution pureIteration(TTPInstance instance, int[] tour){
+    	double [] distances = new double[tour.length];
+		double tourDistance = 0;
+		
+		// Get the distance from the node to the end
+		// Create array of cityId -> distance to end of tour for easy lookup
+		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[tour[0]][1], instance.nodes[tour[0]][2]);
+		// Iterate through tour backwards
+		for (int i = tour.length-1; i>=0; i--){
+			int index = tour[i];
+			java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
+    		tourDistance += point.distance(lastPoint);
+    		
+    		distances[index] = tourDistance;
+		} 
+    	return null;
+    }
+    
+    public static TTPSolution getCuts(TTPInstance instance, int[] tour){
+    	double [] distances = new double[tour.length];
+		double tourDistance = 0;
+		
+		// Get the distance from the node to the end
+		// Create array of cityId -> distance to end of tour for easy lookup
+		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[tour[0]][1], instance.nodes[tour[0]][2]);
+		// Iterate through tour backwards
+		for (int i = tour.length-1; i>=0; i--){
+			int index = tour[i];
+			java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
+    		tourDistance += point.distance(lastPoint);
+    		
+    		distances[index] = tourDistance;
+		} 
+		
+		double[] cutoff = new double[instance.numberOfItems];
+		
+		int itemsPerCity = instance.numberOfItems / (tour.length - 2);
+		List<double[]> items = new LinkedList<double[]>();
+    	for (int i = tour.length-1; i >= 0; i--){
+    		int cityIndex = tour[i];
+    		// Do not want cityIndex of 0, 
+    		// this node has no items and will cause array out of bounds on itemIndex lookup
+    		if (cityIndex != 0){
+				for (int j = 0; j < itemsPerCity; j++){
+					int itemIndex = (tour.length-2) * j + cityIndex-1;
+	    			int[] item = instance.items[itemIndex];
+	    			int itemWeight = item[2];
+	    			int itemProfit = item[1];
+	    			
+	    			double cut = (instance.maxSpeed - instance.rentingRatio * distances[cityIndex] / (itemProfit + instance.rentingRatio*distances[cityIndex]/instance.maxSpeed)) * instance.capacityOfKnapsack;
+	    			cut /= (instance.maxSpeed - instance.minSpeed);
+	    			cut -= itemWeight;
+	    			
+	    			// Save the itemIndex and the ratio into a double array
+	    			// Both of these pieces of data are necessary in the sort
+	    			double[] nodeArray = new double[2];
+	    			nodeArray[0] = i*itemsPerCity + j - 1;
+		    		nodeArray[1] = cut;
+		    		
+		    		// Add item to the list according to its ratio (descending)
+		    		for (int k = 0; k <= items.size(); k++){
+		    			if (k == items.size()){
+		    				items.add(nodeArray);
+		    				break;
+		    			}
+		    			else{
+			    			if (nodeArray[1] >= items.get(k)[1]){
+			    				items.add(k, nodeArray);
+			    				break;
+			    			}
+		    			}
+		    		}
+				}
+    		}
+    	}
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	//int[] canPack = new int[instance.numberOfItems];
+    	List<Integer> canPack = new LinkedList<Integer>();
+ 
+    	for (int k = 0; k < items.size(); k++){
+    		//if (items.get(k)[1] >= 0) canPack.add((int) items.get(k)[0]);
+    		
+			System.out.println(items.get(k)[1] + " " + items.get(k)[0]);
+			/*
+			packingPlan[(int) items.get(k)[0]] = 1;
+			TTPSolution solution = new TTPSolution(tour, packingPlan);
+	    	instance.evaluate(solution);
+	    	System.out.println(solution.ob + " " + solution.wendUsed);
+	    	*/
+		}
+    	TTPSolution solution = new TTPSolution(tour, packingPlan);
+    	instance.evaluate(solution);
+    	//System.out.println(recurThree(packingPlan, 0, tour, solution.ob, instance, canPack));
+    	
+    	
+    	/*
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	packingPlan[(int) items.get(0)[0]] = 1;
+    	packingPlan[(int) items.get(1)[0]] = 1;
+    	
+    	TTPSolution solution = new TTPSolution(tour, packingPlan);
+    	instance.evaluate(solution);
+    	return solution;
+    	*/
+    	return null;
+    }
+    /*
+    public static double recurThree(int[] packingPlan, int packingPlanIndex, int[] tour, double ob, TTPInstance instance, List<Integer> canPack){
+    	if (packingPlanIndex == canPack.size() - 1){
+    		if (ob > bestValue){
+    			System.out.println(ob);
+    			bestValue = ob;
+    		}
+    		return ob;
+    	}
+    	
+    	int[] packingPlanClone = packingPlan.clone();
+    	packingPlanClone[canPack.get(packingPlanIndex)] = 1;
+    	TTPSolution solution = new TTPSolution(tour, packingPlanClone);
+    	instance.evaluate(solution);
+    	solution.printFull();
+
+    	if (solution.wend > 0 && solution.ob > ob){
+    		return Math.max(recurTwo(packingPlan, packingPlanIndex + 1, tour, solution.ob, instance), recurTwo(packingPlanClone, packingPlanIndex + 1, tour, solution.ob, instance));
+    	}
+    	else{
+    		return Math.max(ob, recurTwo(packingPlan, packingPlanIndex + 1, tour, ob, instance));
+    	}
+    }*/
+    	
+    public static TTPSolution recurrance(TTPInstance instance, int[] tour){
+    	TTPSolution solution = new TTPSolution(tour, new int[instance.numberOfItems]);
+    	instance.evaluate(solution);
+    	System.out.println(recurTwo(new int[instance.numberOfItems], 0, tour, solution.ob, instance));
+    	return solution;
+    }
+    static double bestValue = -10000;
+    public static double recurTwo(int[] packingPlan, int packingPlanIndex, int[] tour, double ob, TTPInstance instance){
+    	if (packingPlanIndex == packingPlan.length - 1){
+    		if (ob > bestValue){
+    			System.out.println(ob);
+    			bestValue = ob;
+    		}
+    		return ob;
+    	}
+    	
+    	int[] packingPlanClone = packingPlan.clone();
+    	packingPlanClone[packingPlanIndex] = 1;
+    	TTPSolution solution = new TTPSolution(tour, packingPlanClone);
+    	instance.evaluate(solution);
+
+    	if (solution.wend > 0 && solution.ob > ob){
+    		return Math.max(recurTwo(packingPlan, packingPlanIndex + 1, tour, solution.ob, instance), recurTwo(packingPlanClone, packingPlanIndex + 1, tour, solution.ob, instance));
+    	}
+    	else{
+    		return Math.max(ob, recurTwo(packingPlan, packingPlanIndex + 1, tour, ob, instance));
+    	}
+    }
+    
     /**
      * Sorts the items by profit over cost ratio
      * It then selects items greedily (highest profit cost ratio first)
