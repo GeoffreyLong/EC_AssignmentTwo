@@ -72,10 +72,10 @@ public class Optimisation {
         return s;
     }
 	
-	private static int[] solveKRP(int[][] items, double[] d, double[] W){
-		
-		
-		
+	private static int[] solveKRP(int[][] items, double[] d, double[] W){		
+		return null;
+	}
+	private static int[] solveTSKP(double[] d, double[] W) {
 		return null;
 	}
 	
