@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import ttp.newrep.City;
 import ttp.newrep.Individual;
+import ttp.newrep.Item;
 
 /**
  *
@@ -128,6 +129,11 @@ public class TTPInstance {
     	return new Individual(this.nodes, this.items, tour, itemsPerCity);
     }
     
+    public Individual createIndividual(int[] tour, int[] packingPlan){
+    	int itemsPerCity = this.numberOfItems / (tour.length - 2);
+    	return new Individual(this.nodes, this.items, tour, packingPlan, itemsPerCity);
+    }
+    
     public double evaluate(Individual individual){
     	double fitness = 0;
     	//double distance = 0;
@@ -141,11 +147,10 @@ public class TTPInstance {
     		totalProfit += city.getProfit();
     		
     		fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
-    		
     		totalWeight += city.getWeight();
     		lastPoint = city.location;
     	}
-    	
+
     	double distance = Math.ceil(lastPoint.distance(individual.startingCity.location));
     	fitness -= distance / (this.maxSpeed - totalWeight * (this.maxSpeed - this.minSpeed) / this.capacityOfKnapsack);
     	fitness *= this.rentingRatio;

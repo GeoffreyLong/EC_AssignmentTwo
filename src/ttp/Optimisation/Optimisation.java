@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
+import ttp.newrep.Individual;
 
 /*
  * To change this template, choose Tools | Templates
@@ -218,6 +219,7 @@ public class Optimisation {
     	}
         TTPSolution solution = new TTPSolution(tour, packingPlanClone);
         instance.evaluate(solution);
+        
     	return solution;
     }
     
@@ -436,6 +438,10 @@ public class Optimisation {
             i++;
             
         }
+        
+        
+        Individual ind = instance.createIndividual(tour, packingPlan);
+        System.out.println("individual" + instance.evaluate(ind));
         
         long duration = ttp.Utils.Utils.stopTiming();
         s.computationTime = duration;
