@@ -397,29 +397,25 @@ public class Optimisation {
     
     public static TTPSolution exerciseThreeSolutionTwoNew(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
         Individual individual = instance.createIndividual(tour);
-        double lastSolutionOb = -Double.MAX_VALUE;
         int didNotImprove = 0;
-        int[] tourSave = tour.clone();
+        TTPSolution solution = null;
+        int[] packingPlan = new int[instance.numberOfItems];
 		
         while(didNotImprove <= durationWithoutImprovement){
-        	double fitness = instance.evaluate(individual);
     		int randNodeIndex = (int) (Math.random() * individual.tour.length);
-    		int[] packingPlan = instance.getPackingPlan(individual);
     		
-    		
-    		tour = instance.getTour(individual);
-    		for (int i = 0 ; i<tourSave.length; i++){
-    			System.out.println(tour[i] + " " + tourSave[i]);
-    		}
-    		
-    		System.out.println(instance.evaluate(individual));
+    		solution = new TTPSolution(tour, packingPlan);
+    		instance.evaluate(solution);
     		
 			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
 	    		for (int i = 0; i < 5; i++){
-	    			Individual tempInd = instance.createIndividual(tour, packingPlan);
+	    			int[] tourNew = tour.clone();
+	    			int[] packingPlanNew = packingPlan.clone();
+	    			
+	    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
 	    			double randSwap = Math.random();
 	    			if (randSwap <= 0.1){
-	    				City cityTemp = individual.tour[randNodeIndex - 1];
+	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
 	    				tempInd.tour[randNodeIndex - 1] = individual.tour[randNodeIndex];
 	    				tempInd.tour[randNodeIndex] = cityTemp;
 	    			}
@@ -438,15 +434,187 @@ public class Optimisation {
 		    			}
 	    			}
 	    			
-	    			if (instance.evaluate(tempInd) > fitness){
-	    				individual = tempInd;
-	    				fitness = instance.evaluate(individual);
+	    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
+	    	        instance.evaluate(newSolution);
+	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
+	    	    		//System.out.println(solution.ob);
+	    	    		tour = instance.getTour(tempInd).clone();
+	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
+	    	    		didNotImprove = 0;
+	    			}
+	    			else{
+	    				didNotImprove ++;
 	    			}
 	    		}
 			}
         }
-        TTPSolution solution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
-        instance.evaluate(solution);
+        
+    	return solution;
+    } 
+    
+    public static TTPSolution exerciseThreeSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+        Individual individual = instance.createIndividual(tour);
+        int didNotImprove = 0;
+        TTPSolution solution = null;
+        int[] packingPlan = new int[instance.numberOfItems];
+        double oldFitness = 0;
+        int tempCount = 0;
+        double bestFitness = 0;
+		
+        while(didNotImprove <= durationWithoutImprovement){
+    		int randNodeIndex = (int) (Math.random() * individual.tour.length);
+    		
+    		solution = new TTPSolution(tour, packingPlan);
+    		instance.evaluate(solution);
+    		if (oldFitness == solution.ob){
+    			tempCount ++;
+    		}
+    		else {
+    			tempCount = 0;
+    			oldFitness = solution.ob;
+    		}
+    		if (oldFitness > bestFitness){
+
+        		System.out.println(bestFitness);
+    			bestFitness = oldFitness;
+    		}
+    		
+			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
+	    		for (int i = 0; i < 5; i++){
+	    			int[] tourNew = tour.clone();
+	    			int[] packingPlanNew = packingPlan.clone();
+	    			
+	    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
+	    			double randSwap = Math.random();
+	    			if (randSwap <= 0.1){
+	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
+	    				tempInd.tour[randNodeIndex - 1] = individual.tour[randNodeIndex];
+	    				tempInd.tour[randNodeIndex] = cityTemp;
+	    			}
+	    			
+	    			double packingSwap = Math.random();
+	    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
+	    			}
+	    			for (Item item : tempInd.tour[randNodeIndex].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
+	    			}
+	    			
+	    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
+	    	        instance.evaluate(newSolution);
+	    	        if (tempCount >= 1000){
+	    	        	packingPlan = new int[packingPlan.length];
+	    	        	tempCount = 0;
+	    	        }
+	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
+	    	    		tour = instance.getTour(tempInd).clone();
+	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
+	    			}
+	    		}
+			}
+        }
+        
+    	return solution;
+    } 
+    
+    
+    public static TTPSolution exerciseThreeSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+        Individual individual = instance.createIndividual(tour);
+        int didNotImprove = 0;
+        TTPSolution solution = null;
+        int[] packingPlan = new int[instance.numberOfItems];
+        double oldFitness = hillClimber(instance, tour, 2,1000, 60000).ob;
+		
+        while(didNotImprove <= durationWithoutImprovement){
+    		
+    		solution = new TTPSolution(tour, packingPlan);
+    		instance.evaluate(solution);
+    		
+    		Individual[] individuals = new Individual[10];
+    		for (int i = 0; i < 10; i++){
+				int[] tourNew = tour.clone();
+				int[] packingPlanNew = packingPlan.clone();
+				Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
+				
+				
+				int randNodeIndex = (int) (Math.random() * individual.tour.length);
+				int randNodeIndexTwo = (int) (Math.random() * individual.tour.length);
+	
+				int j=0;
+				while(true) {
+					int indexA = (randNodeIndex+1+j) % individual.tour.length;
+					int indexB = (randNodeIndexTwo-j + individual.tour.length) % individual.tour.length; 
+	
+					City temp = tempInd.tour[indexA];//store temp
+					tempInd.tour[indexA] = tempInd.tour[indexB];
+					tempInd.tour[indexB] = temp;
+					if (Math.abs(indexA-indexB) <= 1 || Math.abs(indexA-indexB) >= individual.tour.length-1) break;
+					
+					j++;
+				}
+				
+				individuals[i] = tempInd;
+    		}
+    		int bestIndex = -1;
+			for (int i = 0; i<individuals.length; i++){
+				Individual tempInd = individuals[i];
+				TTPSolution hillSol = hillClimber(instance, instance.getTour(tempInd), 2,10000, 60000);
+				System.out.println(hillSol.ob + " " + oldFitness);
+				if (hillSol.ob > oldFitness){
+					oldFitness = hillSol.ob;
+					bestIndex = i;
+				}
+				i++;
+			}
+			System.out.println();
+			if (bestIndex != -1) tour = instance.getTour(individuals[bestIndex]).clone();
+        }
+        
+    	return solution;
+    } 
+    
+    public static TTPSolution exerciseThreeSolutionThreeAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+        Individual individual = instance.createIndividual(tour);
+        int didNotImprove = 0;
+        TTPSolution solution = null;
+        int[] packingPlan = new int[instance.numberOfItems];
+        double oldFitness = 0;
+        int tempCount = 0;
+		
+        while(didNotImprove <= durationWithoutImprovement){
+    		
+    		solution = new TTPSolution(tour, packingPlan);
+    		instance.evaluate(solution);
+    		
+			int[] tourNew = tour.clone();
+			int[] packingPlanNew = packingPlan.clone();
+			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
+			
+			
+			
+			for (int i = 0; i<2; i++){
+				int randNodeIndex = (int) (Math.random() * individual.tour.length);
+				int randNodeIndexTwo = (int) (Math.random() * individual.tour.length);
+				if (randNodeIndex != randNodeIndexTwo){
+					City cityTemp = tempInd.tour[randNodeIndex];
+					tempInd.tour[randNodeIndex] = individual.tour[randNodeIndexTwo];
+					tempInd.tour[randNodeIndexTwo] = cityTemp;
+				}
+			}
+			
+			TTPSolution hillSol = hillClimber(instance, instance.getTour(tempInd), 2,1000, 10000);
+			System.out.println(hillSol.ob);
+			if (hillSol.ob > oldFitness){
+				oldFitness = hillSol.ob;
+				tour = instance.getTour(tempInd).clone();
+			}
+        }
         
     	return solution;
     } 
