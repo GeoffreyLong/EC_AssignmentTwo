@@ -32,7 +32,55 @@ import ttp.newrep.Item;
  */
 public class Optimisation {
     
-
+	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime) {
+		
+		double[] d = new double[instance.numberOfNodes];
+		double[] W = new double[instance.numberOfNodes];
+		int[] tourRet = new int[tour.length];
+		int[] tourDash = new int[tour.length];
+		W[0]=0;
+		int[] packingPlanRet = new int[instance.numberOfItems];
+		int[] packingPlanDash = new int[instance.numberOfItems];
+		double P = Double.NEGATIVE_INFINITY;
+		double PDash = Double.NEGATIVE_INFINITY;
+		int runtime = 0;
+		Individual individual = instance.createIndividual(tour);
+		
+		while (runtime<maxRuntime){
+			packingPlanDash = solveKRP(instance.items,d,W);
+			
+			for(int i=0;i < individual.tour.length; i++){
+				W[i+1]=W[i]+individual.tour[i].getWeight();
+			}
+			
+			tourDash = solveTSKP(d,W);
+			PDash = instance.evaluate(individual);
+			
+			if (PDash>P){
+				P=PDash;
+				tourRet=tourDash;
+				packingPlanRet=packingPlanDash;
+				
+				for(int i = 0; i < instance.numberOfNodes-1; i++){//check boundarys
+					d[i]=instance.distances(i, i+1);;
+				}
+			} else {
+				break;
+			}
+		}
+				
+		TTPSolution s = new TTPSolution(tourRet, packingPlanRet);
+    	instance.evaluate(s);
+        return s;
+    }
+	
+	private static int[] solveKRP(int[][] items, double[] d, double[] W){		
+		return null;
+	}
+	private static int[] solveTSKP(double[] d, double[] W) {
+		return null;
+	}
+	
     public static TTPSolution simpleHeuristic(TTPInstance instance, int[] tour, int maxRuntime) {
     	double[] D = new double[instance.numberOfNodes];
     	double dSum = 0;
