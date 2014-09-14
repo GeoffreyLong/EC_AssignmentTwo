@@ -44,7 +44,6 @@ public class Optimisation {
 		int runtime = 0;
 		Individual individual = instance.createIndividual(tour);
 		
-		
 		while (runtime<maxRuntime){
 			packingPlanDash = solveKRP(instance.items,d,W);
 			
