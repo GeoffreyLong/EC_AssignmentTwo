@@ -253,7 +253,11 @@ public class Optimisation {
     public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	double [] distances = new double[tour.length];
 		double tourDistance = 0;
+		
+		// Get the distance from the node to the end
+		// Create array of cityId -> distance to end of tour for easy lookup
 		java.awt.geom.Point2D.Double lastPoint = new Point.Double(instance.nodes[tour[0]][1], instance.nodes[tour[0]][2]);
+		// Iterate through tour backwards
 		for (int i = tour.length-1; i>=0; i--){
 			int index = tour[i];
 			java.awt.geom.Point2D.Double point = new Point.Double(instance.nodes[index][1], instance.nodes[index][2]);
@@ -262,10 +266,13 @@ public class Optimisation {
     		distances[index] = tourDistance;
 		}    	
     		
-		
+		// List will store the index and profit/cost ratio of all items
 		List<double[]> items = new LinkedList<double[]>();
+
     	for (int i = tour.length-1; i >= 0; i--){
     		int cityIndex = tour[i];
+    		// Do not want cityIndex of 0, 
+    		// this node has no items and will cause array out of bounds on itemIndex lookup
     		if (cityIndex != 0){
 				for (int j = 0; j < instance.numberOfItems / (tour.length - 2); j++){
 					int itemIndex = (tour.length-2) * j + cityIndex-1;
@@ -277,16 +284,19 @@ public class Optimisation {
 	    			
 	    			// Takes the symbolic place of the other weights that make up the total weight in the knapsack
 	    			// Perhaps make it ratio of avg weight : avg distance?
-	    			// This is temp penalty, make a better one
+	    			// TODO This is temp penalty, make a better one
 	    			double penalty = distances[cityIndex] + itemWeight / 2;
 	    			cost /= instance.maxSpeed - (itemWeight + penalty) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack;
 	    			
 	    			double ratio = itemProfit / cost;
 	    			
+	    			// Save the itemIndex and the ratio into a double array
+	    			// Both of these pieces of data are necessary in the sort
 	    			double[] nodeArray = new double[2];
 	    			nodeArray[0] = itemIndex;
 		    		nodeArray[1] = ratio;
 		    		
+		    		// Add item to the list according to its ratio (descending)
 		    		for (int k = 0; k <= items.size(); k++){
 		    			if (k == items.size()){
 		    				items.add(nodeArray);
@@ -310,7 +320,9 @@ public class Optimisation {
         double lastSolutionOb = -Double.MAX_VALUE;
         int didNotImprove = 0;
 		
+        // Break the loop when the individual has not improved within a certain number of iterations
         while(didNotImprove <= durationWithoutImprovement){
+        	// Counter for improvement logic
     		if (lastSolutionOb == newSolution.ob){
     			didNotImprove ++;
     		}
@@ -318,14 +330,23 @@ public class Optimisation {
     			didNotImprove = 0;
     		}
 
+    		// Only change the packing plan if the solution is valid
     		if (newSolution.wend >= 0){
     			packingPlanClone = packingPlan.clone();
     		}
     		
     		lastSolutionOb = newSolution.ob;
     		System.out.println(newSolution.ob);
+    		
+    		// Iterate through the items array
     		for (int i = 0; i < instance.numberOfItems; i ++){
+    			// Greedily choose the highest ratio not yet encountered
     			int index = (int) items.get(i)[0];
+    			
+    			// If this item has not yet been picked up
+    			// Pick it up and check if this new packing plan improves the fitness
+    			//		if it does then keep this new packing plan
+    			// 		else revert the plan back
     			if (packingPlan[index] == 0){
     				packingPlan[index] = 1;
 	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
@@ -338,6 +359,11 @@ public class Optimisation {
 	                	packingPlan[index] = 0;
 	                }
     			}
+    			
+    			// If the item has been picked up
+    			// Drop the item and check if this new packing plan improves the fitness
+    			//		if it does then keep this new packing plan
+    			//		else revert the plan back
     			if (packingPlan[index] == 1){
     				packingPlan[index] = 0;
 	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
@@ -355,6 +381,10 @@ public class Optimisation {
     		newSolution = new TTPSolution(tour, packingPlan);
             instance.evaluate(newSolution);
     	}
+        
+        // Create a solution with the packing plan clone
+        // The packing plan clone is guaranteed to be a valid solution (wend >= 0)
+        // Whereas the packing plan may be invalid
         TTPSolution solution = new TTPSolution(tour, packingPlanClone);
         instance.evaluate(solution);
         
