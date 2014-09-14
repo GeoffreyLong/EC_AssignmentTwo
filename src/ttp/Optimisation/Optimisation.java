@@ -17,7 +17,9 @@ import java.util.regex.Pattern;
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
+import ttp.newrep.City;
 import ttp.newrep.Individual;
+import ttp.newrep.Item;
 
 /*
  * To change this template, choose Tools | Templates
@@ -346,60 +348,59 @@ public class Optimisation {
     } 
     
     public static TTPSolution exerciseThreeSolutionTwoNew(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
-        instance.evaluate(newSolution);
-    	
+        Individual individual = instance.createIndividual(tour);
         double lastSolutionOb = -Double.MAX_VALUE;
         int didNotImprove = 0;
+        int[] tourSave = tour.clone();
 		
         while(didNotImprove <= durationWithoutImprovement){
-    		if (lastSolutionOb == newSolution.ob){
-    		}
-    		else{
-    			didNotImprove = 0;
+        	double fitness = instance.evaluate(individual);
+    		int randNodeIndex = (int) (Math.random() * individual.tour.length);
+    		int[] packingPlan = instance.getPackingPlan(individual);
+    		
+    		
+    		tour = instance.getTour(individual);
+    		for (int i = 0 ; i<tourSave.length; i++){
+    			System.out.println(tour[i] + " " + tourSave[i]);
     		}
     		
-    		lastSolutionOb = newSolution.ob;
-    		System.out.println(newSolution.ob);
+    		System.out.println(instance.evaluate(individual));
     		
-    		int randNodeIndex = (int) (Math.random() * tour.length);
-			if (randNodeIndex > 1 && randNodeIndex < tour.length-1){
-				int itemsPerCity = instance.numberOfItems / (tour.length - 2);
-				
+			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
 	    		for (int i = 0; i < 5; i++){
-	    			int[] tourClone = tour.clone();
-	    			int[] packingPlanClone = packingPlan.clone();
+	    			Individual tempInd = instance.createIndividual(tour, packingPlan);
 	    			double randSwap = Math.random();
-	    			if (randSwap <= 0){
-	    				tourClone[randNodeIndex] = tour[randNodeIndex -1];
-	    				tourClone[randNodeIndex - 1] = tour[randNodeIndex];
+	    			if (randSwap <= 0.1){
+	    				City cityTemp = individual.tour[randNodeIndex - 1];
+	    				tempInd.tour[randNodeIndex - 1] = individual.tour[randNodeIndex];
+	    				tempInd.tour[randNodeIndex] = cityTemp;
 	    			}
-    				for (int j = 0; j < itemsPerCity; j++){
-	    				double planMutate = Math.random();
-	    				int itemIndex = (int)(Math.random() * itemsPerCity) + tourClone[randNodeIndex];
-	    				itemIndex -= (int) (Math.random() + 0.5);
-	    				if (planMutate <= 0.5){
-	    					if (packingPlanClone[itemIndex] == 1) packingPlanClone[itemIndex] = 0;
-	    					else packingPlanClone[itemIndex] = 1;
-	    				}
+	    			
+	    			double packingSwap = Math.random();
+	    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
 	    			}
- 
-	    			TTPSolution tempSol = new TTPSolution(tourClone, packingPlanClone);
-	    	        instance.evaluate(tempSol);
-	    	        
-	    			if (tempSol.ob > lastSolutionOb){
-	    				lastSolutionOb = tempSol.ob;
-	    				packingPlan = packingPlanClone.clone();
-	    				tour = tourClone.clone();
+	    			for (Item item : tempInd.tour[randNodeIndex].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
+	    			}
+	    			
+	    			if (instance.evaluate(tempInd) > fitness){
+	    				individual = tempInd;
+	    				fitness = instance.evaluate(individual);
 	    			}
 	    		}
 			}
-	    	newSolution = new TTPSolution(tour, packingPlan);
-    		instance.evaluate(newSolution);
         }
+        TTPSolution solution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
+        instance.evaluate(solution);
         
-    	return newSolution;
+    	return solution;
     } 
     
     
