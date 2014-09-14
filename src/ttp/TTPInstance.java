@@ -331,12 +331,12 @@ public class TTPInstance {
     
     public int[] getTour(Individual individual){
     	int[] tour = new int[individual.tour.length + 2];
-    	for (int i = 1; i < individual.tour.length; i++){
+    	for (int i = 1; i <= individual.tour.length; i++){
     		tour[i] = individual.tour[i-1].cityId;
     	}
-    	tour[tour.length-1] = individual.startingCity.cityId;
+    	tour[tour.length - 1] = individual.startingCity.cityId;
     	tour[0] = individual.startingCity.cityId;
-    	
+
     	return tour;
     }
     
