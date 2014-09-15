@@ -92,7 +92,8 @@ public class Driver {
             
             //solution.altPrint();
             
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
+            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
+            TTPSolution solution3 = Optimisation.cosolver(instance, tour, maxRuntime);
             //solution3.printFull();
             //solution3.altPrint();
             resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
@@ -104,7 +105,8 @@ public class Driver {
     
     public static void runSomeTests() {
         //        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_bounded-strongly-corr_1.ttp"));
-        TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        //TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_uncorr_01.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n2790_bounded-strongly-corr_10.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n837_uncorr_9.ttp"));
 //        instance.printInstance(false);
