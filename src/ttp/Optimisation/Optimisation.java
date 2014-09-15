@@ -444,6 +444,8 @@ public class Optimisation {
 	    			int itemWeight = item[2];
 	    			int itemProfit = item[1];
 	    			
+	    			
+	    			// Remember to edit this, need a wt on the cost without picking up the item
 	    			double cut = (instance.maxSpeed - instance.rentingRatio * distances[cityIndex] / (itemProfit + instance.rentingRatio*distances[cityIndex]/instance.maxSpeed)) * instance.capacityOfKnapsack;
 	    			cut /= (instance.maxSpeed - instance.minSpeed);
 	    			cut -= itemWeight;
@@ -857,6 +859,152 @@ public class Optimisation {
         
     	return solution;
     } 
+
+    /**
+     * This is purely a packing plan crossover
+     * Steps
+     * 	Get two parents randomly
+     * 	Find the items that are selected in the other individual and only select these in the current
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionOne(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+
+    
+
+    /**
+     * This is purely a packing plan crossover
+     * Steps
+     * 	Get two parents randomly
+     * 	Find the index of the cities with items selected in the tour
+     * 	Turn these items on in the other, turn all other items off
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+    
+    
+    /**
+     * Steps
+     * 	Get two parents randomly
+     * 	Swap all nodes which have items selected
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+    
+    /**
+     * Get all nodes where the "getWeightCut" is positive (or greatest)
+     * Swap these nodes (preferably preserving the order / position)
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionFour(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+    
+    
+    /**
+     * Calculate the ob functions for each element, if the ob is better than not having the elm
+     * Swap the node so that it is in the same index and has the same selections
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionFive(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+    
+    /**
+     * Do the same as five but instead of copying it to the same index in the new individual
+     * Copy it such that it has either the same weight added before it or the same distance after it
+     * Probably would want to decide this 
+     * 	based on the knapsack capacity and / or the renting ratio and / or the difference between max and min speed
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseFourSolutionSix(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	int popSize = 10;
+    	int noImprove = 0;
+    	Individual[] population = new Individual[popSize];
+    	
+    	while(noImprove < durationWithoutImprovement){
+    		
+    	}
+    	
+    	return null;
+    }
+    
+    
 
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
             int mode, 
