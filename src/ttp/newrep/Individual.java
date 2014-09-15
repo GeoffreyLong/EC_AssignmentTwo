@@ -27,7 +27,6 @@ public class Individual {
 			City city = new City(nodes[tourIndex][0], nodes[tourIndex][1], nodes[tourIndex][2]);
 			for (int i = 0; i < itemsPerCity; i++){
 				int packingPlanIndex = itemsPerCity * (index-1) + i;
-				System.out.println(packingPlanIndex);
 				int itemIndex = (tour.length-2) * i + tourIndex - 1;
 				Item item = new Item(items[itemIndex][1], items[itemIndex][2], itemIndex);
 				if (packingPlan[packingPlanIndex] == 1) item.isSelected = true;
