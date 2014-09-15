@@ -28,8 +28,11 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-            args = new String[]{"instances", "a280_n279_uncorr_01", // to do all 10 instances (several files match the pattern)
-//            args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_10.ttp", // to do just this 1 instance
+
+//        	args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_01", // to do all 10 instances (several files match the pattern)
+             args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01", // to do all 10 instances (several files match the pattern)
+//                args = new String[]{"instances", "a280_n1395_bounded-strongly-corr_10.ttp", // to do just this 1 instance
+
 
             //args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01.ttp", // to do just this 1 instance
 
@@ -67,7 +70,7 @@ public class Driver {
             System.out.println(f.getName()+": ");
             
             // do the optimisation
-            /*
+            
             System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
            TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
            
@@ -80,16 +83,16 @@ public class Driver {
             
             
             // print to file
-            //solution.writeResult(resultTitle);
+            solution2.writeResult(resultTitle);
             
             solution2.altPrint();
             solution2.printFull();
-            */
+            
             
             //solution.altPrint();
             
             System.out.println("SECOND SOLUTION -------------------------------------");
-            TTPSolution solution3 = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 1000, 0);
+            TTPSolution solution3 = Optimisation.getCuts(instance, tour);
             solution3.printFull();
             solution3.altPrint();
             

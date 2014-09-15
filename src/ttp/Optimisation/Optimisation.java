@@ -170,6 +170,7 @@ public class Optimisation {
 }
 	
     public static TTPSolution simpleHeuristic(TTPInstance instance, int[] tour, int maxRuntime) {
+    	ttp.Utils.Utils.startTiming();
     	double[] D = new double[instance.numberOfNodes];
     	double dSum = 0;
     	D[instance.numberOfNodes-1] = 0; 
@@ -246,6 +247,8 @@ public class Optimisation {
    
     	//System.out.println(Arrays.toString(packingPlan));
     	TTPSolution s = new TTPSolution(tour, packingPlan);
+        long duration = ttp.Utils.Utils.stopTiming();
+        s.computationTime = duration;
     	instance.evaluate(s);	
         return s;
     }
