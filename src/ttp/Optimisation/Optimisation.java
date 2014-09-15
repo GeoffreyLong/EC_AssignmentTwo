@@ -407,7 +407,15 @@ public class Optimisation {
     	return solution;
     }
     
-    public static TTPSolution getCuts(TTPInstance instance, int[] tour){
+    /**
+     * If the tour is fixed, this should output the cutoff weight for  the knapsack
+     * If the knapsack is already this weight, theoretically adding the item will not add profit
+     * 
+     * @param instance
+     * @param tour
+     * @return
+     */
+    public static TTPSolution getWeightCuts(TTPInstance instance, int[] tour){
     	double [] distances = new double[tour.length];
 		double tourDistance = 0;
 		
@@ -464,24 +472,11 @@ public class Optimisation {
 				}
     		}
     	}
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	int weight = 0;
+
     	for (int k = 0; k < items.size(); k++){ 		
-			//System.out.println(items.get(k)[1] + " " + items.get(k)[0] + " " + items.get(k)[2]);
-			//System.out.println(items.get(k)[0] + " " + tour[k]);
-			if (items.get(k)[1] > weight){
-				weight += items.get(k)[2];
-				packingPlan[k] = 1;
-			}
-			
-			TTPSolution solution = new TTPSolution(tour, packingPlan);
-	    	instance.evaluate(solution);
-	    	System.out.println(solution.ob + " " + solution.wendUsed);
+			System.out.println(items.get(k)[1] + " " + items.get(k)[0] + " " + items.get(k)[2]);
 		}
-    	for (int k = 0; k < tour.length; k++){
-    		
-    	}
-    	
+
     	return null;
     }
     

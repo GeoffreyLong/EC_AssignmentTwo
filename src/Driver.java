@@ -92,7 +92,7 @@ public class Driver {
             
             //solution.altPrint();
             
-            TTPSolution solution3 = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 5, maxRuntime);
+            TTPSolution solution3 = Optimisation.getWeightCuts(instance, tour);
             solution3.printFull();
             solution3.altPrint();
             //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
