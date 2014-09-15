@@ -171,14 +171,14 @@ public class Config{
 		double totalWeight = 0;
 		double weightConst = (ttpInstance.maxSpeed - ttpInstance.minSpeed) / ttpInstance.capacityOfKnapsack;
 		int cityStart = 0;
-		obj += this.ttpInstance.distances(cityStart,(int)individual.genotype.get(0)) / ttpInstance.maxSpeed;
+		obj += this.ttpInstance.distances(cityStart,Integer.parseInt((String)individual.genotype.get(0))) / ttpInstance.maxSpeed;
 		for (int i = 0; i < individual.genotype.size() - 1; i++) {
-			int cityA = (int)individual.genotype.get(i);
-			int cityB = (int)individual.genotype.get(i+1);
+			int cityA = Integer.parseInt((String) individual.genotype.get(i));
+			int cityB = Integer.parseInt((String)individual.genotype.get(i+1));
 			totalWeight += tskpW[cityA]; // pick up items at cityA
 			obj += ttpInstance.distances(cityA, cityB) / (ttpInstance.maxSpeed - totalWeight*weightConst);
 		}
-		int cityEnd = (int)individual.genotype.get(individual.genotype.size()-1);
+		int cityEnd = Integer.parseInt((String)individual.genotype.get(individual.genotype.size()-1));
 		totalWeight += tskpW[cityEnd];
 		obj += ttpInstance.distances(cityEnd, cityStart) / (ttpInstance.maxSpeed - totalWeight*weightConst);
 		return -ttpInstance.rentingRatio*obj;

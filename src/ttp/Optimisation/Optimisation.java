@@ -119,7 +119,7 @@ public class Optimisation {
 	private static int[] solveTSKP(double[] W, ttp.newrep.Individual ind) {
 		Config config = Config.getInstance();
 		config.setTSKPw(W);
-		int populationSize = 100;
+		int populationSize = 20;
 		config.setInverOverProbability(0.02);
 		// set inverOver probability and fitness function
 		Mutation mutate = new Mutation(null);
@@ -128,19 +128,21 @@ public class Optimisation {
 		ga.Individual currentSol = new ga.Individual();
 		currentSol.genotype = new ArrayList<Object>(ind.tour.length);
 		for (int i = 0; i < ind.tour.length; i++) {
-			currentSol.genotype.set(i, ind.tour[i].cityId);
+			currentSol.genotype.add(Integer.toString(ind.tour[i].cityId));
 		}
 		population.population.add(currentSol);
+		//population.population.add(currentSol);
 		
 		
 		int numberOfGenerations = 0;
 		int maxGeneration = 1000;
-		double bestSolution = Double.MAX_VALUE;
+		double bestSolution = Double.NEGATIVE_INFINITY;
 		ga.Individual bestSolInd=null;
 		
 		System.out.println("--------------------------------------------------------------------------");
 		System.out.println("GEN #     ITER BEST (  POP BEST,    POP AVG,  POP WORST), TIME SINCE ITER START ( OVERALL TIME AVG, OVERALL TIME SUM)");
-		while (numberOfGenerations < maxGeneration){
+		// (numberOfGenerations < maxGeneration){
+			while(numberOfGenerations < maxGeneration | true) {
 			Population offspring = population.clone();
 			
 			offspring = mutate.inverOver(offspring);
@@ -151,19 +153,19 @@ public class Optimisation {
 			//bestF,avgF,worstF,bestInd,worstInd
 			Double[] data = population.getStats();
 
-			if (data[0] < bestSolution){
-				bestSolution = data[0];
+			if (1/data[0] > bestSolution){
+				bestSolution = 1/data[0];
 				bestSolInd=population.population.get(data[3].intValue());
 			}
 			
-			System.out.println("G: "+String.format("%5d",numberOfGenerations)+" "+String.format("%10.3f",bestSolution) + " ("+String.format("%10.2f",data[0])+", "+String.format("%10.2f",data[1])+", "+String.format("%10.2f",data[2])+"), \n");
-			
+			System.out.println("G: "+String.format("%5d",numberOfGenerations)+" "+String.format("%10.3f",bestSolution) + " ("+String.format("%10.2f",1/data[0])+", "+String.format("%10.2f",1/data[1])+", "+String.format("%10.2f",1/data[2])+"), \n");
+			population = offspring;
 		}
 		
 		int[] sol = new int[bestSolInd.genotype.size()+2];
 		sol[0] = 0;
 		for (int i = 0; i < bestSolInd.genotype.size(); i++) {
-			sol[i+1] = (int)bestSolInd.genotype.get(i);
+			sol[i+1] = Integer.parseInt((String)bestSolInd.genotype.get(i));
 		}
 		sol[sol.length-1] = 0;
 		
