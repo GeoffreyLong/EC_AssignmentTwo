@@ -160,11 +160,12 @@ public class Optimisation {
 			
 		}
 		
-		int[] sol = new int[bestSolInd.genotype.size()+1];
-		sol[0] = 1;
-		for (int i = 1; i < sol.length; i++) {
-			sol[i] = (int)bestSolInd.genotype.get(i);
+		int[] sol = new int[bestSolInd.genotype.size()+2];
+		sol[0] = 0;
+		for (int i = 0; i < bestSolInd.genotype.size(); i++) {
+			sol[i+1] = (int)bestSolInd.genotype.get(i);
 		}
+		sol[sol.length-1] = 0;
 		
 		return sol;
 }
