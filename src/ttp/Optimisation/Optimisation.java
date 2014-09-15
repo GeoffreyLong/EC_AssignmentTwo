@@ -387,7 +387,7 @@ public class Optimisation {
 	    			// Save the itemIndex and the ratio into a double array
 	    			// Both of these pieces of data are necessary in the sort
 	    			double[] nodeArray = new double[2];
-	    			nodeArray[0] = (i-1)*itemsPerCity + j - 1;
+	    			nodeArray[0] = (i-1)*itemsPerCity + j;
 		    		nodeArray[1] = ratio;
 		    		
 		    		// Add item to the list according to its ratio (descending)
