@@ -37,6 +37,7 @@ import ttp.newrep.Item;
 public class Optimisation {
     
 	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime) {
+		ttp.Utils.Utils.startTiming();
 		Config config = Config.getInstance();
 		config.setTtpInstance(instance);
 		double[] d = new double[instance.numberOfNodes];
@@ -50,7 +51,8 @@ public class Optimisation {
 		int[] packingPlanDash = new int[instance.numberOfItems];
 		double P = Double.NEGATIVE_INFINITY;
 		double PDash = Double.NEGATIVE_INFINITY;
-		int runtime = 0;
+		long runtime = 0;
+		long startTime = System.currentTimeMillis();
 		Individual individual = instance.createIndividual(tour);
 		
 		while (runtime<maxRuntime){
@@ -81,6 +83,8 @@ public class Optimisation {
 		}
 				
 		TTPSolution s = new TTPSolution(tourRet, packingPlanRet);
+		long duration = ttp.Utils.Utils.stopTiming();
+	    s.computationTime = duration;
     	instance.evaluate(s);
         return s;
         
@@ -493,7 +497,7 @@ public class Optimisation {
     			// Pick it up and check if this new packing plan improves the fitness
     			//		if it does then keep this new packing plan
     			// 		else revert the plan back
-    			if (packingPlan[index] == 0){
+    			if (packingPlan[index] 	== 0){
     				packingPlan[index] = 1;
 	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
 	                instance.evaluate(tempSolution);
