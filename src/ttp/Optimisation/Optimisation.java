@@ -331,58 +331,6 @@ public class Optimisation {
     	
     	return null;
     }
-    /*
-    public static double recurThree(int[] packingPlan, int packingPlanIndex, int[] tour, double ob, TTPInstance instance, List<Integer> canPack){
-    	if (packingPlanIndex == canPack.size() - 1){
-    		if (ob > bestValue){
-    			System.out.println(ob);
-    			bestValue = ob;
-    		}
-    		return ob;
-    	}
-    	
-    	int[] packingPlanClone = packingPlan.clone();
-    	packingPlanClone[canPack.get(packingPlanIndex)] = 1;
-    	TTPSolution solution = new TTPSolution(tour, packingPlanClone);
-    	instance.evaluate(solution);
-    	solution.printFull();
-
-    	if (solution.wend > 0 && solution.ob > ob){
-    		return Math.max(recurTwo(packingPlan, packingPlanIndex + 1, tour, solution.ob, instance), recurTwo(packingPlanClone, packingPlanIndex + 1, tour, solution.ob, instance));
-    	}
-    	else{
-    		return Math.max(ob, recurTwo(packingPlan, packingPlanIndex + 1, tour, ob, instance));
-    	}
-    }*/
-    	
-    public static TTPSolution recurrance(TTPInstance instance, int[] tour){
-    	TTPSolution solution = new TTPSolution(tour, new int[instance.numberOfItems]);
-    	instance.evaluate(solution);
-    	System.out.println(recurTwo(new int[instance.numberOfItems], 0, tour, solution.ob, instance));
-    	return solution;
-    }
-    static double bestValue = -10000;
-    public static double recurTwo(int[] packingPlan, int packingPlanIndex, int[] tour, double ob, TTPInstance instance){
-    	if (packingPlanIndex == packingPlan.length - 1){
-    		if (ob > bestValue){
-    			System.out.println(ob);
-    			bestValue = ob;
-    		}
-    		return ob;
-    	}
-    	
-    	int[] packingPlanClone = packingPlan.clone();
-    	packingPlanClone[packingPlanIndex] = 1;
-    	TTPSolution solution = new TTPSolution(tour, packingPlanClone);
-    	instance.evaluate(solution);
-
-    	if (solution.wend > 0 && solution.ob > ob){
-    		return Math.max(recurTwo(packingPlan, packingPlanIndex + 1, tour, solution.ob, instance), recurTwo(packingPlanClone, packingPlanIndex + 1, tour, solution.ob, instance));
-    	}
-    	else{
-    		return Math.max(ob, recurTwo(packingPlan, packingPlanIndex + 1, tour, ob, instance));
-    	}
-    }
     
     /**
      * Sorts the items by profit over cost ratio
@@ -440,7 +388,7 @@ public class Optimisation {
 	    			// Save the itemIndex and the ratio into a double array
 	    			// Both of these pieces of data are necessary in the sort
 	    			double[] nodeArray = new double[2];
-	    			nodeArray[0] = i*itemsPerCity + j - 1;
+	    			nodeArray[0] = (i-1)*itemsPerCity + j;
 		    		nodeArray[1] = ratio;
 		    		
 		    		// Add item to the list according to its ratio (descending)
@@ -654,7 +602,7 @@ public class Optimisation {
 	    			}
     				for (int j = 0; j < itemsPerCity; j++){
 	    				double planMutate = Math.random();
-	    				int itemIndex = (int)(Math.random() * itemsPerCity) + tourClone[randNodeIndex];
+	    				int itemIndex = (int)(Math.random() * itemsPerCity) + tourClone[randNodeIndex] - 1;
 	    				itemIndex -= (int) (Math.random() + 0.5);
 	    				if (planMutate <= 0.5){
 	    					if (packingPlanClone[itemIndex] == 1) packingPlanClone[itemIndex] = 0;
@@ -681,6 +629,7 @@ public class Optimisation {
     
     /**
      * Same as last algorithm, but uses the object oriented approach
+     * This one does not work out too well
      * 
      * @param instance
      * @param tour
@@ -746,7 +695,8 @@ public class Optimisation {
     } 
     
     /**
-     * Might actually be the exact same as TwoNew
+     * Might actually be the same as Two New, but it uses a resetter for the packing plan... 
+     * It actually works very well, so definitely keep this one
      * @param instance
      * @param tour
      * @param durationWithoutImprovement
@@ -775,7 +725,6 @@ public class Optimisation {
     			oldFitness = solution.ob;
     		}
     		if (oldFitness > bestFitness){
-
         		System.out.println(bestFitness);
     			bestFitness = oldFitness;
     		}
