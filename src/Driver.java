@@ -92,13 +92,11 @@ public class Driver {
             
             //solution.altPrint();
             
-            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
-            TTPSolution solution3 = Optimisation.cosolver(instance, tour, maxRuntime);
-            //solution3.printFull();
-            //solution3.altPrint();
-            resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
-            solution3.writeResult(resultTitle);
-            
+            TTPSolution solution3 = Optimisation.getWeightCuts(instance, tour);
+            solution3.printFull();
+            solution3.altPrint();
+            //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
+            //solution3.writeResult(resultTitle);
         }
     }
     
