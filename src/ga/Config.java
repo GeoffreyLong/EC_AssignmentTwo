@@ -112,7 +112,7 @@ public class Config{
 	public int getIndividualLength(){
 		return individualLength;
 	}
-	void setGenerationMix(boolean mixGenerations){
+	public void setGenerationMix(boolean mixGenerations){
 		this.generationMix = mixGenerations;
 	}
 	public void setTournamentSize(int tournamentSize){

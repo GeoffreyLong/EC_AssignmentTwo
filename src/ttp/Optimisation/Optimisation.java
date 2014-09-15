@@ -1,9 +1,12 @@
 package ttp.Optimisation;
 
 
+import ga.Crossover;
 import ga.Mutation;
 import ga.Population;
 import ga.Config;
+import ga.Selection;
+import ga.Selection.SelectionType;
 
 import java.awt.Point;
 import java.io.*;
@@ -119,10 +122,18 @@ public class Optimisation {
 	private static int[] solveTSKP(double[] W, ttp.newrep.Individual ind) {
 		Config config = Config.getInstance();
 		config.setTSKPw(W);
-		int populationSize = 20;
+		System.out.println(Arrays.toString(W));
+		config.setGenerationMix(true);
+		config.setParentSelectionType(SelectionType.ELITISM);
+		config.setCrossoverChance(1);
+		config.setMutationChance(1);
+		int populationSize = 2;
+		config.setPopulationSize(populationSize);
 		config.setInverOverProbability(0.02);
 		// set inverOver probability and fitness function
-		Mutation mutate = new Mutation(null);
+		Mutation mutation = new Mutation(new double[]{1,0,0,0,0});
+		Crossover crossover = new Crossover(new double[]{1,0,0,0});
+		Selection selection = new Selection(SelectionType.ELITISM);
 		Population population = new Population(populationSize-1, ind.tour.length);
 		
 		ga.Individual currentSol = new ga.Individual();
@@ -141,12 +152,19 @@ public class Optimisation {
 		
 		System.out.println("--------------------------------------------------------------------------");
 		System.out.println("GEN #     ITER BEST (  POP BEST,    POP AVG,  POP WORST), TIME SINCE ITER START ( OVERALL TIME AVG, OVERALL TIME SUM)");
-		// (numberOfGenerations < maxGeneration){
-			while(numberOfGenerations < maxGeneration | true) {
+		while(numberOfGenerations < maxGeneration | true) {
 			Population offspring = population.clone();
 			
-			offspring = mutate.inverOver(offspring);
+			//offspring = crossover.cross(offspring);
+			offspring = mutation.mutate(offspring);
 			
+			if (config.generationMix){
+				population.population.addAll(offspring.population);
+			}
+			else{
+				population.population = offspring.population;
+			}
+			population = selection.select(population);
 			numberOfGenerations++;
 			
 			/// calc data store best worst and avg
@@ -159,7 +177,6 @@ public class Optimisation {
 			}
 			
 			System.out.println("G: "+String.format("%5d",numberOfGenerations)+" "+String.format("%10.3f",bestSolution) + " ("+String.format("%10.2f",1/data[0])+", "+String.format("%10.2f",1/data[1])+", "+String.format("%10.2f",1/data[2])+"), \n");
-			population = offspring;
 		}
 		
 		int[] sol = new int[bestSolInd.genotype.size()+2];
