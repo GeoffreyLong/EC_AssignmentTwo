@@ -71,40 +71,49 @@ public class Driver {
             
             // do the optimisation
             
-            System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
-           //TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
+            //System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
+         // TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
            
            //solution.println();
-           //solution.altPrint();
+         //  solution.altPrint();
            //solution.printFull();
            
            //System.out.println("SIMPLE HEURISTIC SOLUTION -------------------------------------");
             //TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
-            
             // print to file
             //resultTitle = instance.file.getName() + ".SimpleHeuristic." + startTime;
             //solution2.writeResult(resultTitle);
             
-            //solution2.altPrint();
+
+            TTPSolution solution2 = Optimisation.exerciseTwoSolutionOne(instance, tour, maxRuntime, instance.createIndividual(tour));
+            resultTitle = instance.file.getName() + ".exerciseTwoSolutionOne." + startTime;
+            solution2.writeResult(resultTitle);
+            solution2.altPrint();
             //solution2.printFull();
+
             
             
             //solution.altPrint();
-            
+
             TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 5, maxRuntime);
             solution3.printFull();
             solution3.altPrint();
+            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
+            //solution3.printFull();
+            //solution3.altPrint();
             //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
             //solution3.writeResult(resultTitle);
             
+
         }
     }
     
     
     public static void runSomeTests() {
         //        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_bounded-strongly-corr_1.ttp"));
-        TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        //TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_uncorr_01.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n2790_bounded-strongly-corr_10.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n837_uncorr_9.ttp"));
 //        instance.printInstance(false);
