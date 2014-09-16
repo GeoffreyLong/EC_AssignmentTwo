@@ -193,8 +193,10 @@ public class Optimisation {
     	ttp.Utils.Utils.startTiming();
     	double[] D = new double[instance.numberOfNodes];
     	double dSum = 0;
-    	D[instance.numberOfNodes-1] = 0; 
-    	for (int i = instance.numberOfNodes-2; i >= 0; i--) {
+    	//D[instance.numberOfNodes-1] = 0; 
+    	D[0] = 0;
+    	//for (int i = instance.numberOfNodes-2; i >= 0; i--) {
+    	for (int i = tour.length-2; i >= 0; i--) { // if >= D[0] is set to total distance
     		dSum += instance.distances(tour[i+1], tour[i]);
     		D[tour[i]] = dSum;
     	}
@@ -207,8 +209,8 @@ public class Optimisation {
     		int cityIdx = instance.items[i][3];
     		double itemCarryTime = D[cityIdx] / (instance.maxSpeed - v*instance.items[i][2]);
     		double itemCycleTime = noItemTime - D[cityIdx] + itemCarryTime;
-    		score[i] = instance.items[i][1] - instance.rentingRatio * itemCarryTime;
-    		threshScore[i] = instance.rentingRatio*noItemTime 
+    		score[instance.items[i][0]] = instance.items[i][1] - instance.rentingRatio * itemCarryTime;
+    		threshScore[instance.items[i][0]] = instance.rentingRatio*noItemTime 
     				+ (instance.items[i][1] - instance.rentingRatio * itemCycleTime);
     	}
     	
@@ -224,7 +226,7 @@ public class Optimisation {
     		@Override
     		public int compare(Integer o1, Integer o2) {
     			double diff = score[o1] - score[o2];
-    			return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
+    			return (diff == 0) ? 0 : ((diff > 0) ? -1 : 1); // swapped order
     		}
     	});
     	
