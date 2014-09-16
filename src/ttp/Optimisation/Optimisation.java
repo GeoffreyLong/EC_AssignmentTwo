@@ -234,11 +234,12 @@ public class Optimisation {
     	int[] packingPlan = new int[instance.numberOfItems];
     	int Wc = 0;
     	
-    	
+    	TTPSolution s = new TTPSolution(tour, packingPlan);
+    	instance.evaluate(s);	
     	for (int i = 0; i < instance.numberOfItems; i++) {
     		// If we're not full
-    		if ( ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) && threshScore[itemIdx[i]] > 0) {
-
+    		//if ( ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) && threshScore[itemIdx[i]] > 0) {
+    		if ((Wc + instance.items[itemIdx[i]][2]) < instance.capacityOfKnapsack) {
     			int arrIndex=-1;
     			int itemsPCity=(int)Math.round((double)instance.numberOfItems/(instance.numberOfNodes-1));
     			int cityIndex=instance.items[itemIdx[i]][3];
@@ -252,10 +253,18 @@ public class Optimisation {
     			}
 
     			int ppIndex = (arrIndex*itemsPCity)+itemNumber;
-
-    			packingPlan[ppIndex] = 1;
     			
-    			Wc += instance.items[itemIdx[i]][2];
+    			// Only use the item if it produces a better solution
+    			packingPlan[ppIndex] = 1;
+    			TTPSolution newSol = new TTPSolution(tour,packingPlan);
+    			instance.evaluate(newSol);
+    			if (newSol.ob > s.ob) {
+    				s = newSol;
+        			Wc += instance.items[itemIdx[i]][2];
+    			} else {
+    				packingPlan[ppIndex] = 0;
+    			}
+    			
     			//System.out.println("i: "+arrIndex+" ppI: "+ppIndex + " CI " + (cityIndex) + " id: " + (instance.items[itemIdx[i]][0])+" IN: "+itemNumber+" WGC: "+ instance.items[itemIdx[i]][2] +" WGT: "+Wc);
     			//System.out.printf("ItemID: %d\n", itemIdx[i]);
     		}
@@ -268,10 +277,8 @@ public class Optimisation {
     	
    
     	//System.out.println(Arrays.toString(packingPlan));
-    	TTPSolution s = new TTPSolution(tour, packingPlan);
         long duration = ttp.Utils.Utils.stopTiming();
         s.computationTime = duration;
-    	instance.evaluate(s);	
         return s;
     }
     
