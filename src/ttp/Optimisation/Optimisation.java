@@ -1386,7 +1386,7 @@ public class Optimisation {
 		
 		int[] packingPlanOld = new int[instance.numberOfItems];
 		int indexOld = 0;
-		double jump=Math.ceil(instance.numberOfItems/1000);
+		double jump=Math.ceil(instance.numberOfItems/20);
 		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
