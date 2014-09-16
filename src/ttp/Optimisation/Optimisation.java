@@ -1291,14 +1291,14 @@ public class Optimisation {
         ttp.Utils.Utils.startTiming();
 
         int[] packingPlan = new int[instance.numberOfItems];
-        double bestObjective = Double.NEGATIVE_INFINITY;
+
         int[] cityIndex = new int[instance.numberOfNodes];
 
         int[] cityTourIndex = new int[instance.numberOfItems];
         
         double[] profitVSweight = new double[instance.numberOfItems];
         double profitVSweightTHRESH = 1;
-        double profitTHRESH = 1;
+
         //double cutOff = -1000;//best for 01s
         //double cutOff = 0.005;//
         
@@ -1383,7 +1383,11 @@ public class Optimisation {
     	//System.out.println("Filling Packing Plan");
 		int noImprovement=0;
 		int index=0;
-		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && noImprovement<itemsPerCity){
+		
+		int[] packingPlanOld = new int[instance.numberOfItems];
+		int indexOld = 0;
+		double jump=Math.ceil(instance.numberOfItems/1000);
+		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
 			
@@ -1394,17 +1398,24 @@ public class Optimisation {
 				packingPlan[ppIndex]=1;
 				totalWeight+=weights[bestValueIndex];
 				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
-			
-				if(index%(instance.numberOfItems/50)==1){
-					System.out.println(index);
+				
+				if(index%jump==0){
+					
 					TTPSolution s = new TTPSolution(tour, packingPlan);
 			        instance.evaluate(s);
+			        //System.out.println(jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 			        if(s.ob<lastOB){//remove if id doesn't improve OB
 			        	packingPlan[ppIndex]=0;
 			        	noImprovement++;
+			        	packingPlan=packingPlanOld.clone();
+			        	index=indexOld;
+			        	jump=Math.ceil(jump/2);
+			        	//System.out.println("WORSE: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 			        }else{
 			        	noImprovement=0;
 			        	lastOB=s.ob;
+			        	packingPlanOld=packingPlan.clone();
+			        	//System.out.println("BETTER: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 					}	
 				}
 					        
