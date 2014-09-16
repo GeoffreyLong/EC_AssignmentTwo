@@ -77,6 +77,7 @@ public class Optimisation {
 		while (runtime<maxRuntime){			
 			
 			packingPlanDash = solveKRP(instance,d,W,individual);
+			individual=instance.createIndividual(tour, packingPlanDash);
 			
 			for(int i=0;i < individual.tour.length; i++){
 				W[i+1]=individual.tour[i].getWeight();//by tour order
@@ -128,19 +129,21 @@ public class Optimisation {
 		
 		//build initial PP solution
 		//could use SH
-		TTPSolution s = simpleHeuristic(instance, instance.getTour(individual), 100);
+		TTPSolution s = exerciseTwoSolutionOne(instance, instance.getTour(individual), individual);
 		packingPlanRet=s.packingPlan;
+		s.altPrint();
+		Individual individualNew=instance.createIndividual(instance.getTour(individual), packingPlanRet);
 		
 		while (runtime<maxRuntime){	
 			// modify the packing plan towards optimal
 			
 			//calc profit
-			System.out.println("VALUES MUST BE EQUAL: "+individual.tour[0].items.size()+" : "+itemsPerCity);
-			for (int i = 0; i < individual.tour.length; i++){
-				for(int j = 0; j < individual.tour[i].items.size(); j++){
+			System.out.println("VALUES MUST BE EQUAL: "+individualNew.tour[0].items.size()+" : "+itemsPerCity);
+			for (int i = 0; i < individualNew.tour.length; i++){
+				for(int j = 0; j < individualNew.tour[i].items.size(); j++){
 					//if(packingPlan[(i*itemsPerCity + j)]==1)
-					if(individual.tour[i].items.get(j).isSelected){
-						profit += individual.tour[i].items.get(j).profit;
+					if(individualNew.tour[i].items.get(j).isSelected){
+						profit += individualNew.tour[i].items.get(j).profit;
 					}
 				}
 			}
@@ -153,7 +156,7 @@ public class Optimisation {
 			Pdash = profit - instance.rentingRatio*t;
 			
 			if (Pdash>P){
-				packingPlanRet=instance.getPackingPlan(individual);
+				packingPlanRet=instance.getPackingPlan(individualNew);
 				P=Pdash;
 			}
 			
@@ -1287,7 +1290,7 @@ public class Optimisation {
     	return null;
     }
     
-    public static TTPSolution exerciseTwoSolutionOne(TTPInstance instance, int[] tour, int maxRuntime, Individual individual) {
+    public static TTPSolution exerciseTwoSolutionOne(TTPInstance instance, int[] tour, Individual individual) {
         ttp.Utils.Utils.startTiming();
 
         int[] packingPlan = new int[instance.numberOfItems];
