@@ -77,6 +77,7 @@ public class Optimisation {
 		while (runtime<maxRuntime){			
 			
 			packingPlanDash = solveKRP(instance,d,W,individual);
+			individual=instance.createIndividual(tour, packingPlanDash);
 			
 			for(int i=0;i < individual.tour.length; i++){
 				W[i+1]=individual.tour[i].getWeight();//by tour order
@@ -128,19 +129,21 @@ public class Optimisation {
 		
 		//build initial PP solution
 		//could use SH
-		TTPSolution s = simpleHeuristic(instance, instance.getTour(individual), 100);
+		TTPSolution s = exerciseTwoSolutionOne(instance, instance.getTour(individual), individual);
 		packingPlanRet=s.packingPlan;
+		s.altPrint();
+		Individual individualNew=instance.createIndividual(instance.getTour(individual), packingPlanRet);
 		
 		while (runtime<maxRuntime){	
 			// modify the packing plan towards optimal
 			
 			//calc profit
-			System.out.println("VALUES MUST BE EQUAL: "+individual.tour[0].items.size()+" : "+itemsPerCity);
-			for (int i = 0; i < individual.tour.length; i++){
-				for(int j = 0; j < individual.tour[i].items.size(); j++){
+			System.out.println("VALUES MUST BE EQUAL: "+individualNew.tour[0].items.size()+" : "+itemsPerCity);
+			for (int i = 0; i < individualNew.tour.length; i++){
+				for(int j = 0; j < individualNew.tour[i].items.size(); j++){
 					//if(packingPlan[(i*itemsPerCity + j)]==1)
-					if(individual.tour[i].items.get(j).isSelected){
-						profit += individual.tour[i].items.get(j).profit;
+					if(individualNew.tour[i].items.get(j).isSelected){
+						profit += individualNew.tour[i].items.get(j).profit;
 					}
 				}
 			}
@@ -153,7 +156,7 @@ public class Optimisation {
 			Pdash = profit - instance.rentingRatio*t;
 			
 			if (Pdash>P){
-				packingPlanRet=instance.getPackingPlan(individual);
+				packingPlanRet=instance.getPackingPlan(individualNew);
 				P=Pdash;
 			}
 			
@@ -1287,18 +1290,18 @@ public class Optimisation {
     	return null;
     }
     
-    public static TTPSolution exerciseTwoSolutionOne(TTPInstance instance, int[] tour, int maxRuntime, Individual individual) {
+    public static TTPSolution exerciseTwoSolutionOne(TTPInstance instance, int[] tour, Individual individual) {
         ttp.Utils.Utils.startTiming();
 
         int[] packingPlan = new int[instance.numberOfItems];
-        double bestObjective = Double.NEGATIVE_INFINITY;
+
         int[] cityIndex = new int[instance.numberOfNodes];
 
         int[] cityTourIndex = new int[instance.numberOfItems];
         
         double[] profitVSweight = new double[instance.numberOfItems];
         double profitVSweightTHRESH = 1;
-        double profitTHRESH = 1;
+
         //double cutOff = -1000;//best for 01s
         //double cutOff = 0.005;//
         
@@ -1351,10 +1354,10 @@ public class Optimisation {
 			//values[i]=fitness;
 	    	//values[i]=(profitsRatio[i]*profitTHRESH)-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);
 			double v = (instance.maxSpeed-instance.minSpeed)/instance.capacityOfKnapsack;
-			values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
+			//values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
 			values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);//best for 05s
 			
-			values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);			//in progress
+			//values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);			//in progress
 		}
 
 		//add the items to the PP
@@ -1377,14 +1380,18 @@ public class Optimisation {
 		    }
     	};
     	
-    	System.out.println("Sorting "+instance.numberOfItems+" items...");
+    	//System.out.println("Sorting "+instance.numberOfItems+" items...");
     	Arrays.sort(sortData,newComp);
 
-    	System.out.println("Filling Packing Plan");
+    	//System.out.println("Filling Packing Plan");
 		int noImprovement=0;
 		int index=0;
-		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && noImprovement<itemsPerCity){
-			System.out.println(100*(index/instance.numberOfItems)+"%");
+		
+		int[] packingPlanOld = new int[instance.numberOfItems];
+		int indexOld = 0;
+		double jump=Math.ceil(instance.numberOfItems/20);
+		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
+			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
 			
 			count++;
@@ -1394,16 +1401,27 @@ public class Optimisation {
 				packingPlan[ppIndex]=1;
 				totalWeight+=weights[bestValueIndex];
 				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
-			
-				TTPSolution s = new TTPSolution(tour, packingPlan);
-		        instance.evaluate(s);
-		        if(s.ob<lastOB){//remove if id doesn't improve OB
-		        	packingPlan[ppIndex]=0;
-		        	noImprovement++;
-		        }else{
-		        	noImprovement=0;
-		        	lastOB=s.ob;
-				}		        
+				
+				if(index%jump==0){
+					
+					TTPSolution s = new TTPSolution(tour, packingPlan);
+			        instance.evaluate(s);
+			        //System.out.println(jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        if(s.ob<lastOB){//remove if id doesn't improve OB
+			        	packingPlan[ppIndex]=0;
+			        	noImprovement++;
+			        	packingPlan=packingPlanOld.clone();
+			        	index=indexOld;
+			        	jump=Math.ceil(jump/2);
+			        	//System.out.println("WORSE: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        }else{
+			        	noImprovement=0;
+			        	lastOB=s.ob;
+			        	packingPlanOld=packingPlan.clone();
+			        	//System.out.println("BETTER: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+					}	
+				}
+					        
 			}
 			index++;			
 		}
