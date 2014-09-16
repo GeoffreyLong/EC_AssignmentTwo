@@ -90,8 +90,8 @@ public class Population {
 	}
 	
 	public Double[] getStats(){//might be ugly but only loop through population once to get all the stats
-		double bestFitness = Double.MIN_VALUE;
-		double worstFitness = Double.MAX_VALUE;
+		double bestFitness = Double.NEGATIVE_INFINITY;
+		double worstFitness = Double.POSITIVE_INFINITY;
 		double averageFitness = 0;
 		int bestIndex = -1;
 		int worstIndex = -1;

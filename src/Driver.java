@@ -102,13 +102,15 @@ public class Driver {
             //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
             //solution3.writeResult(resultTitle);
             
+
         }
     }
     
     
     public static void runSomeTests() {
         //        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_bounded-strongly-corr_1.ttp"));
-        TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        //TTPInstance instance = new TTPInstance(new File("instances/a280_n1395_bounded-strongly-corr_1.ttp"));
+        TTPInstance instance = new TTPInstance(new File("instances/a280_n279_uncorr_01.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n2790_bounded-strongly-corr_10.ttp"));
 //        TTPInstance instance = new TTPInstance(new File("instances/a280_n837_uncorr_9.ttp"));
 //        instance.printInstance(false);
