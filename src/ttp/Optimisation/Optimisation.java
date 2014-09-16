@@ -174,21 +174,25 @@ public class Optimisation {
 		config.setParentSelectionType(SelectionType.ELITISM);
 		config.setCrossoverChance(1);
 		config.setMutationChance(1);
-		int populationSize = 2;
+		int populationSize = 50;
 		config.setPopulationSize(populationSize);
 		config.setInverOverProbability(0.02);
 		// set inverOver probability and fitness function
-		Mutation mutation = new Mutation(new double[]{1,0,0,0,0});
+		Mutation mutation = new Mutation(new double[]{0,0,0,0,1});
 		Crossover crossover = new Crossover(new double[]{1,0,0,0});
 		Selection selection = new Selection(SelectionType.ELITISM);
-		Population population = new Population(populationSize-1, ind.tour.length);
+		Population population = new Population(populationSize-48, ind.tour.length);
 		
 		ga.Individual currentSol = new ga.Individual();
 		currentSol.genotype = new ArrayList<Object>(ind.tour.length);
 		for (int i = 0; i < ind.tour.length; i++) {
 			currentSol.genotype.add(Integer.toString(ind.tour[i].cityId));
 		}
-		population.population.add(currentSol);
+		
+		for (int i = 0; i < 48; i++){
+			population.population.add(currentSol.clone());
+		}
+		//population.population.add(currentSol);
 		//population.population.add(currentSol);
 		
 		
@@ -203,15 +207,15 @@ public class Optimisation {
 			Population offspring = population.clone();
 			
 			//offspring = crossover.cross(offspring);
-			offspring = mutation.mutate(offspring);
-			
+			population = mutation.mutate(offspring);
+			/*
 			if (config.generationMix){
 				population.population.addAll(offspring.population);
 			}
 			else{
 				population.population = offspring.population;
 			}
-			population = selection.select(population);
+			population = selection.select(population);*/
 			numberOfGenerations++;
 			
 			/// calc data store best worst and avg
