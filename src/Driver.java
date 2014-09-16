@@ -31,7 +31,7 @@ public class Driver {
             //args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
@@ -96,7 +96,10 @@ public class Driver {
             
             
             //solution.altPrint();
-            
+
+            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 5, maxRuntime);
+            solution3.printFull();
+            solution3.altPrint();
             //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
             //solution3.printFull();
             //solution3.altPrint();
