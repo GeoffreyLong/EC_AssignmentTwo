@@ -780,6 +780,11 @@ public class Optimisation {
     	return null;
     }
     
+    public static TTPSolution exerciseTwoSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	
+    	
+    	return null;
+    }
     
     /**
      * Swaps random two random nodes and mutates the packing plans on these nodes stochastically
