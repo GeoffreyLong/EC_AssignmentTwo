@@ -29,14 +29,14 @@ public class Driver {
        
         if (args.length==0) 
             //args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
-        	args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
+        	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
-        	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
+        	args = new String[]{"instances", "pla33810_n338090_uncorr_10",
             "2", "10000", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
@@ -71,32 +71,36 @@ public class Driver {
             
             // do the optimisation
             
-            System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
-           //TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
+            //System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
+         // TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
            
            //solution.println();
-           //solution.altPrint();
+         //  solution.altPrint();
            //solution.printFull();
            
            //System.out.println("SIMPLE HEURISTIC SOLUTION -------------------------------------");
             //TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
-            
             // print to file
             //resultTitle = instance.file.getName() + ".SimpleHeuristic." + startTime;
             //solution2.writeResult(resultTitle);
             
-            //solution2.altPrint();
+
+            TTPSolution solution2 = Optimisation.exerciseTwoSolutionOne(instance, tour, maxRuntime, instance.createIndividual(tour));
+            resultTitle = instance.file.getName() + ".exerciseTwoSolutionOne." + startTime;
+            solution2.writeResult(resultTitle);
+            solution2.altPrint();
             //solution2.printFull();
+
             
             
             //solution.altPrint();
             
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
+            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
             //solution3.printFull();
             //solution3.altPrint();
-            resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
-            solution3.writeResult(resultTitle);
+            //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
+            //solution3.writeResult(resultTitle);
             
         }
     }
