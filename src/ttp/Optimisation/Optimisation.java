@@ -1048,10 +1048,10 @@ public class Optimisation {
 			//values[i]=fitness;
 	    	//values[i]=(profitsRatio[i]*profitTHRESH)-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);
 			double v = (instance.maxSpeed-instance.minSpeed)/instance.capacityOfKnapsack;
-			values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
+			//values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
 			values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);//best for 05s
 			
-			values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);			//in progress
+			//values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);			//in progress
 		}
 
 		//add the items to the PP
@@ -1074,14 +1074,14 @@ public class Optimisation {
 		    }
     	};
     	
-    	System.out.println("Sorting "+instance.numberOfItems+" items...");
+    	//System.out.println("Sorting "+instance.numberOfItems+" items...");
     	Arrays.sort(sortData,newComp);
 
-    	System.out.println("Filling Packing Plan");
+    	//System.out.println("Filling Packing Plan");
 		int noImprovement=0;
 		int index=0;
 		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && noImprovement<itemsPerCity){
-			System.out.println(100*(index/instance.numberOfItems)+"%");
+			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
 			
 			count++;
@@ -1092,15 +1092,19 @@ public class Optimisation {
 				totalWeight+=weights[bestValueIndex];
 				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
 			
-				TTPSolution s = new TTPSolution(tour, packingPlan);
-		        instance.evaluate(s);
-		        if(s.ob<lastOB){//remove if id doesn't improve OB
-		        	packingPlan[ppIndex]=0;
-		        	noImprovement++;
-		        }else{
-		        	noImprovement=0;
-		        	lastOB=s.ob;
-				}		        
+				if(index%(instance.numberOfItems/50)==1){
+					System.out.println(index);
+					TTPSolution s = new TTPSolution(tour, packingPlan);
+			        instance.evaluate(s);
+			        if(s.ob<lastOB){//remove if id doesn't improve OB
+			        	packingPlan[ppIndex]=0;
+			        	noImprovement++;
+			        }else{
+			        	noImprovement=0;
+			        	lastOB=s.ob;
+					}	
+				}
+					        
 			}
 			index++;			
 		}
