@@ -31,7 +31,7 @@ public class Driver {
             //args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
@@ -78,17 +78,20 @@ public class Driver {
          	//solution.altPrint();
            //solution.printFull();
            
-           	System.out.println("SIMPLE HEURISTIC SOLUTION -------------------------------------");
-            TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
+           	//System.out.println("SIMPLE HEURISTIC SOLUTION -------------------------------------");
+            //TTPSolution solution2 = Optimisation.simpleHeuristic(instance, tour, maxRuntime);
             
-            solution2.altPrint();
+            //solution2.altPrint();
             // print to file
             //resultTitle = instance.file.getName() + ".SimpleHeuristic." + startTime;
             //solution2.writeResult(resultTitle);
             
             System.out.println("E2-A1 (Hayden's) -------------------------------------");
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionOne(instance, tour, maxRuntime, instance.createIndividual(tour));
-            resultTitle = instance.file.getName() + ".exerciseTwoSolutionOne." + startTime;
+            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1);
+            //TTPSolution solution3 = Optimisation.cosolver(instance, tour, maxRuntime);
+            //TTPSolution solution3 = Optimisation.exerciseThreeSolutionH(instance, tour, maxRuntime,1);
+            TTPSolution solution3 = Optimisation.backFourth(instance,tour, 60000,1);
+            resultTitle = instance.file.getName() + ".exerciseThreeSolutionH." + startTime;
             solution3.writeResult(resultTitle);
             solution3.altPrint();
             //solution2.printFull();
@@ -97,9 +100,9 @@ public class Driver {
             
             //solution.altPrint();
 
-            TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 5, maxRuntime);
-            solution3.printFull();
-            solution3.altPrint();
+            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 5, maxRuntime);
+            //solution3.printFull();
+            //solution3.altPrint();
             //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
             //solution3.printFull();
             //solution3.altPrint();
