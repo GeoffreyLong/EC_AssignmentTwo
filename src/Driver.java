@@ -34,7 +34,7 @@ public class Driver {
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
-        	args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
+        	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
             "2", "10000", "60000"};
@@ -86,6 +86,7 @@ public class Driver {
             //resultTitle = instance.file.getName() + ".SimpleHeuristic." + startTime;
             //solution2.writeResult(resultTitle);
             
+            /*
             System.out.println("E2-A1 (Hayden's) -------------------------------------");
             //TTPSolution solution3 = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1);
             //TTPSolution solution3 = Optimisation.cosolver(instance, tour, maxRuntime);
@@ -95,6 +96,7 @@ public class Driver {
             solution3.writeResult(resultTitle);
             solution3.altPrint();
             //solution2.printFull();
+            */
 
             
             

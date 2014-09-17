@@ -1702,8 +1702,19 @@ public class Optimisation {
     }
     /**
      * Steps
-     * 	Get two parents randomly
-     * 	Swap all nodes which have items selected
+     * 	Select two parents at random
+     * 	Create two children nodes
+     * 		Mutate
+     * 			Swap two nodes right next to each other and invert these nodes' item selection
+     * 			The chance of either of these happening is based on a certain probability
+     * 		Crossover
+     * 			For each pairing (16 of them because pairing of individual and self is possible) of the four individuals
+     * 				Create a new child that is the packing plan of one and the tour of another
+     * 				If this child is better than the individual occupying one of two of the indices the parents were drawn from
+     * 					Replace the parent with the child
+     * 
+     * NOTE this solution has lots of room for optimization in terms of runtime
+     * Also the mutation logic could do with some improvement
      * 
      * @param instance
      * @param tour
@@ -1715,9 +1726,93 @@ public class Optimisation {
     	int popSize = 10;
     	int noImprove = 0;
     	Individual[] population = new Individual[popSize];
+    	int itemsPerCity = instance.numberOfItems/(tour.length - 2);
+    	for (int i = 0; i < popSize; i++){
+    		population[i] = new Individual(instance.nodes, instance.items, tour, itemsPerCity);
+    	}
+    	
+    	double bestOb = -Double.MAX_VALUE;
+    	double lastOb = 0;
     	
     	while(noImprove < durationWithoutImprovement){
+    		if (lastOb == bestOb){
+    			noImprove ++;
+    		}
+    		else{
+    			System.out.println(bestOb);
+    			lastOb = bestOb;
+    			noImprove = 0;
+    		}
     		
+    		for (int i = 0; i < popSize; i++){
+    			int indIndexOne = (int) (Math.random() * popSize);
+    			int indIndexTwo = (int) (Math.random() * popSize);
+    			Individual indOne = population[indIndexOne];
+    			Individual mutateOne = instance.createIndividual(instance.getTour(indOne), instance.getPackingPlan(indOne));
+    			Individual indTwo = population[indIndexTwo];
+    			Individual mutateTwo = instance.createIndividual(instance.getTour(indTwo), instance.getPackingPlan(indTwo));
+    			Individual[] mutates = {mutateOne, mutateTwo};	
+    			Individual[] allInds = {indOne, mutateOne, indTwo, mutateTwo};
+
+        		for (Individual ind : mutates){
+        			int randNodeIndex = (int) (Math.random() * indOne.tour.length);
+        			double randSwap = Math.random();
+        			if (randSwap <= 0.1){
+        				City cityTemp = ind.tour[(randNodeIndex - 1 + ind.tour.length) % ind.tour.length];
+        				ind.tour[(randNodeIndex - 1 + ind.tour.length) % ind.tour.length] = ind.tour[randNodeIndex];
+        				ind.tour[randNodeIndex] = cityTemp;
+        			}
+        			
+        			double packingSwap = Math.random();
+	    			for (Item item : ind.tour[(randNodeIndex - 1 + ind.tour.length) % ind.tour.length].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
+	    			}
+	    			for (Item item : ind.tour[randNodeIndex].items){
+		    			if (packingSwap <= 0.1){
+		    				if (item.isSelected) item.isSelected = false;
+		    				else item.isSelected = true;
+		    			}
+	    			}
+        		}
+        		
+    			
+    			/*
+    			Individual childOne = instance.createIndividual(instance.getTour(indOne), instance.getPackingPlan(indTwo));
+    			Individual childTwo = instance.createIndividual(instance.getTour(indOne), instance.getPackingPlan(indTwo));
+    			
+    			for (int cityIndex = 0; cityIndex < tour.length; cityIndex ++){
+    				for (int itemIndex = 0; itemIndex < itemsPerCity; itemIndex ++){
+    					childOne.tour[cityIndex].items.get(itemIndex).isSelected = indTwo.tour[cityIndex].items.get(itemIndex).isSelected;
+    					childTwo.tour[cityIndex].items.get(itemIndex).isSelected = indOne.tour[cityIndex].items.get(itemIndex).isSelected;
+					}
+    			}
+    			*/
+        		double oddSol = -Double.MAX_VALUE;
+        		double evenSol = -Double.MAX_VALUE;
+				for(int j = 0; j < allInds.length; j++){
+					for(int k = 0; k < allInds.length; k++){
+						TTPSolution sol = new TTPSolution(instance.getTour(allInds[j]), instance.getPackingPlan(allInds[k]));
+		    			instance.evaluate(sol);
+		    			int index = (i+1)*j;
+		    			if (sol.wend >= 0){
+			    			if (index % 2 == 0 && sol.ob > evenSol){
+			    				evenSol = sol.ob;
+			    				population[indIndexOne] = instance.createIndividual(instance.getTour(allInds[j]), instance.getPackingPlan(allInds[k]));
+			    			}
+			    			if (index % 2 == 1 && sol.ob > oddSol){
+			    				oddSol = sol.ob;
+			    				population[indIndexTwo] = instance.createIndividual(instance.getTour(allInds[j]), instance.getPackingPlan(allInds[k]));
+			    			}
+			    			if (sol.ob > bestOb){
+			    				bestOb = sol.ob;
+			    			}
+		    			}
+					}
+        		}
+    		}
     	}
     	
     	return null;
