@@ -346,23 +346,49 @@ public class Optimisation {
      */
     public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	ttp.Utils.Utils.startTiming();
+    	long startingTimeForRunLimit = System.currentTimeMillis();
     	
     	List<double[]> items = getProfitWeightRatios(tour, instance);
 
-        TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items);
+        TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit);
         
         solution.computationTime = ttp.Utils.Utils.stopTiming();
         
     	return solution;
     }
     
-    public static TTPSolution exerciseTwoSolutionTwoLogic(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, List<double[]> items){
+    /**
+     * Same as the other solutionTwo, except instead of profit cost ratio it is by the cutoff weight
+     * It then selects items greedily (highest profit cost ratio first)
+     * It changes the packing plan for the corresponding object as long as the fitness increases
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseTwoSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    	ttp.Utils.Utils.startTiming();
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+                
+    	List<double[]> items = getWeightCutoffs(tour, instance);
+    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit);
+         
+    	solution.computationTime = ttp.Utils.Utils.stopTiming();
+    	
+    	return solution;
+    }
+    
+    public static TTPSolution exerciseTwoSolutionTwoLogic(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, List<double[]> items, long startingTimeForRunLimit){
     	int[] packingPlan = new int[instance.numberOfItems];
     	int[] packingPlanClone = packingPlan.clone();
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
         instance.evaluate(newSolution);
         double lastSolutionOb = -Double.MAX_VALUE;
         int didNotImprove = 0;
+        
+        int k = 0;
         
         // Break the loop when the individual has not improved within a certain number of iterations
         while(didNotImprove <= durationWithoutImprovement){
@@ -373,6 +399,11 @@ public class Optimisation {
     		else{
     			didNotImprove = 0;
     		}
+    		
+    		k++;
+    		if (k%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+                    && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+                break;
 
     		// Only change the packing plan if the solution is valid
     		if (newSolution.wend >= 0){
@@ -432,26 +463,6 @@ public class Optimisation {
         instance.evaluate(solution);
         
 		return solution;
-    }
-    
-    
-    /**
-     * Same as the other solutionTwo, except instead of profit cost ratio it is by the cutoff weight
-     * It then selects items greedily (highest profit cost ratio first)
-     * It changes the packing plan for the corresponding object as long as the fitness increases
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseTwoSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	List<double[]> items = getWeightCutoffs(tour, instance);
-    	
-    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items);
-                
-    	return solution;
     }
     
     
@@ -1917,7 +1928,7 @@ public class Optimisation {
         int counter = 0;
         while(counter<durationWithoutImprovement) {
             
-            if (i%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+        	if (i%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
                     && (System.currentTimeMillis()-startingTimeForRuntimeLimit)>=maxRuntime)
                 break;
             
