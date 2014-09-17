@@ -48,7 +48,7 @@ public class TTPSolution {
         System.out.println();
     }
     public void altPrint(){
-    	//System.out.println();
+    	System.out.println();
     	System.out.println(String.format("%-30s= %.2f" , "Leftover Knapsack Capacity", wend));
     	System.out.println(String.format("%-30s= %.2f" , "Total weight of items", wendUsed));
     	System.out.println(String.format("%-30s= %.2f" , "Total Profit", fp));
