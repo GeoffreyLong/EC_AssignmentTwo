@@ -28,7 +28,7 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-            //args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+            args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",

@@ -1692,7 +1692,6 @@ public class Optimisation {
             }
     	}
             
-    	
     	long duration = ttp.Utils.Utils.stopTiming();
     
     	TTPSolution newSolution = new TTPSolution(bestTour, bestPP);
