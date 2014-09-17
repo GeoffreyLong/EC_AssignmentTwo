@@ -345,10 +345,14 @@ public class Optimisation {
      * @return
      */
     public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-        List<double[]> items = getProfitWeightRatios(tour, instance);
+    	ttp.Utils.Utils.startTiming();
+    	
+    	List<double[]> items = getProfitWeightRatios(tour, instance);
 
         TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items);
-                
+        
+        solution.computationTime = ttp.Utils.Utils.stopTiming();
+        
     	return solution;
     }
     
@@ -376,7 +380,6 @@ public class Optimisation {
     		}
     		
     		lastSolutionOb = newSolution.ob;
-    		System.out.println(newSolution.ob);
     		
     		// Iterate through the items array
     		for (int i = 0; i < instance.numberOfItems; i ++){
@@ -1257,7 +1260,7 @@ public class Optimisation {
      * @param maxRuntime
      * @return
      */
-    public static TTPSolution exerciseFourSolutionOne(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    public static TTPSolution exerciseFourSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	int popSize = 10;
     	int noImprove = 0;
     	Individual[] population = new Individual[popSize];
@@ -1726,7 +1729,7 @@ public class Optimisation {
      * @param maxRuntime
      * @return
      */
-    public static TTPSolution exerciseFourSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    public static TTPSolution exerciseFourSolutionOne(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	int popSize = 10;
     	int noImprove = 0;
     	Individual[] population = new Individual[popSize];
