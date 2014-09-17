@@ -1076,6 +1076,8 @@ public class Optimisation {
     /**
      * Might actually be the same as Two New, but it uses a resetter for the packing plan... 
      * It actually works very well for some of them (esp smaller instances), so definitely keep this one
+     * 
+     * First Test -> about 19000 to 21000
      * @param instance
      * @param tour
      * @param durationWithoutImprovement -> Run with a value of around five
@@ -1436,6 +1438,9 @@ public class Optimisation {
     
 
     /**
+     * Currently this is a purely stochastic crossover alg
+     * It crosses either the full tour or the full packing plan
+     * 
      * Steps
      * 	Select two parents at random
      * 	Create two children nodes
