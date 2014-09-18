@@ -169,18 +169,18 @@ public class Optimisation {
 	private static int[] solveTSKP(double[] W, ttp.newrep.Individual ind) {
 		Config config = Config.getInstance();
 		config.setTSKPw(W);
-		System.out.println(Arrays.toString(W));
 		config.setGenerationMix(true);
 		config.setParentSelectionType(SelectionType.ELITISM);
 		config.setCrossoverChance(1);
-		config.setMutationChance(1);
+		config.setMutationChance(0.01);
 		int populationSize = 2;
 		config.setPopulationSize(populationSize);
 		config.setInverOverProbability(0.02);
+		config.setTournamentSize(2);
 		// set inverOver probability and fitness function
-		Mutation mutation = new Mutation(new double[]{1,0,0,0,0});
+		Mutation mutation = new Mutation(new double[]{0,0,0,0,0, 1});
 		Crossover crossover = new Crossover(new double[]{1,0,0,0});
-		Selection selection = new Selection(SelectionType.ELITISM);
+		Selection selection = new Selection(SelectionType.TOURNAMENT);
 		Population population = new Population(populationSize-1, ind.tour.length);
 		
 		ga.Individual currentSol = new ga.Individual();
@@ -188,7 +188,9 @@ public class Optimisation {
 		for (int i = 0; i < ind.tour.length; i++) {
 			currentSol.genotype.add(Integer.toString(ind.tour[i].cityId));
 		}
-		population.population.add(currentSol);
+		for (int i = 0; i < 1; i++) {
+			population.population.add(currentSol.clone());
+		}
 		//population.population.add(currentSol);
 		
 		
@@ -203,6 +205,8 @@ public class Optimisation {
 			Population offspring = population.clone();
 			
 			//offspring = crossover.cross(offspring);
+			population = mutation.inverOver(offspring);
+			/*
 			offspring = mutation.mutate(offspring);
 			
 			if (config.generationMix){
@@ -212,6 +216,8 @@ public class Optimisation {
 				population.population = offspring.population;
 			}
 			population = selection.select(population);
+			*/
+			
 			numberOfGenerations++;
 			
 			/// calc data store best worst and avg

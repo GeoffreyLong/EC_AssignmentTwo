@@ -22,7 +22,7 @@ public class Config{
 	public double inverOverProbability = 0.02;
 	public boolean generationMix = true;
 	
-	public double[] mutationTypeChance = new double[5];
+	public double[] mutationTypeChance = new double[6];
 	public double[] crossoverTypeChance = new double[4];
 	public double[] selectionTypeChance = new double[4];
 	
