@@ -24,12 +24,28 @@ public class City {
 		return weight;
 	}
 	
+	public int getEmptyWeight(){
+		int weight = 0;
+		for (Item item : items){
+			weight += item.weight;
+		}
+		return weight;
+	}
+	
 	public int getProfit(){
 		int profit = 0;
 		for (Item item : items){
 			if(item.isSelected){
 				profit += item.profit;
 			}
+		}
+		return profit;
+	}
+	
+	public int getEmptyProfit(){
+		int profit = 0;
+		for (Item item : items){
+			profit += item.profit;
 		}
 		return profit;
 	}

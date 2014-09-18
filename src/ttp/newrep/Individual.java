@@ -3,10 +3,12 @@ package ttp.newrep;
 public class Individual {
 	public City[] tour;
 	public City startingCity;
+	public int itemsPerCity;
 	
 	public Individual(double[][] nodes, int[][] items, int[] tour, int itemsPerCity){
 		this.tour = new City[tour.length-2];
 		startingCity = new City(nodes[tour[0]][0],nodes[tour[0]][1],nodes[tour[0]][2]);
+		this.itemsPerCity = itemsPerCity;
 		for (int index = 1; index < tour.length-1; index ++){
 			int tourIndex = tour[index];
 			City city = new City(nodes[tourIndex][0], nodes[tourIndex][1], nodes[tourIndex][2]);
@@ -22,6 +24,7 @@ public class Individual {
 	public Individual(double[][] nodes, int[][] items, int[] tour, int[] packingPlan, int itemsPerCity){
 		this.tour = new City[tour.length-2];
 		startingCity = new City(nodes[tour[0]][0],nodes[tour[0]][1],nodes[tour[0]][2]);
+		this.itemsPerCity = itemsPerCity;
 		for (int index = 1; index < tour.length-1; index ++){
 			int tourIndex = tour[index];
 			City city = new City(nodes[tourIndex][0], nodes[tourIndex][1], nodes[tourIndex][2]);
