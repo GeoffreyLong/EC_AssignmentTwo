@@ -136,7 +136,6 @@ public class Optimisation {
 		
 		while (runtime<maxRuntime){	
 			// modify the packing plan towards optimal
-			
 			//calc profit
 			System.out.println("VALUES MUST BE EQUAL: "+individualNew.tour[0].items.size()+" : "+itemsPerCity);
 			for (int i = 0; i < individualNew.tour.length; i++){
