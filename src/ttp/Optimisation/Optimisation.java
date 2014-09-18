@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sf.javaml.core.kdtree.KDTree;
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
@@ -601,16 +602,121 @@ public class Optimisation {
     }
     
     public static TTPSolution exerciseThreeLinkernCycles(TTPInstance instance) {
-    	// Find best items
+    	ttp.Utils.Utils.startTiming();
+    	// Find best items in terms of profit/weight
+        double[] profitWeightRatio = new double[instance.numberOfItems];
+
+		for(int i = 0; i < instance.numberOfItems; i++){
+			profitWeightRatio[i] = instance.items[i][1] / instance.items[i][2];
+		}
+		
+		// Sort items
+		double[][] sortData = new double[instance.numberOfItems][2];
+		
+		for(int i = 0; i<instance.numberOfItems; i++){
+			sortData[i][0]=i;
+			sortData[i][1]=profitWeightRatio[i];
+		}
+		
+		Comparator<double[]> newComp = new Comparator<double[]>() {
+    		@Override
+    		public int compare(double[] s1, double[] s2) {
+    			return -Double.compare(s1[1], s2[1]);
+		    }
+    	};
+    	Arrays.sort(sortData,newComp);
+    	
+    	// Find best city indexes
+    	List<Integer> bestCities = new ArrayList<Integer>();
+    	Set<Integer> bestCitiesSet = new HashSet<Integer>();
+    	double totalWeight = 0;
+    	int index = 0;
+    	while (totalWeight < instance.capacityOfKnapsack && index < instance.numberOfItems) {
+    		int sortedItemIndex = (int)sortData[index][0];
+    		if ((totalWeight + instance.items[sortedItemIndex][2]) <= instance.capacityOfKnapsack) {
+    			if (!bestCitiesSet.contains(instance.items[sortedItemIndex][3])) {
+    				bestCities.add(instance.items[sortedItemIndex][3]);
+    				bestCitiesSet.add(instance.items[sortedItemIndex][3]);
+    			}
+    			totalWeight += instance.items[sortedItemIndex][2];
+    		}
+    		index++;
+    	}
+    	System.out.println("BEST CITIES: " + bestCities);
+    	// Generate linkern compatible tsp file with best cities 
+    	try {
+    		BufferedWriter writer = new BufferedWriter(new FileWriter("linkernCycles.txt"));
+    		String output = "";
+    		output += "PROBLEM NAME: linkernCycles\n";
+    		output += "DIMENSION: " + (bestCities.size()+1) + "\n";
+    		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
+    		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
+    		output += String.format("%d \t %d %d\n", 330, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		for (int cityId : bestCities) {
+    			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
+    		}
+    		writer.write(output);
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
     	
     	// Generate linkern between best items from start city
+    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+1);
+    	// Tour indicies converted to city order in file, map back to normal range
+    	for (int i = 1; i < bestCitiesTour.length-1; i++) {
+    		bestCitiesTour[i] = bestCities.get( bestCitiesTour[i] - 1);
+    	}
+    	System.out.println("Linkern for item cities: " + Arrays.toString(bestCitiesTour));
     	
     	// 'Fill' in the generated tour
+    	// Construct kd tree for nearest neighbour lookups
+    	KDTree tree = new KDTree(2);
+    	for (int i = 0; i < instance.numberOfNodes; i++) {
+    		tree.insert(new double[]{instance.nodes[i][1], instance.nodes[i][2]}, i);
+    	}
+    	//System.out.println( tree.nearest(new double[]{288,149}));
+    	List<Integer> filledTour = new ArrayList<Integer>();
+    	Set<Integer> filledTourSet = new HashSet<Integer>();
+    	filledTour.add(0);
+    	filledTourSet.add(0);
+    	int prevCity = 0;
+    	for (int i = 1; i < bestCitiesTour.length; i++) {
+    		int currentCity =  bestCitiesTour[i];
+    		double remainingDistance = instance.distances(prevCity,currentCity);
+    		// fill in path between prev city and current city, only using nodes that get us closer to currentCity
+    		while (prevCity != currentCity) {
+	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},5);
+	    		boolean found = false;
+	    		for (Object o : nn) {
+	    			double newRemainingDistance = instance.distances((int)o,currentCity);
+	    			if ((newRemainingDistance < remainingDistance && !filledTourSet.contains((int)o) && !bestCitiesSet.contains((int)o)) || ((int)o) == currentCity) {
+	    				prevCity = (int)o;
+	    				filledTour.add(prevCity);
+	    				filledTourSet.add(prevCity);
+		    			remainingDistance = newRemainingDistance;
+		    			found = true;
+	    				break;
+	    			}
+	    		}
+	    		if (!found) {
+	    			filledTour.add(currentCity);
+	    			filledTourSet.add(currentCity);
+	    		}
+    		}
+    	}
     	
+    	
+    	
+    	System.exit(1);
     	// Generate linkern tour from the set of cities not including the above
     	
     	// Combine linkern cycles with the best item tour at the end
     	
+    	
+
+        long duration = ttp.Utils.Utils.stopTiming();
     	return null;
     }
         
@@ -1398,7 +1504,7 @@ public class Optimisation {
 		while(totalWeight<MAXWEIGHT && index<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
-
+			System.out.println(instance.items[bestValueIndex][3]);
 			//add it as long as it doesn't break capacity			
 			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
 				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
@@ -2126,6 +2232,7 @@ public class Optimisation {
         return s;
     }
     
+    
     public static int[] linkernTour(TTPInstance instance) {
         int[] result = new int[instance.numberOfNodes+1];
         
@@ -2180,6 +2287,63 @@ public class Optimisation {
             
             if (debugPrint) System.out.println(Arrays.toString(result));
           
+            
+            } catch (Exception ex) {
+            	ex.printStackTrace();
+            }
+        return result;
+    }
+    
+    public static int[] linkernTour(String tourFileName, int numNodes) {
+        int[] result = new int[numNodes];
+        
+        boolean debugPrint = !true;
+        File tourFile = new File(tourFileName);
+        String temp = tourFile.getPath();
+        int index = temp.indexOf("_");
+        String tspfilename = temp;
+        if (index==-1) index = tspfilename.indexOf(".");
+        String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
+        if (debugPrint) System.out.println("LINKERN: "+tspfilename);
+  
+        try {
+            List<String> command = new ArrayList<String>();
+            command.add("./linkern");
+            command.add("-o");
+            command.add(tspresultfilename);
+            command.add(tspfilename);
+//                printListOfStrings(command);
+            
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream(true);
+            final Process process = builder.start();
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (debugPrint) System.out.println("<LINKERN> "+line);
+            }
+            
+            if (debugPrint) System.out.println("Program terminated?");    
+            int rc = process.waitFor();
+            if (debugPrint) System.out.println("Program terminated!");
+            br.close();
+            
+            br = new BufferedReader( new FileReader(tspresultfilename));
+            // discard the first line
+            br.readLine();
+            line = null; 
+            for (int i=0; i<result.length-1; i++) {
+                line = br.readLine();
+                if (debugPrint) System.out.println("<TOUR> "+line);
+                index = line.indexOf(" ");
+                int number = Integer.parseInt(line.split("\\s+")[0]);
+                result[i] = number; 
+            }
+            
+            if (debugPrint) System.out.println(Arrays.toString(result));
+            br.close();
             
             } catch (Exception ex) {
             	ex.printStackTrace();
