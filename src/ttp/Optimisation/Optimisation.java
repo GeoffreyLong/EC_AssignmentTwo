@@ -380,6 +380,138 @@ public class Optimisation {
     	return solution;
     }
     
+    /**
+     * Same as previous two, but instead of costly sorting simply iterate through items in reverse tour order
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @param debug
+     * @return
+     */
+    public static TTPSolution exerciseTwoSolutionTwoAltTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
+    	ttp.Utils.Utils.startTiming();
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+                
+    	List<double[]> items = new LinkedList<double[]>();
+    	int itemsPerCity = instance.numberOfItems / (tour.length - 2);
+    	for (int i = tour.length-1; i >= 0; i--){
+    		
+    		int cityIndex = tour[i];
+    		// Do not want cityIndex of 0, 
+    		// this node has no items and will cause array out of bounds on itemIndex lookup
+    		if (cityIndex != 0){
+				for (int j = 0; j < itemsPerCity; j++){
+					int itemIndex = (tour.length-2) * j + cityIndex-1;
+					items.add(new double[]{itemIndex,0});
+				}
+    		}
+    	}
+    	
+    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit, debug);
+         
+    	solution.computationTime = ttp.Utils.Utils.stopTiming();
+    	
+    	return solution;
+    }
+    
+    /**
+     * No sorting at all, no linked list structure
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @param debug
+     * @return
+     */
+    public static TTPSolution exerciseTwoSolutionTwoAltThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+    	int[] packingPlan = new int[instance.numberOfItems];
+		int[] packingPlanClone = packingPlan.clone();
+		TTPSolution newSolution = new TTPSolution(tour, packingPlan);
+	    instance.evaluate(newSolution);
+	    double lastSolutionOb = -Double.MAX_VALUE;
+	    int didNotImprove = 0;
+	    
+	    int k = 0;
+	    
+	    // Break the loop when the individual has not improved within a certain number of iterations
+	    while(didNotImprove <= durationWithoutImprovement){
+	    	// Counter for improvement logic
+			if (lastSolutionOb == newSolution.ob){
+				didNotImprove ++;
+			}
+			else{
+				didNotImprove = 0;
+			}
+	
+			// Only change the packing plan if the solution is valid
+			if (newSolution.wend >= 0){
+				packingPlanClone = packingPlan.clone();
+			}
+			
+			if(debug) System.out.println(lastSolutionOb);
+			lastSolutionOb = newSolution.ob;
+			k++;
+			if (k%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+	                && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+	            break;
+			
+			// Iterate through the items array
+			for (int i = 0; i < instance.numberOfItems; i ++){
+				
+				// Greedily choose the highest ratio not yet encountered
+				
+				// If this item has not yet been picked up
+				// Pick it up and check if this new packing plan improves the fitness
+				//		if it does then keep this new packing plan
+				// 		else revert the plan back
+				if (packingPlan[i] 	== 0){
+					packingPlan[i] = 1;
+	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
+	                instance.evaluate(tempSolution);
+	                
+	                if (tempSolution.ob > newSolution.ob){
+	                	break;
+	                }
+	                else{
+	                	packingPlan[i] = 0;
+	                }
+				}
+				
+				// If the item has been picked up
+				// Drop the item and check if this new packing plan improves the fitness
+				//		if it does then keep this new packing plan
+				//		else revert the plan back
+				if (packingPlan[i] == 1){
+					packingPlan[i] = 0;
+	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
+	                instance.evaluate(tempSolution);
+	                
+	                if (tempSolution.ob > newSolution.ob){
+	                	break;
+	                }
+	                else{
+	                	packingPlan[i] = 1;
+	                }
+				}
+				
+			}
+			newSolution = new TTPSolution(tour, packingPlan);
+	        instance.evaluate(newSolution);
+		}
+	    
+	    // Create a solution with the packing plan clone
+	    // The packing plan clone is guaranteed to be a valid solution (wend >= 0)
+	    // Whereas the packing plan may be invalid
+	    TTPSolution solution = new TTPSolution(tour, packingPlanClone);
+	    instance.evaluate(solution);
+	    
+		return solution;
+	}
+    
     public static TTPSolution exerciseTwoSolutionTwoLogic(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, List<double[]> items, long startingTimeForRunLimit, boolean debug){
     	if(debug) System.out.println("Sorting took " + (System.currentTimeMillis()-startingTimeForRunLimit));
     	int[] packingPlan = new int[instance.numberOfItems];
@@ -489,7 +621,7 @@ public class Optimisation {
 
 		int itemsPerCity = instance.numberOfItems / (tour.length - 2);
 		int runCount = 0;
-    	for (int i = tour.length-1; i >= 0; i--){
+		for (int i = tour.length-1; i >= 0; i--){
     		runCount++;
     		if (runCount%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
                     && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
@@ -716,8 +848,19 @@ public class Optimisation {
     	return null;
     }
     
+    
+    /**
+     * At each instance recalculate the profit of the item - the future profit loss if the item is picked up
+     * Grab the biggest ratio
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseTwoSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	
+
     	
     	return null;
     }
