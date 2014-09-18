@@ -467,6 +467,21 @@ public class Optimisation {
 		return solution;
     }
     
+    public static TTPSolution exerciseThreeLinkernCycles(TTPInstance instance) {
+    	// Find best items
+    	
+    	// Generate linkern between best items from start city
+    	
+    	// 'Fill' in the generated tour
+    	
+    	// Generate linkern tour from the set of cities not including the above
+    	
+    	// Combine linkern cycles with the best item tour at the end
+    	
+    	return null;
+    }
+        
+    
     
     public static List<double[]> getProfitWeightRatios(int[] tour, TTPInstance instance){
     	double [] distances = new double[tour.length];
