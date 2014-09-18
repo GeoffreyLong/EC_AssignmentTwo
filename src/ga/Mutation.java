@@ -13,7 +13,7 @@ public class Mutation {
 	private double[] mutationTypeChance;
 	
 	public enum MutationType{
-		INSERT,SWAP,INVERSION,SCRAMBLE,INVEROVER
+		INSERT,SWAP,INVERSION,SCRAMBLE,INVEROVER, INSERT_SPECIAL
 	}
 	
 	public Mutation(double[] mutationTypeChance){
@@ -64,6 +64,13 @@ public class Mutation {
 			case INVEROVER:
 				population = inverOver(population);
 				break;
+			case INSERT_SPECIAL:
+				for (int i = 0; i<population.size();i++){
+					if (rand.nextDouble() < config.mutationChance){
+						population.population.set(i, insertSpecial(population.population.get(i)));
+					}
+				}
+				break;
 		}
 		return population;
 	}
@@ -89,6 +96,45 @@ public class Mutation {
 
 		return i;
 	}
+	
+	public Individual insertSpecial(Individual i){
+		Config config = Config.getInstance();
+		double totalWeight = 0;
+		double[] weightRatio = new double[config.tskpW.length];
+		for (int j = 0; j < config.tskpW.length; j++) {
+			totalWeight += config.tskpW[j];
+		}
+		for (int j = 0; j < config.tskpW.length; j++) {
+			weightRatio[j] = config.tskpW[j] / totalWeight;
+		}
+		
+		
+		int numChromosomes=i.genotype.size();
+		
+		int indexA = rand.nextInt(numChromosomes);
+		int indexB = (int)Math.floor(weightRatio[indexA]*rand.nextDouble()*numChromosomes);
+		
+		if (indexA < indexB) {//make sure indexes in ascending order
+			for (int j = indexA+1; j < indexB; j++) {
+				Object temp = i.genotype.get(j);
+				i.genotype.set(j, i.genotype.get(indexB));
+				i.genotype.set(indexB,temp);			
+			}
+		} else {
+			for (int j = indexB-1; j > indexA; j--) {
+				Object temp = i.genotype.get(j);
+				i.genotype.set(j, i.genotype.get(indexA));
+				i.genotype.set(indexA,temp);			
+			}
+		}
+		//System.out.println(indexA+", "+indexB);//testing
+		
+		
+
+		return i;
+	}
+	
+	
 	
 	public Individual swap(Individual i){
 		int numChromosomes=i.genotype.size();

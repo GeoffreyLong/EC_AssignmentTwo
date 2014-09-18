@@ -102,7 +102,7 @@ public class Selection {
     	int outCount = 0;
     	while (outCount<outSize){//until we have the output subset population size
     		int tourCount=0;
-    		double bestFitness = 0;
+    		double bestFitness = Double.NEGATIVE_INFINITY;
     		int bestIndex = -1;
     		while (tourCount<tourSize){//until we have the specified tour size
     			int index = rand.nextInt(popSize);
