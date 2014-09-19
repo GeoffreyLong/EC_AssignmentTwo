@@ -17,6 +17,7 @@ import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
 import ttp.Utils.Utils;
+import ttp.newrep.Individual;
 
 /**
  *
@@ -34,16 +35,16 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-        	args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+        	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "2", "10000", "60000"};
+            "2", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -75,9 +76,33 @@ public class Driver {
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
 
+            for(int i = 1; i<tour.length/2;i++){ //FILP HELPS FOR ALL DATASETS EXCEPT 7+8
+                	int temp = tour[i];
+                	tour[i]=tour[tour.length-1-i];
+                	tour[tour.length-1-i]=temp;
+                }
+          
+            TTPSolution ppSol = Optimisation.ppGreedyRegardTour(instance, tour, instance.createIndividual(tour),1);
+
+            TTPSolution solution3 = Optimisation.inversion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,1);
+
+            //TTPSolution solution3 = Optimisation.ppGreedyDisregardTour(instance, tour, instance.createIndividual(tour),2);
+            //TTPSolution solution3 = Optimisation.backFourth(instance,tour, 60000,2);
+
+            //TTPSolution solution3 = Optimisation.exerciseThreeSolutionH(instance, tour, maxRuntime,1);
+            int[] p = solution3.packingPlan;
             
-            System.out.println(f.getName()+": ");
-            
+            Individual i = instance.createIndividual(solution3.tspTour,solution3.packingPlan);
+            System.out.println(i.startingCity.cityId+"\t"+i.startingCity.location.getX()+"\t"+i.startingCity.location.getY());
+            for(int k = 0; k<tour.length-2; k++){
+            	//if(i.tour[k].getWeight()>0)
+                System.out.println(i.tour[k].cityId+"\t"+i.tour[k].location.getX()+"\t"+i.tour[k].location.getY());
+            }
+            //solution3.printFull();
+            solution3.altPrint();
+            resultTitle = instance.file.getName() + ".ppGreedyRegardTour_1_flip_inversion." + startTime;
+            solution3.writeResult(resultTitle);
+
             // do the optimisation
             
             //System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
