@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sf.javaml.core.kdtree.KDTree;
 import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
@@ -345,13 +346,13 @@ public class Optimisation {
      * @param maxRuntime
      * @return
      */
-    public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    public static TTPSolution exerciseTwoSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
     	ttp.Utils.Utils.startTiming();
     	long startingTimeForRunLimit = System.currentTimeMillis();
     	
-    	List<double[]> items = getProfitWeightRatios(tour, instance);
+    	List<double[]> items = getProfitWeightRatios(tour, instance, startingTimeForRunLimit, maxRuntime);
 
-        TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit);
+        TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit, debug);
         
         solution.computationTime = ttp.Utils.Utils.stopTiming();
         
@@ -369,19 +370,152 @@ public class Optimisation {
      * @param maxRuntime
      * @return
      */
-    public static TTPSolution exerciseTwoSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    public static TTPSolution exerciseTwoSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
     	ttp.Utils.Utils.startTiming();
     	long startingTimeForRunLimit = System.currentTimeMillis();
                 
-    	List<double[]> items = getWeightCutoffs(tour, instance);
-    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit);
+    	List<double[]> items = getWeightCutoffs(tour, instance, startingTimeForRunLimit, maxRuntime);
+    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit, debug);
          
     	solution.computationTime = ttp.Utils.Utils.stopTiming();
     	
     	return solution;
     }
     
-    public static TTPSolution exerciseTwoSolutionTwoLogic(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, List<double[]> items, long startingTimeForRunLimit){
+    /**
+     * Same as previous two, but instead of costly sorting simply iterate through items in reverse tour order
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @param debug
+     * @return
+     */
+    public static TTPSolution exerciseTwoSolutionTwoAltTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
+    	ttp.Utils.Utils.startTiming();
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+                
+    	List<double[]> items = new LinkedList<double[]>();
+    	int itemsPerCity = instance.numberOfItems / (tour.length - 2);
+    	for (int i = tour.length-1; i >= 0; i--){
+    		
+    		int cityIndex = tour[i];
+    		// Do not want cityIndex of 0, 
+    		// this node has no items and will cause array out of bounds on itemIndex lookup
+    		if (cityIndex != 0){
+				for (int j = 0; j < itemsPerCity; j++){
+					int itemIndex = (tour.length-2) * j + cityIndex-1;
+					items.add(new double[]{itemIndex,0});
+				}
+    		}
+    	}
+    	
+    	TTPSolution solution = exerciseTwoSolutionTwoLogic(instance, tour, durationWithoutImprovement, maxRuntime, items, startingTimeForRunLimit, debug);
+         
+    	solution.computationTime = ttp.Utils.Utils.stopTiming();
+    	
+    	return solution;
+    }
+    
+    /**
+     * No sorting at all, no linked list structure
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @param debug
+     * @return
+     */
+    public static TTPSolution exerciseTwoSolutionTwoAltThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, boolean debug){
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+    	int[] packingPlan = new int[instance.numberOfItems];
+		int[] packingPlanClone = packingPlan.clone();
+		TTPSolution newSolution = new TTPSolution(tour, packingPlan);
+	    instance.evaluate(newSolution);
+	    double lastSolutionOb = -Double.MAX_VALUE;
+	    int didNotImprove = 0;
+	    
+	    int k = 0;
+	    
+	    // Break the loop when the individual has not improved within a certain number of iterations
+	    while(didNotImprove <= durationWithoutImprovement){
+	    	// Counter for improvement logic
+			if (lastSolutionOb == newSolution.ob){
+				didNotImprove ++;
+			}
+			else{
+				didNotImprove = 0;
+			}
+	
+			// Only change the packing plan if the solution is valid
+			if (newSolution.wend >= 0){
+				packingPlanClone = packingPlan.clone();
+			}
+			
+			if(debug) System.out.println(lastSolutionOb);
+			lastSolutionOb = newSolution.ob;
+			k++;
+			if (k%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+	                && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+	            break;
+			
+			// Iterate through the items array
+			for (int i = 0; i < instance.numberOfItems; i ++){
+				
+				// Greedily choose the highest ratio not yet encountered
+				
+				// If this item has not yet been picked up
+				// Pick it up and check if this new packing plan improves the fitness
+				//		if it does then keep this new packing plan
+				// 		else revert the plan back
+				if (packingPlan[i] 	== 0){
+					packingPlan[i] = 1;
+	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
+	                instance.evaluate(tempSolution);
+	                
+	                if (tempSolution.ob > newSolution.ob){
+	                	break;
+	                }
+	                else{
+	                	packingPlan[i] = 0;
+	                }
+				}
+				
+				// If the item has been picked up
+				// Drop the item and check if this new packing plan improves the fitness
+				//		if it does then keep this new packing plan
+				//		else revert the plan back
+				if (packingPlan[i] == 1){
+					packingPlan[i] = 0;
+	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
+	                instance.evaluate(tempSolution);
+	                
+	                if (tempSolution.ob > newSolution.ob){
+	                	break;
+	                }
+	                else{
+	                	packingPlan[i] = 1;
+	                }
+				}
+				
+			}
+			newSolution = new TTPSolution(tour, packingPlan);
+	        instance.evaluate(newSolution);
+		}
+	    
+	    // Create a solution with the packing plan clone
+	    // The packing plan clone is guaranteed to be a valid solution (wend >= 0)
+	    // Whereas the packing plan may be invalid
+	    TTPSolution solution = new TTPSolution(tour, packingPlanClone);
+	    instance.evaluate(solution);
+	    
+		return solution;
+	}
+    
+    public static TTPSolution exerciseTwoSolutionTwoLogic(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime, List<double[]> items, long startingTimeForRunLimit, boolean debug){
+    	if(debug) System.out.println("Sorting took " + (System.currentTimeMillis()-startingTimeForRunLimit));
     	int[] packingPlan = new int[instance.numberOfItems];
     	int[] packingPlanClone = packingPlan.clone();
     	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
@@ -400,21 +534,22 @@ public class Optimisation {
     		else{
     			didNotImprove = 0;
     		}
-    		
-    		k++;
-    		if (k%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
-                    && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
-                break;
 
     		// Only change the packing plan if the solution is valid
     		if (newSolution.wend >= 0){
     			packingPlanClone = packingPlan.clone();
     		}
     		
+    		if(debug) System.out.println(lastSolutionOb);
     		lastSolutionOb = newSolution.ob;
+    		k++;
+    		if (k%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+                    && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+                break;
     		
     		// Iterate through the items array
     		for (int i = 0; i < instance.numberOfItems; i ++){
+    			
     			// Greedily choose the highest ratio not yet encountered
     			int index = (int) items.get(i)[0];
     			
@@ -467,22 +602,127 @@ public class Optimisation {
     }
     
     public static TTPSolution exerciseThreeLinkernCycles(TTPInstance instance) {
-    	// Find best items
+    	ttp.Utils.Utils.startTiming();
+    	// Find best items in terms of profit/weight
+        double[] profitWeightRatio = new double[instance.numberOfItems];
+
+		for(int i = 0; i < instance.numberOfItems; i++){
+			profitWeightRatio[i] = instance.items[i][1] / instance.items[i][2];
+		}
+		
+		// Sort items
+		double[][] sortData = new double[instance.numberOfItems][2];
+		
+		for(int i = 0; i<instance.numberOfItems; i++){
+			sortData[i][0]=i;
+			sortData[i][1]=profitWeightRatio[i];
+		}
+		
+		Comparator<double[]> newComp = new Comparator<double[]>() {
+    		@Override
+    		public int compare(double[] s1, double[] s2) {
+    			return -Double.compare(s1[1], s2[1]);
+		    }
+    	};
+    	Arrays.sort(sortData,newComp);
+    	
+    	// Find best city indexes
+    	List<Integer> bestCities = new ArrayList<Integer>();
+    	Set<Integer> bestCitiesSet = new HashSet<Integer>();
+    	double totalWeight = 0;
+    	int index = 0;
+    	while (totalWeight < instance.capacityOfKnapsack && index < instance.numberOfItems) {
+    		int sortedItemIndex = (int)sortData[index][0];
+    		if ((totalWeight + instance.items[sortedItemIndex][2]) <= instance.capacityOfKnapsack) {
+    			if (!bestCitiesSet.contains(instance.items[sortedItemIndex][3])) {
+    				bestCities.add(instance.items[sortedItemIndex][3]);
+    				bestCitiesSet.add(instance.items[sortedItemIndex][3]);
+    			}
+    			totalWeight += instance.items[sortedItemIndex][2];
+    		}
+    		index++;
+    	}
+    	System.out.println("BEST CITIES: " + bestCities);
+    	// Generate linkern compatible tsp file with best cities 
+    	try {
+    		BufferedWriter writer = new BufferedWriter(new FileWriter("linkernCycles.txt"));
+    		String output = "";
+    		output += "PROBLEM NAME: linkernCycles\n";
+    		output += "DIMENSION: " + (bestCities.size()+1) + "\n";
+    		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
+    		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
+    		output += String.format("%d \t %d %d\n", 330, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		for (int cityId : bestCities) {
+    			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
+    		}
+    		writer.write(output);
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
     	
     	// Generate linkern between best items from start city
+    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+1);
+    	// Tour indicies converted to city order in file, map back to normal range
+    	for (int i = 1; i < bestCitiesTour.length-1; i++) {
+    		bestCitiesTour[i] = bestCities.get( bestCitiesTour[i] - 1);
+    	}
+    	System.out.println("Linkern for item cities: " + Arrays.toString(bestCitiesTour));
     	
     	// 'Fill' in the generated tour
+    	// Construct kd tree for nearest neighbour lookups
+    	KDTree tree = new KDTree(2);
+    	for (int i = 0; i < instance.numberOfNodes; i++) {
+    		tree.insert(new double[]{instance.nodes[i][1], instance.nodes[i][2]}, i);
+    	}
+    	//System.out.println( tree.nearest(new double[]{288,149}));
+    	List<Integer> filledTour = new ArrayList<Integer>();
+    	Set<Integer> filledTourSet = new HashSet<Integer>();
+    	filledTour.add(0);
+    	filledTourSet.add(0);
+    	int prevCity = 0;
+    	for (int i = 1; i < bestCitiesTour.length; i++) {
+    		int currentCity =  bestCitiesTour[i];
+    		double remainingDistance = instance.distances(prevCity,currentCity);
+    		// fill in path between prev city and current city, only using nodes that get us closer to currentCity
+    		while (prevCity != currentCity) {
+	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},5);
+	    		boolean found = false;
+	    		for (Object o : nn) {
+	    			double newRemainingDistance = instance.distances((int)o,currentCity);
+	    			if ((newRemainingDistance < remainingDistance && !filledTourSet.contains((int)o) && !bestCitiesSet.contains((int)o)) || ((int)o) == currentCity) {
+	    				prevCity = (int)o;
+	    				filledTour.add(prevCity);
+	    				filledTourSet.add(prevCity);
+		    			remainingDistance = newRemainingDistance;
+		    			found = true;
+	    				break;
+	    			}
+	    		}
+	    		if (!found) {
+	    			filledTour.add(currentCity);
+	    			filledTourSet.add(currentCity);
+	    		}
+    		}
+    	}
     	
+    	
+    	
+    	System.exit(1);
     	// Generate linkern tour from the set of cities not including the above
     	
     	// Combine linkern cycles with the best item tour at the end
     	
+    	
+
+        long duration = ttp.Utils.Utils.stopTiming();
     	return null;
     }
         
     
     
-    public static List<double[]> getProfitWeightRatios(int[] tour, TTPInstance instance){
+    public static List<double[]> getProfitWeightRatios(int[] tour, TTPInstance instance, long startingTimeForRunLimit, int maxRuntime){
     	double [] distances = new double[tour.length];
 		double tourDistance = 0;
 		
@@ -502,8 +742,13 @@ public class Optimisation {
 		List<double[]> items = new LinkedList<double[]>();
 
 		int itemsPerCity = instance.numberOfItems / (tour.length - 2);
-		
-    	for (int i = tour.length-1; i >= 0; i--){
+		int runCount = 0;
+		for (int i = tour.length-1; i >= 0; i--){
+    		runCount++;
+    		if (runCount%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+                    && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+                break;
+    		
     		int cityIndex = tour[i];
     		// Do not want cityIndex of 0, 
     		// this node has no items and will cause array out of bounds on itemIndex lookup
@@ -549,7 +794,7 @@ public class Optimisation {
     	return items;
     }
     
-    public static List<double[]> getWeightCutoffs(int[] tour, TTPInstance instance){
+    public static List<double[]> getWeightCutoffs(int[] tour, TTPInstance instance, long startingTimeForRunLimit, int maxRuntime){
     	double [] distances = new double[tour.length];
 		double tourDistance = 0;
 		
@@ -567,7 +812,12 @@ public class Optimisation {
 		
 		int itemsPerCity = instance.numberOfItems / (tour.length - 2);
 		List<double[]> items = new LinkedList<double[]>();
+		int runCount = 0;
     	for (int i = 0; i <= tour.length - 1; i++){
+    		runCount++;
+    		if (runCount%10==0 /*do the time check just every 10 iterations, as it is time consuming*/
+                    && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+                break;
     		int cityIndex = tour[i];
     		// Do not want cityIndex of 0, 
     		// this node has no items and will cause array out of bounds on itemIndex lookup
@@ -644,176 +894,6 @@ public class Optimisation {
     
     
     
-    /**
-     * Try to first get an optimal solution via the weight cutoffs
-     * Then try to permute this to see if we can get any better...
-     * Need to implement the hill climber for an existing packing plan essentially
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    /*
-    public static TTPSolution exerciseTwoSolutionTwoNew(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	int[] packingPlanClone = packingPlan.clone();
-    	int[] tourClone = tour.clone();
-    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
-        instance.evaluate(newSolution);
-        double lastSolutionOb = -Double.MAX_VALUE;
-        int didNotImprove = 0;
-        double bestSolution = -Double.MAX_VALUE;
-        
-        List<double[]> items = getWeightCutoffs(tour, instance);
-        
-        // Break the loop when the individual has not improved within a certain number of iterations
-        while(didNotImprove <= durationWithoutImprovement){
-        	// Counter for improvement logic
-    		if (lastSolutionOb == newSolution.ob){
-    			didNotImprove ++;
-    		}
-    		else{
-    			didNotImprove = 0;
-    		}
-
-    		// Only change the packing plan if the solution is valid
-    		if (newSolution.wend >= 0){
-    			packingPlanClone = packingPlan.clone();
-    		}
-    		
-    		lastSolutionOb = newSolution.ob;
-    		System.out.println(newSolution.ob);
-    		
-    		// Iterate through the items array
-    		for (int i = 0; i < instance.numberOfItems; i ++){
-    			// Greedily choose the highest ratio not yet encountered
-    			int index = (int) items.get(i)[0];
-    			
-    			// If this item has not yet been picked up
-    			// Pick it up and check if this new packing plan improves the fitness
-    			//		if it does then keep this new packing plan
-    			// 		else revert the plan back
-    			if (packingPlan[index] == 0){
-    				packingPlan[index] = 1;
-	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
-	                instance.evaluate(tempSolution);
-	                
-	                if (tempSolution.ob > newSolution.ob){
-	                	break;
-	                }
-	                else{
-	                	packingPlan[index] = 0;
-	                }
-    			}
-    			
-    			// If the item has been picked up
-    			// Drop the item and check if this new packing plan improves the fitness
-    			//		if it does then keep this new packing plan
-    			//		else revert the plan back
-    			if (packingPlan[index] == 1){
-    				packingPlan[index] = 0;
-	    			TTPSolution tempSolution = new TTPSolution(tour, packingPlan);
-	                instance.evaluate(tempSolution);
-	                
-	                if (tempSolution.ob > newSolution.ob){
-	                	break;
-	                }
-	                else{
-	                	packingPlan[index] = 1;
-	                }
-    			}
-    			
-    		}
-    		newSolution = new TTPSolution(tour, packingPlan);
-            instance.evaluate(newSolution);
-    	}
-        
-        // packingPlanClone and tour are the important ones
-		int l = 0;
-        while(l < 100){
-        	int[] newPlan = packingPlanClone;
-	    	for(int k = 0; k<5; k++){
-	    		int randIndex = (int) (Math.random() * packingPlan.length);
-	    		if (newPlan[randIndex] == 1) newPlan[randIndex] = 0;
-	    		else newPlan[randIndex] = 1;
-	    		
-		        while(didNotImprove <= durationWithoutImprovement){
-		        	// Counter for improvement logic
-		    		if (lastSolutionOb == newSolution.ob){
-		    			didNotImprove ++;
-		    		}
-		    		else{
-		    			didNotImprove = 0;
-		    		}
-		
-		    		// Only change the packing plan if the solution is valid
-		    		if (newSolution.wend >= 0){
-		            	tour = tourClone.clone();
-		            	packingPlan = packingPlan.clone();
-		    		}
-		    		
-		    		lastSolutionOb = newSolution.ob;
-		    		System.out.println(newSolution.ob);
-		    		
-		    		// Iterate through the items array
-		    		for (int i = 0; i < instance.numberOfItems; i ++){
-		    			// Greedily choose the highest ratio not yet encountered
-		    			int index = (int) items.get(i)[0];
-		    			
-		    			// If this item has not yet been picked up
-		    			// Pick it up and check if this new packing plan improves the fitness
-		    			//		if it does then keep this new packing plan
-		    			// 		else revert the plan back
-		    			if (packingPlanClone[index] == 0){
-		    				packingPlanClone[index] = 1;
-			    			TTPSolution tempSolution = new TTPSolution(tourClone, packingPlanClone);
-			                instance.evaluate(tempSolution);
-			                
-			                if (tempSolution.ob > newSolution.ob){
-			                	break;
-			                }
-			                else{
-			                	packingPlanClone[index] = 0;
-			                }
-		    			}
-		    			
-		    			// If the item has been picked up
-		    			// Drop the item and check if this new packing plan improves the fitness
-		    			//		if it does then keep this new packing plan
-		    			//		else revert the plan back
-		    			if (packingPlanClone[index] == 1){
-		    				packingPlanClone[index] = 0;
-			    			TTPSolution tempSolution = new TTPSolution(tourClone, packingPlanClone);
-			                instance.evaluate(tempSolution);
-			                
-			                if (tempSolution.ob > newSolution.ob){
-			                	break;
-			                }
-			                else{
-			                	packingPlanClone[index] = 1;
-			                }
-		    			}
-		    			
-		    		}
-		    		newSolution = new TTPSolution(tour, packingPlan);
-		            instance.evaluate(newSolution);
-		            if (newSolution.ob > bestSolution){
-		            	bestSolution = newSolution.ob;
-		            }
-		    	}
-	        }
-        }
-        // Create a solution with the packing plan clone
-        // The packing plan clone is guaranteed to be a valid solution (wend >= 0)
-        // Whereas the packing plan may be invalid
-        TTPSolution solution = new TTPSolution(tour, packingPlanClone);
-        instance.evaluate(solution);
-        
-    	return solution;
-    }
-    */
     
     /**
      * If the tour is fixed, this should output the cutoff weight for  the knapsack
@@ -890,8 +970,19 @@ public class Optimisation {
     	return null;
     }
     
+    
+    /**
+     * At each instance recalculate the profit of the item - the future profit loss if the item is picked up
+     * Grab the biggest ratio
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
     public static TTPSolution exerciseTwoSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	
+
     	
     	return null;
     }
@@ -1413,7 +1504,7 @@ public class Optimisation {
 		while(totalWeight<MAXWEIGHT && index<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
-
+			System.out.println(instance.items[bestValueIndex][3]);
 			//add it as long as it doesn't break capacity			
 			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
 				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
@@ -2235,6 +2326,7 @@ public class Optimisation {
         return s;
     }
     
+    
     public static int[] linkernTour(TTPInstance instance) {
         int[] result = new int[instance.numberOfNodes+1];
         
@@ -2289,6 +2381,63 @@ public class Optimisation {
             
             if (debugPrint) System.out.println(Arrays.toString(result));
           
+            
+            } catch (Exception ex) {
+            	ex.printStackTrace();
+            }
+        return result;
+    }
+    
+    public static int[] linkernTour(String tourFileName, int numNodes) {
+        int[] result = new int[numNodes];
+        
+        boolean debugPrint = !true;
+        File tourFile = new File(tourFileName);
+        String temp = tourFile.getPath();
+        int index = temp.indexOf("_");
+        String tspfilename = temp;
+        if (index==-1) index = tspfilename.indexOf(".");
+        String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
+        if (debugPrint) System.out.println("LINKERN: "+tspfilename);
+  
+        try {
+            List<String> command = new ArrayList<String>();
+            command.add("./linkern");
+            command.add("-o");
+            command.add(tspresultfilename);
+            command.add(tspfilename);
+//                printListOfStrings(command);
+            
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream(true);
+            final Process process = builder.start();
+            InputStream is = process.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (debugPrint) System.out.println("<LINKERN> "+line);
+            }
+            
+            if (debugPrint) System.out.println("Program terminated?");    
+            int rc = process.waitFor();
+            if (debugPrint) System.out.println("Program terminated!");
+            br.close();
+            
+            br = new BufferedReader( new FileReader(tspresultfilename));
+            // discard the first line
+            br.readLine();
+            line = null; 
+            for (int i=0; i<result.length-1; i++) {
+                line = br.readLine();
+                if (debugPrint) System.out.println("<TOUR> "+line);
+                index = line.indexOf(" ");
+                int number = Integer.parseInt(line.split("\\s+")[0]);
+                result[i] = number; 
+            }
+            
+            if (debugPrint) System.out.println(Arrays.toString(result));
+            br.close();
             
             } catch (Exception ex) {
             	ex.printStackTrace();
