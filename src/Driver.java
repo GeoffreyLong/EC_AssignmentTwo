@@ -48,7 +48,6 @@ public class Driver {
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
-        
         //testAllInst();
     }
     
