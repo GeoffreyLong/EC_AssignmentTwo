@@ -164,7 +164,6 @@ public class Optimisation {
 			runtime=System.currentTimeMillis()-startTime;
 		}
 		
-		
 		return packingPlanRet;
 	}
 	private static int[] solveTSKP(double[] W, ttp.newrep.Individual ind) {
