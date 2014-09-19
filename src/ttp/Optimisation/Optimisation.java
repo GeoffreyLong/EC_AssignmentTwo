@@ -131,7 +131,7 @@ public class Optimisation {
 		
 		//build initial PP solution
 		//could use SH
-		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual), individual,H);
+		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual), individual,H,10);
 		packingPlanRet=s.packingPlan;
 		s.altPrint();
 		Individual individualNew=instance.createIndividual(instance.getTour(individual), packingPlanRet);
@@ -602,6 +602,35 @@ public class Optimisation {
 		return solution;
     }
     
+    public static TTPSolution excerciseThreeRandomLinkernTours(TTPInstance instance, long maxRunTime) {
+    	ttp.Utils.Utils.startTiming();
+    	long startTime = System.currentTimeMillis();
+    	int numIterations = 0;
+    	long elapsedTime = 0;
+    	long averageIterationTime;
+    	TTPSolution bestSol = null;
+    	double bestObj = Double.NEGATIVE_INFINITY;
+    	do {
+    		// Generate a new linkern tour
+        	int[] linTour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
+        	
+        	// Generate a packing plan
+        	int itemsPerCity = instance.numberOfItems / (instance.numberOfNodes - 1);
+        	TTPSolution sol = ppGreedyRegardTour(instance, linTour, instance.createIndividual(linTour),itemsPerCity,1);
+        	instance.evaluate(sol);    	    
+        	
+        	if (sol.ob > bestObj) {
+        		bestSol = sol;
+        		bestObj = sol.ob;
+        	}
+    		System.out.printf("BestObj: %f, NewObj: %f\n",bestObj, sol.ob);
+    		numIterations++;
+    		elapsedTime = System.currentTimeMillis() - startTime;
+    		averageIterationTime = elapsedTime / numIterations;
+    	} while (elapsedTime <= (maxRunTime - averageIterationTime*1.3));
+    	bestSol.computationTime = ttp.Utils.Utils.stopTiming();
+    	return bestSol;
+    }
     public static TTPSolution exerciseThreeLinkernCycles(TTPInstance instance) {
     	ttp.Utils.Utils.startTiming();
     	// Find best items in terms of profit/weight
@@ -628,6 +657,7 @@ public class Optimisation {
     	Arrays.sort(sortData,newComp);
     	
     	// Find best city indexes
+    	int maxCities = instance.numberOfNodes/2; // The item solution must contain at most this number of cities
     	List<Integer> bestCities = new ArrayList<Integer>();
     	Set<Integer> bestCitiesSet = new HashSet<Integer>();
     	double totalWeight = 0;
@@ -638,6 +668,9 @@ public class Optimisation {
     			if (!bestCitiesSet.contains(instance.items[sortedItemIndex][3])) {
     				bestCities.add(instance.items[sortedItemIndex][3]);
     				bestCitiesSet.add(instance.items[sortedItemIndex][3]);
+    				if (bestCitiesSet.size() >= maxCities) {
+    					break;
+    				}
     			}
     			totalWeight += instance.items[sortedItemIndex][2];
     		}
@@ -652,7 +685,7 @@ public class Optimisation {
     		output += "DIMENSION: " + (bestCities.size()+1) + "\n";
     		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
     		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
-    		output += String.format("%d \t %d %d\n", 330, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		output += String.format("%d \t %d %d\n", 0, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
     		for (int cityId : bestCities) {
     			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
     		}
@@ -664,7 +697,7 @@ public class Optimisation {
     	}
     	
     	// Generate linkern between best items from start city
-    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+1);
+    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+2);
     	// Tour indicies converted to city order in file, map back to normal range
     	for (int i = 1; i < bestCitiesTour.length-1; i++) {
     		bestCitiesTour[i] = bestCities.get( bestCitiesTour[i] - 1);
@@ -682,16 +715,34 @@ public class Optimisation {
     	Set<Integer> filledTourSet = new HashSet<Integer>();
     	filledTour.add(0);
     	filledTourSet.add(0);
+    	int numNearestNeighbours = 40;
     	int prevCity = 0;
     	for (int i = 1; i < bestCitiesTour.length; i++) {
     		int currentCity =  bestCitiesTour[i];
     		double remainingDistance = instance.distances(prevCity,currentCity);
     		// fill in path between prev city and current city, only using nodes that get us closer to currentCity
     		while (prevCity != currentCity) {
-	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},5);
+	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},numNearestNeighbours);
 	    		boolean found = false;
+	    		// get line equation: Ax + By + C = 0
+	    		double x1 = instance.nodes[prevCity][1];
+	    		double x2 = instance.nodes[currentCity][1];
+	    		double y1 = instance.nodes[prevCity][2];
+	    		double y2 = instance.nodes[currentCity][2];
+	    		double A = y1 - y2;
+	    		double B = x2 - x1;
+	    		double C = x1*y2 - x2*y1;
+	    		
+
+	    		// perp dist threshold
+	    		double perpDistThreshold = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+	    		perpDistThreshold /= 0.5;
+	    		
 	    		for (Object o : nn) {
 	    			double newRemainingDistance = instance.distances((int)o,currentCity);
+	    			double perpDist = Math.abs(A*instance.nodes[(int)o][1] + B*instance.nodes[(int)o][2] + C);
+	    			perpDist /= Math.sqrt(A*A + B*B);
+	    			// && perpDist < perpDistThreshold
 	    			if ((newRemainingDistance < remainingDistance && !filledTourSet.contains((int)o) && !bestCitiesSet.contains((int)o)) || ((int)o) == currentCity) {
 	    				prevCity = (int)o;
 	    				filledTour.add(prevCity);
@@ -704,21 +755,89 @@ public class Optimisation {
 	    		if (!found) {
 	    			filledTour.add(currentCity);
 	    			filledTourSet.add(currentCity);
+	    			prevCity = currentCity;
 	    		}
     		}
     	}
     	
     	
-    	
-    	System.exit(1);
     	// Generate linkern tour from the set of cities not including the above
+    	List<Integer> remainingCities = new ArrayList<Integer>();
+    	for (int i = 0; i < instance.numberOfNodes; i++) {
+    		if (!filledTourSet.contains(i)) {
+    			remainingCities.add(i);
+    		}
+    	}
+    	System.out.println("REMAINING CITIES: " + remainingCities);
+    	// Generate linkern compatible tsp file with best cities 
+    	try {
+    		BufferedWriter writer = new BufferedWriter(new FileWriter("linkernCycles.txt"));
+    		String output = "";
+    		output += "PROBLEM NAME: linkernCycles\n";
+    		output += "DIMENSION: " + (remainingCities.size()+1) + "\n";
+    		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
+    		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
+    		output += String.format("%d \t %d %d\n", 0, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		for (int cityId : remainingCities) {
+    			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
+    		}
+    		writer.write(output);
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
     	
-    	// Combine linkern cycles with the best item tour at the end
+    	// Generate linkern for remaining cities
+    	int[] remainingCitiesTour = linkernTour("linkernCycles.txt", remainingCities.size()+2);
+    	// Tour indices converted to city order in file, map back to normal range
+    	for (int i = 1; i < remainingCitiesTour.length-1; i++) {
+    		remainingCitiesTour[i] = remainingCities.get( remainingCitiesTour[i] - 1);
+    	}
+    	System.out.println("Linkern for remaining cities: " + Arrays.toString(remainingCitiesTour));
     	
+    	// Combine linkern cycles with best cities tour at end
+    	int[] combinedTour = new int[instance.numberOfNodes+1];
+    	for (int i = 0; i < remainingCitiesTour.length; i++) {
+    		combinedTour[i] = remainingCitiesTour[i];
+    	}
+    	for (int i = remainingCitiesTour.length - 1, j = 0; i < combinedTour.length; i++, j++) {
+    		combinedTour[i] = filledTour.get(j+1);
+    	}
+    	System.out.println("COMBINED TOUR: " + Arrays.toString(combinedTour));
     	
-
+    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour, instance.createIndividual(combinedTour),2,1);
+    	instance.evaluate(sol);    	    	
         long duration = ttp.Utils.Utils.stopTiming();
-    	return null;
+        sol.computationTime = duration;
+        
+        try {
+        	BufferedWriter bw = new BufferedWriter(new FileWriter("filledCitiesTour"));
+        	for (Integer i : filledTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("bestCitiesTour"));
+        	for (Integer i : bestCitiesTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("combinedTour"));
+        	for (Integer i : combinedTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("remainingTour"));
+        	for (Integer i : remainingCitiesTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
+        
+        
+    	return sol;
     }
         
     
@@ -1722,16 +1841,17 @@ public class Optimisation {
     	//System.out.println("Filling Packing Plan");
 		int index=0;
 		
+		Set<Integer> visitedCities = new HashSet<Integer>();
 		double jump=Math.ceil(instance.numberOfItems/20);
 		while(totalWeight<MAXWEIGHT && index<instance.numberOfItems && jump>=2){
-			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
-			System.out.println(instance.items[bestValueIndex][3]);
+			//System.out.println(instance.items[bestValueIndex][3]);
 			//add it as long as it doesn't break capacity			
 			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
 				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
 				packingPlan[ppIndex]=1;
-				totalWeight+=weights[bestValueIndex];					        
+				totalWeight+=weights[bestValueIndex];
+				visitedCities.add(tour[cityTourIndex[bestValueIndex]]);
 			}
 			index++;			
 		}
@@ -1745,7 +1865,7 @@ public class Optimisation {
     }
     
     
-    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour, Individual individual, int H) {
+    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour, Individual individual, int H,double jump) {
         ttp.Utils.Utils.startTiming();
 
         
@@ -1849,7 +1969,14 @@ public class Optimisation {
 		int[] packingPlanOld = new int[instance.numberOfItems];
 		int indexOld = 0;
 		double weightOld = 0;
-		double jump=Math.ceil(instance.numberOfItems/20);
+		boolean jumpSet=false;
+		if(jump>1){
+			jumpSet=true;
+		}else{
+			jumpSet=false;
+			jump=2;
+		}
+		
 		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
@@ -1862,19 +1989,23 @@ public class Optimisation {
 				totalWeight+=weights[bestValueIndex];
 				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
 				
-				if(index%jump==0){
+				if(!jumpSet || index%jump==0){
 					
 					TTPSolution s = new TTPSolution(tour, packingPlan);
 			        instance.evaluate(s);
-			        //System.out.println(jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        System.out.println(jump+" .. "+s.ob+" .<?. "+lastOB+" .. "+index+" .. "+noImprovement);
 			        if(s.ob<lastOB){//remove if id doesn't improve OB
 			        	totalWeight-=weights[bestValueIndex];
 			        	packingPlan[ppIndex]=0;
 			        	noImprovement++;
-			        	packingPlan=packingPlanOld.clone();
-			        	index=indexOld;
-			        	totalWeight=weightOld;
-			        	jump=Math.ceil(jump/2);
+			        	
+			        	if(jumpSet){
+				        	packingPlan=packingPlanOld.clone();
+				        	index=indexOld;
+				        	totalWeight=weightOld;
+			        		jump=Math.ceil(jump/2);
+			        	}
+
 			        	//System.out.println("WORSE: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 			        }else{
 			        	weightOld=totalWeight;
@@ -1935,9 +2066,9 @@ public class Optimisation {
     	//System.out.println("Sorting "+instance.numberOfItems+" items...");
     	Arrays.sort(itemCosts,newComp);
     	
-    	for(int i = 0; i<instance.numberOfItems; i++){
+    	//for(int i = 0; i<instance.numberOfItems; i++){
     		//System.out.println(itemCosts[i][0]+" City : "+itemCosts[i][1]+" Costs :"+itemCosts[i][0]+" Weights: "+instance.items[(int)itemCosts[i][2]][2]);
-    	}
+    	//}
     	
     	// CALCULATE CITY WEIGHTS AND PROFITS AND DISTANCES TRAVELLED TO CITY
     	for(int i = 0; i<cityWeights.length;i++){
@@ -1965,22 +2096,11 @@ public class Optimisation {
     	
     	Arrays.sort(movePref,newComp);
     	
-    	for(int j = 0; j<cityWeights.length;j++){
+    	/*for(int j = 0; j<cityWeights.length;j++){
     		int i=(int)movePref[j][1];
-    		//System.out.println(individual.tour[i].cityId+" .. W: "+tourCityWeights[i]+" .. W: "+tourCityWeightsCumulative[i]+" .. P: "+cityProfits[individual.tour[i].cityId-1]+" .. PvW: "+cityProfits[individual.tour[i].cityId-1]/cityWeights[individual.tour[i].cityId-1]+" .. Mv: "+movePref[j][0]);        	
-    	}
+    		System.out.println(individual.tour[i].cityId+" .. W: "+tourCityWeights[i]+" .. W: "+tourCityWeightsCumulative[i]+" .. P: "+cityProfits[individual.tour[i].cityId-1]+" .. PvW: "+cityProfits[individual.tour[i].cityId-1]/cityWeights[individual.tour[i].cityId-1]+" .. Mv: "+movePref[j][0]);        	
+    	}*/
     	
-    	// CALCULATE DISTANCE BETWEEN CITYS AND PUT IN SYMMETRIC ARRAY
-    	/*
-    	for(int i = 0;i<cityDistances.length; i++){
-    		for(int j = i; j<cityDistances.length; j++){
-    			cityDistances[i][j]=instance.distances(i, j);
-    			cityDistances[j][i]=cityDistances[i][j];
-    			//System.out.printf("%1$.0f ", cityDistances[i][j]);
-    		}
-    		//System.out.println();
-    	}
-    	*/
     	// FOR ALL CITIES THAT ARE SUGGESTED TO BE MOVED TRY AND FIT THEM ELSEWHERE IN THE TOUR, CHECK NEW OB OR HUERISTIC VALUE
     	double moveThresh=1;
     	int betterMoves=0;
@@ -1997,17 +2117,11 @@ public class Optimisation {
 			double removedDistance=0;
     		if(j==individual.tour.length-1){
     			continue;
-    		}else if (j==0){/*
-    			distanceWithoutOld = cityDistances[0][individual.tour[j+1].cityId];
-    			distanceWithOld = cityDistances[individual.tour[j].cityId][0]+cityDistances[individual.tour[j].cityId][individual.tour[j+1].cityId];    		
-    			removedDistance=distanceWithoutOld-distanceWithOld;*/
+    		}else if (j==0){
     			distanceWithoutOld =instance.distances(0,individual.tour[j+1].cityId);
     			distanceWithOld = instance.distances(individual.tour[j].cityId,0)+instance.distances(individual.tour[j].cityId,individual.tour[j+1].cityId);    		
     			removedDistance=distanceWithoutOld-distanceWithOld;
-    		}else{/*
-    			distanceWithoutOld = cityDistances[individual.tour[j-1].cityId][individual.tour[j+1].cityId];
-    			distanceWithOld = cityDistances[individual.tour[j].cityId][individual.tour[j-1].cityId]+cityDistances[individual.tour[j].cityId][individual.tour[j+1].cityId];    		
-    			removedDistance=distanceWithoutOld-distanceWithOld;*/
+    		}else{
     			distanceWithoutOld = instance.distances(individual.tour[j-1].cityId,individual.tour[j+1].cityId);
     			distanceWithOld = instance.distances(individual.tour[j].cityId,individual.tour[j-1].cityId)+instance.distances(individual.tour[j].cityId,individual.tour[j+1].cityId);    		
     			removedDistance=distanceWithoutOld-distanceWithOld;
@@ -2021,7 +2135,7 @@ public class Optimisation {
     		double bestValue= Double.POSITIVE_INFINITY;
     		int bestIndex=-1;
     		
-    		//put after at ni and push all forward (so basically put after ni)    		
+    		//put at ni and push all forward (so basically put after ni)    		
     		for(int ni=j+1;ni<cityWeights.length;ni++){
     			double distanceWithoutNew=0;
     			double distanceWithNew = 0;
@@ -2029,18 +2143,10 @@ public class Optimisation {
     			if(ni==j){// ni == j can compare with current spot (doesn't move)	
     				addedDistance=removedDistance;
     			}else if(ni==individual.tour.length-1){
-    				/*
-        			distanceWithoutNew = cityDistances[individual.tour[ni].cityId][0];
-        			distanceWithNew = cityDistances[individual.tour[j].cityId][individual.tour[ni].cityId]+cityDistances[individual.tour[j].cityId][0];    		
-        			addedDistance=distanceWithNew-distanceWithoutNew;*/
         			distanceWithoutNew = instance.distances(individual.tour[ni].cityId,0);
         			distanceWithNew = instance.distances(individual.tour[j].cityId,individual.tour[ni].cityId)+instance.distances(individual.tour[j].cityId,0);    		
         			addedDistance=distanceWithNew-distanceWithoutNew;
         		}else{
-        			/*
-        			distanceWithoutNew = cityDistances[individual.tour[ni].cityId][individual.tour[ni+1].cityId];
-        			distanceWithNew = cityDistances[individual.tour[j].cityId][individual.tour[ni].cityId]+cityDistances[individual.tour[j].cityId][individual.tour[ni+1].cityId];    		
-        			addedDistance=distanceWithNew-distanceWithoutNew;*/
         			distanceWithoutNew = instance.distances(individual.tour[ni].cityId,individual.tour[ni+1].cityId);
         			distanceWithNew = instance.distances(individual.tour[j].cityId,individual.tour[ni].cityId)+instance.distances(individual.tour[j].cityId,individual.tour[ni+1].cityId);    		
         			addedDistance=distanceWithNew-distanceWithoutNew;
@@ -2048,35 +2154,12 @@ public class Optimisation {
     			
     			currentValue=(addedDistance+removedDistance)*(tourCityWeightsCumulative[ni]-tourCityWeights[j])/overallDist;
     			
-    			//System.out.println(ni+" .. "+currentValue+" .. "+removedDistance+" .. "+addedDistance);
+    			
     			if(currentValue<=bestValue){
+    				//System.out.println(ni+" .. "+currentValue+" .. "+removedDistance+" .. "+addedDistance);
     				bestValue=currentValue;
     				bestIndex=ni;
     			}
-    			/*
-    			Individual old = instance.createIndividual(instance.getTour(individual), packingPlan);
-        		TTPSolution oldSolution = new TTPSolution(instance.getTour(old), packingPlan);
-                instance.evaluate(oldSolution);
-                double oldOB = oldSolution.ob;
-              
-        		
-        		// INSERT CITY LATER DOWN TOUR
-        		for(int mi=ni;mi>j;mi--){
-        			City temp = individual.tour[mi];
-        			individual.tour[mi]=individual.tour[ni];
-        			individual.tour[ni]=temp;
-        		}
-        		
-        		TTPSolution newSolution = new TTPSolution(instance.getTour(individual), packingPlan);
-                instance.evaluate(newSolution);
-                double newOB = newSolution.ob;
-                System.out.println(j+" ...: "+ni+" .. "+currentValue+" .. "+newOB+" .. "+newOB/currentValue);
-        		if(newOB>oldOB){
-        			System.out.println("BETTER!!!!!!");
-        			return null;
-        		}else{
-        			individual=old;
-        		}*/
     		}
     		
     		Individual old = instance.createIndividual(instance.getTour(individual), instance.getPackingPlan(individual));
@@ -2095,8 +2178,9 @@ public class Optimisation {
     		TTPSolution newSolution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
             instance.evaluate(newSolution);
             double newOB = newSolution.ob;
-            //System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
+            
     		if(newOB>oldOB){
+    			System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
     			betterMoves+=1;
     		}else{
     			individual=old;
@@ -2142,7 +2226,7 @@ public class Optimisation {
         int betterCountB=0;
         
     	//for(int dist=tour.length-2;dist>1;dist--){
-    	for(int dist=300;dist>1;dist--){
+    	for(int dist=4;dist>1;dist--){
     		
     		for(int a = 1; a+dist<tour.length; a++){
     			int b=a+dist-1;
@@ -2164,19 +2248,14 @@ public class Optimisation {
     				valueAfter+=tempWeight[dist-(1+c-a)]*tempFromEnd[dist-(1+c-a)];
     			}
     			
-    			
+
     			System.out.println("D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
-    			if(valueAfter<valueBefore){
+    			//if(valueAfter<valueBefore){
+    			if(true){
     				
-    				System.out.println("-----------D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
+    				//System.out.println("-----------D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
     				betterCount++;
     				
-    				for(int c = a; c<=b; c++){
-    					cityWeights[c]=tempWeight[c-a];
-    					fromEnd[c]=tempFromEnd[c-a];
-    				}
-    				
-
     				int swaps = (int) Math.floor(dist/2);//how many swap operations
     				//System.out.println(indexA+", "+indexB+", "+swaps);//testing
    		        
@@ -2197,6 +2276,10 @@ public class Optimisation {
     		        //System.out.println(oldS.ob + " ... N: "+ tempS.ob);
     		        
     		        if(tempS.ob>oldS.ob){
+        				for(int c = a; c<=b; c++){
+        					cityWeights[c]=tempWeight[c-a];
+        					fromEnd[c]=tempFromEnd[c-a];
+        				}
     		        	betterCountB++;
     		        	System.out.println(oldS.ob + " ... YY: "+ tempS.ob);
     		        	oldS.ob=tempS.ob;
