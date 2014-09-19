@@ -1407,7 +1407,7 @@ public class Optimisation {
 	    			
     				double wend = instance.capacityOfKnapsack / j;
     				
-	    			double cost = 1/(instance.maxSpeed - ((item.weight + wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
+    				double cost = 1/(instance.maxSpeed - ((item.weight + wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
 	    			cost -= 1/(instance.maxSpeed - ((wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
 	    			cost *= instance.rentingRatio * distance;
 	    			double profit = item.profit - cost;
