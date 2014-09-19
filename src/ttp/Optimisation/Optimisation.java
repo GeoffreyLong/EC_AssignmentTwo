@@ -616,7 +616,7 @@ public class Optimisation {
         	
         	// Generate a packing plan
         	int itemsPerCity = instance.numberOfItems / (instance.numberOfNodes - 1);
-        	TTPSolution sol = ppGreedyRegardTour(instance, linTour, instance.createIndividual(linTour),itemsPerCity);
+        	TTPSolution sol = ppGreedyRegardTour(instance, linTour, instance.createIndividual(linTour),itemsPerCity,1);
         	instance.evaluate(sol);    	    
         	
         	if (sol.ob > bestObj) {
@@ -806,7 +806,7 @@ public class Optimisation {
     	}
     	System.out.println("COMBINED TOUR: " + Arrays.toString(combinedTour));
     	
-    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour, instance.createIndividual(combinedTour),2);
+    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour, instance.createIndividual(combinedTour),2,1);
     	instance.evaluate(sol);    	    	
         long duration = ttp.Utils.Utils.stopTiming();
         sol.computationTime = duration;
