@@ -9,6 +9,7 @@ import ga.Selection;
 import ga.Selection.SelectionType;
 
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1200,9 +1201,7 @@ public class Optimisation {
     
     /**
      * Might actually be the same as Two New, but it uses a resetter for the packing plan... 
-     * It actually works very well for some of them (esp smaller instances), so definitely keep this one
-     * 
-     * First Test -> about 19000 to 21000
+
      * @param instance
      * @param tour
      * @param durationWithoutImprovement -> Run with a value of around five
@@ -1210,7 +1209,9 @@ public class Optimisation {
      * @return
      */
     public static TTPSolution exerciseThreeSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-        Individual individual = instance.createIndividual(tour);
+    	ttp.Utils.Utils.startTiming();
+    	long startingTimeForRunLimit = System.currentTimeMillis();
+    	Individual individual = instance.createIndividual(tour);
         int didNotImprove = 0;
         TTPSolution solution = null;
         int[] packingPlan = new int[instance.numberOfItems];
@@ -1220,9 +1221,14 @@ public class Optimisation {
         
         int[] bestPlan = packingPlan.clone();
         int[] bestTour = tour.clone();
-		
+		int k=0;
         while(didNotImprove <= durationWithoutImprovement){
     		int randNodeIndex = (int) (Math.random() * individual.tour.length);
+    		
+			k++;
+			if (k%100==0 /*do the time check just every 10 iterations, as it is time consuming*/
+	                && (System.currentTimeMillis()-startingTimeForRunLimit)>=maxRuntime)
+	            break;
     		
     		solution = new TTPSolution(tour, packingPlan);
     		instance.evaluate(solution);
@@ -1236,7 +1242,7 @@ public class Optimisation {
     		if (oldFitness > bestFitness){
     			bestPlan = packingPlan.clone();
     			bestTour = tour.clone();
-        		System.out.println(bestFitness);
+        		//System.out.println(bestFitness);
         		didNotImprove = 0;
     			bestFitness = oldFitness;
     		}
@@ -1256,7 +1262,7 @@ public class Optimisation {
 	    			double randSwap = Math.random();
 	    			if (randSwap <= 0.1){
 	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
-	    				tempInd.tour[randNodeIndex - 1] = individual.tour[randNodeIndex];
+	    				tempInd.tour[randNodeIndex - 1] = tempInd.tour[randNodeIndex];
 	    				tempInd.tour[randNodeIndex] = cityTemp;
 	    			}
 	    			
@@ -1282,9 +1288,10 @@ public class Optimisation {
 	    	        	packingPlan = new int[packingPlan.length];
 	    	        	tempCount = 0;
 	    	        	didNotImprove ++;
+	    	        	break;
 	    	        }
 	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
-	    	    		tour = instance.getTour(tempInd).clone();
+	    				tour = instance.getTour(tempInd).clone();
 	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
 	    			}
 	    		}
@@ -1292,7 +1299,7 @@ public class Optimisation {
         }
         solution = new TTPSolution(bestTour, bestPlan);
         instance.evaluate(solution);
-        
+        solution.computationTime = ttp.Utils.Utils.stopTiming();
     	return solution;
     } 
     
@@ -1365,6 +1372,221 @@ public class Optimisation {
         
     	return solution;
     } 
+    
+    
+    /**
+     * 
+     * 
+     * @param instance
+     * @param tour
+     * @param durationWithoutImprovement
+     * @param maxRuntime
+     * @return
+     */
+    public static TTPSolution exerciseThreeSolutionFour(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+        ttp.Utils.Utils.startTiming();
+    	
+        int didNotImprove = 0;
+
+    	double lastOb = -Double.MAX_VALUE;
+    	int[] newTour = tour.clone();
+    	int[] packingPlan = new int[instance.numberOfItems];
+    	
+    	for(int j = 1; j<=10; j++){
+    		Individual ind = instance.createIndividual(tour);
+    		Point2D lastPoint = ind.startingCity.location;
+    		double distance = 0;
+    		
+
+    		double lastProfit = Double.MAX_VALUE;
+    		for (int i = ind.tour.length-1; i >= 0; i--){
+	    		City city = ind.tour[i];
+	    		distance += Math.ceil(lastPoint.distance(city.location));
+	    		for(Item item : city.items){
+	    			//System.out.println("weight= " + city.weightToCity);
+	    			
+    				double wend = instance.capacityOfKnapsack / j;
+    				
+	    			double cost = 1/(instance.maxSpeed - ((item.weight + wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
+	    			cost -= 1/(instance.maxSpeed - ((wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
+	    			cost *= instance.rentingRatio * distance;
+	    			double profit = item.profit - cost;
+	    			
+	    			if (profit > lastProfit && i != 0){
+	    				City cityTemp = ind.tour[i - 1];
+	    				ind.tour[i - 1] = ind.tour[i];
+	    				ind.tour[i] = cityTemp;
+	    			}
+	    			
+	    			lastProfit = profit;
+	    		}
+	    		lastPoint = city.location;
+	    	}
+    		/*
+    		TTPSolution temp = Optimisation.exerciseTwoSolutionTwoAlt(instance, instance.getTour(ind), durationWithoutImprovement, maxRuntime, false);
+    		System.out.println(temp.ob);
+    		*/
+	    	double ob = instance.evaluate(ind);
+	    	//System.out.println(ob);
+	    	if (ob > lastOb){
+	    		newTour = instance.getTour(ind).clone();
+	    		packingPlan = instance.getPackingPlan(ind).clone();
+	    	}
+	    	lastOb = ob;
+    	}
+        
+    	TTPSolution solution = new TTPSolution(newTour, packingPlan);
+    	instance.evaluate(solution);
+    	
+    	return solution;
+    } 
+    
+    public static TTPSolution exerciseTwoSolutionOne(TTPInstance instance, int[] tour, Individual individual, int H) {
+        ttp.Utils.Utils.startTiming();
+
+        int[] packingPlan = new int[instance.numberOfItems];
+
+        int[] cityIndex = new int[instance.numberOfNodes];
+
+        int[] cityTourIndex = new int[instance.numberOfItems];
+        
+        double[] profitVSweight = new double[instance.numberOfItems];
+        double profitVSweightTHRESH = 1;
+
+        //double cutOff = -1000;//best for 01s
+        //double cutOff = 0.005;//
+        
+        double[] weights = new double[instance.numberOfItems];
+        double[] weightsRatio = new double[instance.numberOfItems];
+        double totW = 0;
+        double[] profits = new double[instance.numberOfItems];
+        double[] profitsRatio = new double[instance.numberOfItems];
+        double totP = 0;
+        double[] values = new double[instance.numberOfItems];
+        double[] dSoFar = new double[instance.numberOfNodes];
+        double[] dToGo = new double[instance.numberOfNodes];
+        
+        double MAXWEIGHT = instance.capacityOfKnapsack;
+        //MAXWEIGHT=25404;
+        
+        int itemsPerCity = instance.numberOfItems / (instance.numberOfNodes-1);
+		dSoFar[0]=0;
+		cityTourIndex[0]=0;
+
+		for(int i = 1; i < tour.length-1; i++){
+			dSoFar[i] = dSoFar[i-1]+instance.distances(tour[i-1],tour[i]);
+			cityIndex[tour[i]]=i;
+		}
+        
+		for(int i = 0; i < instance.numberOfNodes; i++){
+			dToGo[i] = dSoFar[instance.numberOfNodes-1]-dSoFar[i];
+		}
+		
+		for(int i = 0; i < instance.numberOfItems; i++){
+			cityTourIndex[i]=cityIndex[instance.items[i][3]];
+			totW+=instance.items[i][2];
+			weights[i]=instance.items[i][2];
+			totP+=instance.items[i][2];
+			profits[i]=instance.items[i][1];
+		}
+
+		
+		for(int i = 0; i < instance.numberOfItems; i++){
+			weightsRatio[i]=weights[i]/totW;
+			profitsRatio[i]=profits[i]/totP;
+			profitVSweight[i]=profitsRatio[i]/weightsRatio[i]*profitVSweightTHRESH;
+		}
+		
+		for(int i = 0; i < instance.numberOfItems; i++){//this is the important weightings
+			//double fitness=0;
+	    	//fitness -= ((dToGo[cityTourIndex[i]])/dSoFar[instance.numberOfNodes-1]) / (instance.maxSpeed - weightsRatio[i] * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack);
+	    	//fitness *= instance.rentingRatio;
+	    	//fitness += profitsRatio[i];
+			//values[i]=fitness;
+	    	//values[i]=(profitsRatio[i]*profitTHRESH)-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);
+			double v = (instance.maxSpeed-instance.minSpeed)/instance.capacityOfKnapsack;
+			if(H==1){
+				values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
+			}else{
+				values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);//best for 05s
+			}
+			
+			//values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);			//in progress
+		}
+
+		//add the items to the PP
+		double totalWeight = 0;
+		int count=0;
+
+		double lastOB=Double.NEGATIVE_INFINITY;
+		
+		double[][] sortData = new double[instance.numberOfItems][2];
+		
+		for(int i = 0; i<instance.numberOfItems; i++){
+			sortData[i][0]=i;
+			sortData[i][1]=values[i];
+		}
+		
+		Comparator<double[]> newComp = new Comparator<double[]>() {
+    		@Override
+    		public int compare(double[] s1, double[] s2) {
+    			return -Double.compare(s1[1], s2[1]);
+		    }
+    	};
+    	
+    	//System.out.println("Sorting "+instance.numberOfItems+" items...");
+    	Arrays.sort(sortData,newComp);
+
+    	//System.out.println("Filling Packing Plan");
+		int noImprovement=0;
+		int index=0;
+		
+		int[] packingPlanOld = new int[instance.numberOfItems];
+		int indexOld = 0;
+		double jump=Math.ceil(instance.numberOfItems/20);
+		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
+			//System.out.println(100*(index/instance.numberOfItems)+"%");
+			int bestValueIndex=(int)sortData[index][0];
+			
+			count++;
+			//add it as long as it doesn't break capacity			
+			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
+				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
+				packingPlan[ppIndex]=1;
+				totalWeight+=weights[bestValueIndex];
+				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
+				
+				if(index%jump==0){
+					
+					TTPSolution s = new TTPSolution(tour, packingPlan);
+			        instance.evaluate(s);
+			        //System.out.println(jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        if(s.ob<lastOB){//remove if id doesn't improve OB
+			        	packingPlan[ppIndex]=0;
+			        	noImprovement++;
+			        	packingPlan=packingPlanOld.clone();
+			        	index=indexOld;
+			        	jump=Math.ceil(jump/2);
+			        	//System.out.println("WORSE: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        }else{
+			        	noImprovement=0;
+			        	lastOB=s.ob;
+			        	packingPlanOld=packingPlan.clone();
+			        	//System.out.println("BETTER: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+					}	
+				}
+					        
+			}
+			index++;			
+		}
+		
+        long duration = ttp.Utils.Utils.stopTiming();
+        //System.out.println("TIME TAKEN: "+duration+" .. Total Weight: "+totalWeight);
+        TTPSolution newSolution = new TTPSolution(tour, packingPlan);
+        newSolution.computationTime = duration;
+        instance.evaluate(newSolution);
+        return newSolution;
+    }
 
     /**
      * This is purely a packing plan crossover
