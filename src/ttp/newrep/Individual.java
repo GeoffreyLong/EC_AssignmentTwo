@@ -4,6 +4,8 @@ public class Individual {
 	public City[] tour;
 	public City startingCity;
 	public int itemsPerCity;
+	public int totalWeight;
+	public int totalDistance;
 	
 	public Individual(double[][] nodes, int[][] items, int[] tour, int itemsPerCity){
 		this.tour = new City[tour.length-2];

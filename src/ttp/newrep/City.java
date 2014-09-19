@@ -9,6 +9,10 @@ public class City {
 	public Point2D location;
 	public int cityId;
 	
+	// The knapsacks weight when it reaches the city... this is calculated on eval
+	public int weightToCity;
+	public int distanceFromEnd;
+	
 	public City(double id, double x, double y){
 		this.cityId = (int) id;
 		this.location = new Point2D.Double(x,y);
