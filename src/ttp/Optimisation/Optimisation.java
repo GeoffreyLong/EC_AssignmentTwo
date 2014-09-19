@@ -656,6 +656,7 @@ public class Optimisation {
     	};
     	Arrays.sort(sortData,newComp);
     	
+    	
     	// Find best city indexes
     	int maxCities = instance.numberOfNodes/2; // The item solution must contain at most this number of cities
     	List<Integer> bestCities = new ArrayList<Integer>();
