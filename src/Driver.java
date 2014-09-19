@@ -17,6 +17,7 @@ import ttp.TTPInstance;
 import ttp.TTPSolution;
 import ttp.Utils.DeepCopy;
 import ttp.Utils.Utils;
+import ttp.newrep.Individual;
 
 /**
  *
@@ -34,8 +35,8 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-        	args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
-        	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
+        	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
@@ -43,12 +44,11 @@ public class Driver {
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "2", "10000", "60000"};
+            "2", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
-        
-        testAllInst();
+        //testAllInst();
     }
     
     // note: doBatch can process several files sequentially
@@ -75,9 +75,35 @@ public class Driver {
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
 
+            for(int i = 1; i<tour.length/2;i++){ //FILP HELPS FOR ALL DATASETS EXCEPT 7+8
+                	int temp = tour[i];
+                	tour[i]=tour[tour.length-1-i];
+                	tour[tour.length-1-i]=temp;
+                }
+         
+            TTPSolution ppSol = Optimisation.ppGreedyRegardTour(instance, tour, instance.createIndividual(tour),2);
+            //TTPSolution ppSol = Optimisation.ppGreedyDisregardTour(instance, tour, instance.createIndividual(tour),1);
+
+            //TTPSolution solution3 = Optimisation.inversion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,1);
+            TTPSolution solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
+            //TTPSolution solution3=ppSol;
             
-            System.out.println(f.getName()+": ");
+            //ppSol = Optimisation.ppGreedyRegardTour(instance, solution3.tspTour, instance.createIndividual(tour),2);
+            //solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
+            //ppSol = Optimisation.ppGreedyRegardTour(instance, solution3.tspTour, instance.createIndividual(tour),2);
+            //solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
             
+            Individual i = instance.createIndividual(solution3.tspTour,solution3.packingPlan);
+            System.out.println(i.startingCity.cityId+"\t"+i.startingCity.location.getX()+"\t"+i.startingCity.location.getY());
+            for(int k = 0; k<tour.length-2; k++){
+            	if(i.tour[k].getWeight()>0)
+                System.out.println(i.tour[k].cityId+"\t"+i.tour[k].location.getX()+"\t"+i.tour[k].location.getY());
+            }
+            //solution3.printFull();
+            solution3.altPrint();
+            resultTitle = instance.file.getName() + ".ppGreedyRegardTour_1_flip_insertion." + startTime;
+            solution3.writeResult(resultTitle);
+
             // do the optimisation
             
             //System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
@@ -134,10 +160,12 @@ public class Driver {
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime);
+            TTPSolution solution = Optimisation.exerciseThreeSolutionFour(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime);
             
-            //solution.altPrint();
+            solution.altPrint();
+            solution.printFull();
         }
     }
     
@@ -168,11 +196,11 @@ public class Driver {
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1); String csvFilename = "Z_ex2sol1iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime,false); String csvFilename = "Z_ex2sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 10, maxRuntime,false); String csvFilename = "Z_ex2sol2Aiter1.csv";
-	                TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
+	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol1iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Niter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
+	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol3iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3solHiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
