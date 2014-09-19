@@ -628,6 +628,7 @@ public class Optimisation {
     	Arrays.sort(sortData,newComp);
     	
     	// Find best city indexes
+    	int maxCities = instance.numberOfNodes/3; // The item solution must contain at most this number of cities
     	List<Integer> bestCities = new ArrayList<Integer>();
     	Set<Integer> bestCitiesSet = new HashSet<Integer>();
     	double totalWeight = 0;
@@ -638,6 +639,9 @@ public class Optimisation {
     			if (!bestCitiesSet.contains(instance.items[sortedItemIndex][3])) {
     				bestCities.add(instance.items[sortedItemIndex][3]);
     				bestCitiesSet.add(instance.items[sortedItemIndex][3]);
+    				if (bestCitiesSet.size() >= maxCities) {
+    					break;
+    				}
     			}
     			totalWeight += instance.items[sortedItemIndex][2];
     		}
@@ -652,7 +656,7 @@ public class Optimisation {
     		output += "DIMENSION: " + (bestCities.size()+1) + "\n";
     		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
     		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
-    		output += String.format("%d \t %d %d\n", 330, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		output += String.format("%d \t %d %d\n", 0, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
     		for (int cityId : bestCities) {
     			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
     		}
@@ -664,7 +668,7 @@ public class Optimisation {
     	}
     	
     	// Generate linkern between best items from start city
-    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+1);
+    	int[] bestCitiesTour = linkernTour("linkernCycles.txt", bestCities.size()+2);
     	// Tour indicies converted to city order in file, map back to normal range
     	for (int i = 1; i < bestCitiesTour.length-1; i++) {
     		bestCitiesTour[i] = bestCities.get( bestCitiesTour[i] - 1);
@@ -710,14 +714,53 @@ public class Optimisation {
     	}
     	
     	
-    	
-    	System.exit(1);
     	// Generate linkern tour from the set of cities not including the above
+    	List<Integer> remainingCities = new ArrayList<Integer>();
+    	for (int i = 0; i < instance.numberOfNodes; i++) {
+    		if (!filledTourSet.contains(i)) {
+    			remainingCities.add(i);
+    		}
+    	}
+    	System.out.println("REMAINING CITIES: " + remainingCities);
+    	// Generate linkern compatible tsp file with best cities 
+    	try {
+    		BufferedWriter writer = new BufferedWriter(new FileWriter("linkernCycles.txt"));
+    		String output = "";
+    		output += "PROBLEM NAME: linkernCycles\n";
+    		output += "DIMENSION: " + (remainingCities.size()+1) + "\n";
+    		output += "EDGE_WEIGHT_TYPE: CEIL_2D\n";
+    		output += "NODE_COORD_SECTION	(INDEX, X, Y): \n";
+    		output += String.format("%d \t %d %d\n", 0, (int)instance.nodes[0][1], (int)instance.nodes[0][2]);
+    		for (int cityId : remainingCities) {
+    			output += String.format("%d \t %d %d\n", cityId, (int)instance.nodes[cityId][1], (int)instance.nodes[cityId][2]);
+    		}
+    		writer.write(output);
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
     	
-    	// Combine linkern cycles with the best item tour at the end
+    	// Generate linkern for remaining cities
+    	int[] remainingCitiesTour = linkernTour("linkernCycles.txt", remainingCities.size()+2);
+    	// Tour indices converted to city order in file, map back to normal range
+    	for (int i = 1; i < remainingCitiesTour.length-1; i++) {
+    		remainingCitiesTour[i] = remainingCities.get( remainingCitiesTour[i] - 1);
+    	}
+    	System.out.println("Linkern for remaining cities: " + Arrays.toString(remainingCitiesTour));
+    	
+    	// Combine linkern cycles with best cities tour at end
+    	int[] combinedTour = new int[instance.numberOfNodes+1];
+    	for (int i = 0; i < remainingCitiesTour.length; i++) {
+    		combinedTour[i] = remainingCitiesTour[i];
+    	}
+    	for (int i = remainingCitiesTour.length - 1, j = 0; i < combinedTour.length; i++, j++) {
+    		combinedTour[i] = filledTour.get(j+1);
+    	}
+    	System.out.println("COMBINED TOUR: " + Arrays.toString(combinedTour));
     	
     	
-
+    	    	
         long duration = ttp.Utils.Utils.stopTiming();
     	return null;
     }
