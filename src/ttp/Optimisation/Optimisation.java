@@ -1724,9 +1724,8 @@ public class Optimisation {
 		
 		double jump=Math.ceil(instance.numberOfItems/20);
 		while(totalWeight<MAXWEIGHT && index<instance.numberOfItems && jump>=2){
-			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
-			System.out.println(instance.items[bestValueIndex][3]);
+			//System.out.println(instance.items[bestValueIndex][3]);
 			//add it as long as it doesn't break capacity			
 			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
 				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
@@ -2047,8 +2046,9 @@ public class Optimisation {
     		TTPSolution newSolution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
             instance.evaluate(newSolution);
             double newOB = newSolution.ob;
-            System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
+            
     		if(newOB>oldOB){
+    			System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
     			betterMoves+=1;
     		}else{
     			individual=old;
@@ -2094,7 +2094,7 @@ public class Optimisation {
         int betterCountB=0;
         
     	//for(int dist=tour.length-2;dist>1;dist--){
-    	for(int dist=300;dist>1;dist--){
+    	for(int dist=4;dist>1;dist--){
     		
     		for(int a = 1; a+dist<tour.length; a++){
     			int b=a+dist-1;
@@ -2116,19 +2116,14 @@ public class Optimisation {
     				valueAfter+=tempWeight[dist-(1+c-a)]*tempFromEnd[dist-(1+c-a)];
     			}
     			
-    			
+
     			System.out.println("D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
-    			if(valueAfter<valueBefore){
+    			//if(valueAfter<valueBefore){
+    			if(true){
     				
-    				System.out.println("-----------D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
+    				//System.out.println("-----------D: "+dist+" A: "+a+" B: "+b+" BF: "+valueBefore+" AV: "+valueAfter+" BC: "+betterCount+" BCB: "+betterCountB);
     				betterCount++;
     				
-    				for(int c = a; c<=b; c++){
-    					cityWeights[c]=tempWeight[c-a];
-    					fromEnd[c]=tempFromEnd[c-a];
-    				}
-    				
-
     				int swaps = (int) Math.floor(dist/2);//how many swap operations
     				//System.out.println(indexA+", "+indexB+", "+swaps);//testing
    		        
@@ -2149,6 +2144,10 @@ public class Optimisation {
     		        //System.out.println(oldS.ob + " ... N: "+ tempS.ob);
     		        
     		        if(tempS.ob>oldS.ob){
+        				for(int c = a; c<=b; c++){
+        					cityWeights[c]=tempWeight[c-a];
+        					fromEnd[c]=tempFromEnd[c-a];
+        				}
     		        	betterCountB++;
     		        	System.out.println(oldS.ob + " ... YY: "+ tempS.ob);
     		        	oldS.ob=tempS.ob;
