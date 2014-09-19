@@ -48,7 +48,7 @@ public class Driver {
 //        runSomeTests();
         doBatch(args);
         
-        testAllInst();
+        //testAllInst();
     }
     
     // note: doBatch can process several files sequentially
@@ -134,10 +134,12 @@ public class Driver {
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime);
+            TTPSolution solution = Optimisation.exerciseThreeSolutionFour(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime);
             
-            //solution.altPrint();
+            solution.altPrint();
+            solution.printFull();
         }
     }
     
@@ -168,11 +170,11 @@ public class Driver {
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1); String csvFilename = "Z_ex2sol1iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime,false); String csvFilename = "Z_ex2sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 10, maxRuntime,false); String csvFilename = "Z_ex2sol2Aiter1.csv";
-	                TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
+	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol1iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Niter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
+	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol3iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3solHiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
