@@ -131,7 +131,7 @@ public class Optimisation {
 		
 		//build initial PP solution
 		//could use SH
-		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual), individual,H);
+		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual), individual,H,10);
 		packingPlanRet=s.packingPlan;
 		s.altPrint();
 		Individual individualNew=instance.createIndividual(instance.getTour(individual), packingPlanRet);
@@ -1744,7 +1744,7 @@ public class Optimisation {
     }
     
     
-    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour, Individual individual, int H) {
+    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour, Individual individual, int H,double jump) {
         ttp.Utils.Utils.startTiming();
 
         
@@ -1848,7 +1848,14 @@ public class Optimisation {
 		int[] packingPlanOld = new int[instance.numberOfItems];
 		int indexOld = 0;
 		double weightOld = 0;
-		double jump=Math.ceil(instance.numberOfItems/20);
+		boolean jumpSet=false;
+		if(jump>1){
+			jumpSet=true;
+		}else{
+			jumpSet=false;
+			jump=2;
+		}
+		
 		while(totalWeight<MAXWEIGHT && count<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
 			int bestValueIndex=(int)sortData[index][0];
@@ -1861,19 +1868,23 @@ public class Optimisation {
 				totalWeight+=weights[bestValueIndex];
 				//System.out.println("I: "+bestValueIndex+" .. P: "+profits[bestValueIndex]+" .. W: "+weights[bestValueIndex]+" .. C: "+cityTourIndex[bestValueIndex]+"/"+(tour.length-2)+" ... V: "+values[bestValueIndex]+" PvW: "+profitVSweight[bestValueIndex]);
 				
-				if(index%jump==0){
+				if(!jumpSet || index%jump==0){
 					
 					TTPSolution s = new TTPSolution(tour, packingPlan);
 			        instance.evaluate(s);
-			        //System.out.println(jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
+			        System.out.println(jump+" .. "+s.ob+" .<?. "+lastOB+" .. "+index+" .. "+noImprovement);
 			        if(s.ob<lastOB){//remove if id doesn't improve OB
 			        	totalWeight-=weights[bestValueIndex];
 			        	packingPlan[ppIndex]=0;
 			        	noImprovement++;
-			        	packingPlan=packingPlanOld.clone();
-			        	index=indexOld;
-			        	totalWeight=weightOld;
-			        	jump=Math.ceil(jump/2);
+			        	
+			        	if(jumpSet){
+				        	packingPlan=packingPlanOld.clone();
+				        	index=indexOld;
+				        	totalWeight=weightOld;
+			        		jump=Math.ceil(jump/2);
+			        	}
+
 			        	//System.out.println("WORSE: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 			        }else{
 			        	weightOld=totalWeight;
