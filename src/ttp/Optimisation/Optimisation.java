@@ -1713,9 +1713,9 @@ public class Optimisation {
     	//System.out.println("Sorting "+instance.numberOfItems+" items...");
     	Arrays.sort(itemCosts,newComp);
     	
-    	for(int i = 0; i<instance.numberOfItems; i++){
+    	//for(int i = 0; i<instance.numberOfItems; i++){
     		//System.out.println(itemCosts[i][0]+" City : "+itemCosts[i][1]+" Costs :"+itemCosts[i][0]+" Weights: "+instance.items[(int)itemCosts[i][2]][2]);
-    	}
+    	//}
     	
     	// CALCULATE CITY WEIGHTS AND PROFITS AND DISTANCES TRAVELLED TO CITY
     	for(int i = 0; i<cityWeights.length;i++){
@@ -1743,22 +1743,11 @@ public class Optimisation {
     	
     	Arrays.sort(movePref,newComp);
     	
-    	for(int j = 0; j<cityWeights.length;j++){
+    	/*for(int j = 0; j<cityWeights.length;j++){
     		int i=(int)movePref[j][1];
-    		//System.out.println(individual.tour[i].cityId+" .. W: "+tourCityWeights[i]+" .. W: "+tourCityWeightsCumulative[i]+" .. P: "+cityProfits[individual.tour[i].cityId-1]+" .. PvW: "+cityProfits[individual.tour[i].cityId-1]/cityWeights[individual.tour[i].cityId-1]+" .. Mv: "+movePref[j][0]);        	
-    	}
+    		System.out.println(individual.tour[i].cityId+" .. W: "+tourCityWeights[i]+" .. W: "+tourCityWeightsCumulative[i]+" .. P: "+cityProfits[individual.tour[i].cityId-1]+" .. PvW: "+cityProfits[individual.tour[i].cityId-1]/cityWeights[individual.tour[i].cityId-1]+" .. Mv: "+movePref[j][0]);        	
+    	}*/
     	
-    	// CALCULATE DISTANCE BETWEEN CITYS AND PUT IN SYMMETRIC ARRAY
-    	/*
-    	for(int i = 0;i<cityDistances.length; i++){
-    		for(int j = i; j<cityDistances.length; j++){
-    			cityDistances[i][j]=instance.distances(i, j);
-    			cityDistances[j][i]=cityDistances[i][j];
-    			//System.out.printf("%1$.0f ", cityDistances[i][j]);
-    		}
-    		//System.out.println();
-    	}
-    	*/
     	// FOR ALL CITIES THAT ARE SUGGESTED TO BE MOVED TRY AND FIT THEM ELSEWHERE IN THE TOUR, CHECK NEW OB OR HUERISTIC VALUE
     	double moveThresh=1;
     	int betterMoves=0;
@@ -1775,17 +1764,11 @@ public class Optimisation {
 			double removedDistance=0;
     		if(j==individual.tour.length-1){
     			continue;
-    		}else if (j==0){/*
-    			distanceWithoutOld = cityDistances[0][individual.tour[j+1].cityId];
-    			distanceWithOld = cityDistances[individual.tour[j].cityId][0]+cityDistances[individual.tour[j].cityId][individual.tour[j+1].cityId];    		
-    			removedDistance=distanceWithoutOld-distanceWithOld;*/
+    		}else if (j==0){
     			distanceWithoutOld =instance.distances(0,individual.tour[j+1].cityId);
     			distanceWithOld = instance.distances(individual.tour[j].cityId,0)+instance.distances(individual.tour[j].cityId,individual.tour[j+1].cityId);    		
     			removedDistance=distanceWithoutOld-distanceWithOld;
-    		}else{/*
-    			distanceWithoutOld = cityDistances[individual.tour[j-1].cityId][individual.tour[j+1].cityId];
-    			distanceWithOld = cityDistances[individual.tour[j].cityId][individual.tour[j-1].cityId]+cityDistances[individual.tour[j].cityId][individual.tour[j+1].cityId];    		
-    			removedDistance=distanceWithoutOld-distanceWithOld;*/
+    		}else{
     			distanceWithoutOld = instance.distances(individual.tour[j-1].cityId,individual.tour[j+1].cityId);
     			distanceWithOld = instance.distances(individual.tour[j].cityId,individual.tour[j-1].cityId)+instance.distances(individual.tour[j].cityId,individual.tour[j+1].cityId);    		
     			removedDistance=distanceWithoutOld-distanceWithOld;
@@ -1799,7 +1782,7 @@ public class Optimisation {
     		double bestValue= Double.POSITIVE_INFINITY;
     		int bestIndex=-1;
     		
-    		//put after at ni and push all forward (so basically put after ni)    		
+    		//put at ni and push all forward (so basically put after ni)    		
     		for(int ni=j+1;ni<cityWeights.length;ni++){
     			double distanceWithoutNew=0;
     			double distanceWithNew = 0;
@@ -1807,18 +1790,10 @@ public class Optimisation {
     			if(ni==j){// ni == j can compare with current spot (doesn't move)	
     				addedDistance=removedDistance;
     			}else if(ni==individual.tour.length-1){
-    				/*
-        			distanceWithoutNew = cityDistances[individual.tour[ni].cityId][0];
-        			distanceWithNew = cityDistances[individual.tour[j].cityId][individual.tour[ni].cityId]+cityDistances[individual.tour[j].cityId][0];    		
-        			addedDistance=distanceWithNew-distanceWithoutNew;*/
         			distanceWithoutNew = instance.distances(individual.tour[ni].cityId,0);
         			distanceWithNew = instance.distances(individual.tour[j].cityId,individual.tour[ni].cityId)+instance.distances(individual.tour[j].cityId,0);    		
         			addedDistance=distanceWithNew-distanceWithoutNew;
         		}else{
-        			/*
-        			distanceWithoutNew = cityDistances[individual.tour[ni].cityId][individual.tour[ni+1].cityId];
-        			distanceWithNew = cityDistances[individual.tour[j].cityId][individual.tour[ni].cityId]+cityDistances[individual.tour[j].cityId][individual.tour[ni+1].cityId];    		
-        			addedDistance=distanceWithNew-distanceWithoutNew;*/
         			distanceWithoutNew = instance.distances(individual.tour[ni].cityId,individual.tour[ni+1].cityId);
         			distanceWithNew = instance.distances(individual.tour[j].cityId,individual.tour[ni].cityId)+instance.distances(individual.tour[j].cityId,individual.tour[ni+1].cityId);    		
         			addedDistance=distanceWithNew-distanceWithoutNew;
@@ -1826,35 +1801,12 @@ public class Optimisation {
     			
     			currentValue=(addedDistance+removedDistance)*(tourCityWeightsCumulative[ni]-tourCityWeights[j])/overallDist;
     			
-    			//System.out.println(ni+" .. "+currentValue+" .. "+removedDistance+" .. "+addedDistance);
+    			
     			if(currentValue<=bestValue){
+    				//System.out.println(ni+" .. "+currentValue+" .. "+removedDistance+" .. "+addedDistance);
     				bestValue=currentValue;
     				bestIndex=ni;
     			}
-    			/*
-    			Individual old = instance.createIndividual(instance.getTour(individual), packingPlan);
-        		TTPSolution oldSolution = new TTPSolution(instance.getTour(old), packingPlan);
-                instance.evaluate(oldSolution);
-                double oldOB = oldSolution.ob;
-              
-        		
-        		// INSERT CITY LATER DOWN TOUR
-        		for(int mi=ni;mi>j;mi--){
-        			City temp = individual.tour[mi];
-        			individual.tour[mi]=individual.tour[ni];
-        			individual.tour[ni]=temp;
-        		}
-        		
-        		TTPSolution newSolution = new TTPSolution(instance.getTour(individual), packingPlan);
-                instance.evaluate(newSolution);
-                double newOB = newSolution.ob;
-                System.out.println(j+" ...: "+ni+" .. "+currentValue+" .. "+newOB+" .. "+newOB/currentValue);
-        		if(newOB>oldOB){
-        			System.out.println("BETTER!!!!!!");
-        			return null;
-        		}else{
-        			individual=old;
-        		}*/
     		}
     		
     		Individual old = instance.createIndividual(instance.getTour(individual), instance.getPackingPlan(individual));
@@ -1873,7 +1825,7 @@ public class Optimisation {
     		TTPSolution newSolution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
             instance.evaluate(newSolution);
             double newOB = newSolution.ob;
-            //System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
+            System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
     		if(newOB>oldOB){
     			betterMoves+=1;
     		}else{
