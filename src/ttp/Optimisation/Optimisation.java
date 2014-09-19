@@ -602,6 +602,35 @@ public class Optimisation {
 		return solution;
     }
     
+    public static TTPSolution excerciseThreeRandomLinkernTours(TTPInstance instance, long maxRunTime) {
+    	ttp.Utils.Utils.startTiming();
+    	long startTime = System.currentTimeMillis();
+    	int numIterations = 0;
+    	long elapsedTime = 0;
+    	long averageIterationTime;
+    	TTPSolution bestSol = null;
+    	double bestObj = Double.NEGATIVE_INFINITY;
+    	do {
+    		// Generate a new linkern tour
+        	int[] linTour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
+        	
+        	// Generate a packing plan
+        	int itemsPerCity = instance.numberOfItems / (instance.numberOfNodes - 1);
+        	TTPSolution sol = ppGreedyRegardTour(instance, linTour, instance.createIndividual(linTour),itemsPerCity);
+        	instance.evaluate(sol);    	    
+        	
+        	if (sol.ob > bestObj) {
+        		bestSol = sol;
+        		bestObj = sol.ob;
+        	}
+    		System.out.printf("BestObj: %f, NewObj: %f\n",bestObj, sol.ob);
+    		numIterations++;
+    		elapsedTime = System.currentTimeMillis() - startTime;
+    		averageIterationTime = elapsedTime / numIterations;
+    	} while (elapsedTime <= (maxRunTime - averageIterationTime*1.3));
+    	bestSol.computationTime = ttp.Utils.Utils.stopTiming();
+    	return bestSol;
+    }
     public static TTPSolution exerciseThreeLinkernCycles(TTPInstance instance) {
     	ttp.Utils.Utils.startTiming();
     	// Find best items in terms of profit/weight
@@ -628,7 +657,7 @@ public class Optimisation {
     	Arrays.sort(sortData,newComp);
     	
     	// Find best city indexes
-    	int maxCities = instance.numberOfNodes/3; // The item solution must contain at most this number of cities
+    	int maxCities = instance.numberOfNodes/2; // The item solution must contain at most this number of cities
     	List<Integer> bestCities = new ArrayList<Integer>();
     	Set<Integer> bestCitiesSet = new HashSet<Integer>();
     	double totalWeight = 0;
@@ -686,16 +715,34 @@ public class Optimisation {
     	Set<Integer> filledTourSet = new HashSet<Integer>();
     	filledTour.add(0);
     	filledTourSet.add(0);
+    	int numNearestNeighbours = 40;
     	int prevCity = 0;
     	for (int i = 1; i < bestCitiesTour.length; i++) {
     		int currentCity =  bestCitiesTour[i];
     		double remainingDistance = instance.distances(prevCity,currentCity);
     		// fill in path between prev city and current city, only using nodes that get us closer to currentCity
     		while (prevCity != currentCity) {
-	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},5);
+	    		Object[] nn = tree.nearest(new double[]{instance.nodes[prevCity][1],instance.nodes[prevCity][2]},numNearestNeighbours);
 	    		boolean found = false;
+	    		// get line equation: Ax + By + C = 0
+	    		double x1 = instance.nodes[prevCity][1];
+	    		double x2 = instance.nodes[currentCity][1];
+	    		double y1 = instance.nodes[prevCity][2];
+	    		double y2 = instance.nodes[currentCity][2];
+	    		double A = y1 - y2;
+	    		double B = x2 - x1;
+	    		double C = x1*y2 - x2*y1;
+	    		
+
+	    		// perp dist threshold
+	    		double perpDistThreshold = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+	    		perpDistThreshold /= 0.5;
+	    		
 	    		for (Object o : nn) {
 	    			double newRemainingDistance = instance.distances((int)o,currentCity);
+	    			double perpDist = Math.abs(A*instance.nodes[(int)o][1] + B*instance.nodes[(int)o][2] + C);
+	    			perpDist /= Math.sqrt(A*A + B*B);
+	    			// && perpDist < perpDistThreshold
 	    			if ((newRemainingDistance < remainingDistance && !filledTourSet.contains((int)o) && !bestCitiesSet.contains((int)o)) || ((int)o) == currentCity) {
 	    				prevCity = (int)o;
 	    				filledTour.add(prevCity);
@@ -759,10 +806,38 @@ public class Optimisation {
     	}
     	System.out.println("COMBINED TOUR: " + Arrays.toString(combinedTour));
     	
-    	
-    	    	
+    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour, instance.createIndividual(combinedTour),2);
+    	instance.evaluate(sol);    	    	
         long duration = ttp.Utils.Utils.stopTiming();
-    	return null;
+        sol.computationTime = duration;
+        
+        try {
+        	BufferedWriter bw = new BufferedWriter(new FileWriter("filledCitiesTour"));
+        	for (Integer i : filledTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("bestCitiesTour"));
+        	for (Integer i : bestCitiesTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("combinedTour"));
+        	for (Integer i : combinedTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        	bw = new BufferedWriter(new FileWriter("remainingTour"));
+        	for (Integer i : remainingCitiesTour) {
+        		bw.write(String.format("%d\t%d\t%d\n",i, (int)instance.nodes[i][1], (int)instance.nodes[i][2]));
+        	}
+        	bw.close();
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
+        
+        
+    	return sol;
     }
         
     
