@@ -703,6 +703,7 @@ public class Optimisation {
 	    		if (!found) {
 	    			filledTour.add(currentCity);
 	    			filledTourSet.add(currentCity);
+	    			prevCity = currentCity;
 	    		}
     		}
     	}
@@ -1500,6 +1501,7 @@ public class Optimisation {
     	//System.out.println("Filling Packing Plan");
 		int index=0;
 		
+		Set<Integer> visitedCities = new HashSet<Integer>();
 		double jump=Math.ceil(instance.numberOfItems/20);
 		while(totalWeight<MAXWEIGHT && index<instance.numberOfItems && jump>=2){
 			//System.out.println(100*(index/instance.numberOfItems)+"%");
@@ -1509,7 +1511,8 @@ public class Optimisation {
 			if(totalWeight+weights[bestValueIndex]<=instance.capacityOfKnapsack){
 				int ppIndex=(cityTourIndex[bestValueIndex]-1)*itemsPerCity + (int)(bestValueIndex/(tour.length-2));
 				packingPlan[ppIndex]=1;
-				totalWeight+=weights[bestValueIndex];					        
+				totalWeight+=weights[bestValueIndex];
+				visitedCities.add(tour[cityTourIndex[bestValueIndex]]);
 			}
 			index++;			
 		}
