@@ -94,55 +94,15 @@ public class Driver {
             		newSolution=Optimisation.randomLinkernTours(instance, maxRuntime);
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip." + startTime;
             		break;
-            	case 6: //Exercise 3 : Algorithm 3 : A1 + insertion
-            		TTPSolution tmpSolution=Optimisation.randomLinkernTours(instance, maxRuntime-(int)(instance.numberOfItems*.01));
-            		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.01));
+            	case 6: //Exercise 3 : Algorithm 3 : A2 + insertion
+            		TTPSolution tmpSolution=Optimisation.randomLinkernTours(instance, maxRuntime-(int)(instance.numberOfItems*.001));
+            		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.001));
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip_insert." + startTime;
             		break;
             }
-
-
-            
-            /*Individual i = instance.createIndividual(ppSol.tspTour,ppSol.packingPlan);
-            System.out.println(i.startingCity.cityId+"\t"+i.startingCity.location.getX()+"\t"+i.startingCity.location.getY());
-            for(int k = 0; k<tour.length-2; k++){
-            	//if(i.tour[k].getWeight()>0)
-                System.out.println(i.tour[k].cityId+"\t"+i.tour[k].location.getX()+"\t"+i.tour[k].location.getY());
-            }*/
-            
-            /*
-            System.out.println("E2-A1 (Hayden's) -------------------------------------");
-            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1);
-            //TTPSolution solution3 = Optimisation.cosolver(instance, tour, maxRuntime);
-            //TTPSolution solution3 = Optimisation.exerciseThreeSolutionH(instance, tour, maxRuntime,1);
-            TTPSolution solution3 = Optimisation.backFourth(instance,tour, 60000,1);
-            resultTitle = instance.file.getName() + ".exerciseThreeSolutionH." + startTime;
-            solution3.writeResult(resultTitle);
-            solution3.altPrint();
-            //solution2.printFull();
-            */
-
-            
-            // General form of result output
-            // test	: obAVG	: timeAVG :	# of times run
-            
-            
-            //TTPSolution solution = Optimisation.exerciseTwoSolutionOne(instance, tour, instance.createIndividual(tour),1);
-            //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime, true);
-            //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 2, maxRuntime,true);
-            //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, true);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionOne(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionFour(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime);
-            //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime);
-            
+           
             newSolution.writeResult(resultTitle);
             newSolution.altPrint();
-
         }
     }
     
