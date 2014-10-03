@@ -26,15 +26,17 @@ public class RunTests {
 		for (int algNum = 0; algNum < ALGORITHMS.length; algNum++) {
 			for (int testNum = 0; testNum < TEST_FILES.length; testNum++) {
 				for (int iteration = 0; iteration < numIterations; iteration++) {
-					Driver.runTest("instances/"+TEST_FILES[testNum], algNum, iteration);
+					//Driver.main(new String[] {							
+					//"instances/",TEST_FILES[testNum], Integer.);
 				}
 			}
 		}
 		
 		// Combine results
-		
+		/*
 		for (int algNum = 0; algNum < ALGORITHMS.length; algNum++) {
 			for (int testNum = 0; testNum < TEST_FILES.length; testNum++) {
+				// Read in objective values
 				double[][] obj = new double[numIterations][numTimeSaves];
 				for (int iteration = 0; iteration < numIterations; iteration++) {
 					String resultFile = String.format("%s_%s_%d",
@@ -46,7 +48,7 @@ public class RunTests {
 						obj[iteration][timeIdx] = Integer.parseInt(br.readLine());
 					}
 				}
-				// Calc average, standev, best (include iteration num that was best)
+				// Calculate average, best and best iteration
 				double[] objAvg = new double[numTimeSaves];
 				double[] objBest = new double[numTimeSaves];
 				double[] objBestIter = new double[numTimeSaves];
@@ -61,7 +63,37 @@ public class RunTests {
 						}
 					}
 				}
+				for (int timeIdx = 0; timeIdx < objAvg.length; i++) {
+					objAvg[timeIdx] /= numIterations;
+				}
+				
+				// Calculate standard deviation
+				double[] objStdDev = new double[numTimeSaves];
+				Arrays.fill(objStdDev,0);
+				for (int iteration = 0; iteration < numIterations; iteration++) {
+					for (int timeIdx = 0; timeIdx < objAvg.length; timeIdx++) {
+						objStdDev[timeIdx] += Math.pow(obj[iteration][timeIdx] - objAvg[timeIdx],2);
+					}
+				}
+				for (int timeIdx = 0; timeIdx < objAvg.length; i++) {
+					objStdDev[timeIdx] /= numIterations;
+				}
+				
+				// Save data
+				System.out.printf("Algorithm: %s, Test File: %s\n",
+						ALGORITHMS[algNum], TEST_FILES[testNum]);
+				System.out.println("TimeIdx, BestOb, BestObIter, AverageOb, StdDev");
+				for (int timeIdx = 0; timeIdx < numTimeSaves; timeIdx++) {
+					System.out.printf("%d, %f, %d, %f, %f\n",
+							timeIdx,
+							objBest[timeIdx],
+							objBestIter[timeIdx],
+							objAvg[timeIdx],
+							objStdDev[timeIdx]);
+				}
+				
 			}
 		}
+		*/
 	}
 }
