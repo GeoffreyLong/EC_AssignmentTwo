@@ -39,12 +39,12 @@ public class Driver {
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
-        	args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
+        	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
-        	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "5", "5", "60000"};
+        	args = new String[]{"instances", "pla33810_n338090_uncorr_10",
+            "6", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -65,7 +65,7 @@ public class Driver {
         for (File f:files) {
             // read the TSP instance
             TTPInstance instance = new TTPInstance(f);
-            
+            //System.out.println((int)(instance.numberOfItems*.01));
             long startTime = System.currentTimeMillis();
             String resultTitle="";        
             
@@ -95,20 +95,9 @@ public class Driver {
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip." + startTime;
             		break;
             	case 6: //Exercise 3 : Algorithm 3 : A1 + insertion
-            		TTPSolution ppSol=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan.
-                    TTPSolution trSol=null;
-                    instance.evaluate(ppSol);
-
-                    double ob=Double.MIN_VALUE;
-                    while(ppSol.ob>ob){
-                    	ob=ppSol.ob;
-                        //trSol = Optimisation.inversion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime);
-                    	trSol = Optimisation.insertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime);
-                    	ppSol = Optimisation.ppGreedyRegardTour(instance, trSol.tspTour);                    	
-                    }
-            
-            		newSolution=ppSol;
-            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_flip_Insertion." + startTime;
+            		TTPSolution tmpSolution=Optimisation.randomLinkernTours(instance, maxRuntime-(int)(instance.numberOfItems*.01));
+            		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.01));
+            		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip." + startTime;
             		break;
             }
 

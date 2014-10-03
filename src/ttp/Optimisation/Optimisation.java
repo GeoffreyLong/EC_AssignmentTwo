@@ -1614,8 +1614,6 @@ public class Optimisation {
     }
     
     public static TTPSolution flipTourCheck(TTPInstance instance, int[] tour) {
-        ttp.Utils.Utils.startTiming();
-        
         int[] tourOrig= new int[tour.length];
         tourOrig=tour.clone();
         TTPSolution newSolution = null;
@@ -1636,9 +1634,7 @@ public class Optimisation {
     	}else{
     		newSolution=flipSolution;
     	}
-    	    	
-        long duration = ttp.Utils.Utils.stopTiming();
-        newSolution.computationTime = duration;
+
         instance.evaluate(newSolution);
         return newSolution;
     }
