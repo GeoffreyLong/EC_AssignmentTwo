@@ -36,15 +36,15 @@ public class Driver {
        
         if (args.length==0) 
         	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
-        	args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
+        	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
-        	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
+        	args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "2", "5", "60000"};
+            "4", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -52,9 +52,7 @@ public class Driver {
     }
     
     // note: doBatch can process several files sequentially
-    public static void doBatch(String[] args) {
-//        String[] args = new String[]{"instances/","a2"};                      // first argument: folder with TTP and TSP files, second argument: partial filename of the instances to be solved   
-//        System.out.println("parameters: "+Arrays.toString(args));
+    public static void doBatch(String[] args) {;
     	
     	File[] files = ttp.Utils.Utils.getFileList(args);
         
@@ -62,62 +60,66 @@ public class Driver {
         int durationWithoutImprovement = Integer.parseInt(args[3]);
         int maxRuntime = Integer.parseInt(args[4]);
         
-//        System.out.println("files.length="+files.length+" algorithm="+algorithm+" durationWithoutImprovement="+durationWithoutImprovement);
-//        System.out.println("wend wendUsed fp ftraw ft ob computationTime");
+
         
         for (File f:files) {
             // read the TSP instance
             TTPInstance instance = new TTPInstance(f);
             
             long startTime = System.currentTimeMillis();
-            String resultTitle="";
+            String resultTitle="";        
             
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
 
-            for(int i = 1; i<tour.length/2;i++){ //FILP HELPS FOR ALL DATASETS EXCEPT 7+8
-                	int temp = tour[i];
-                	tour[i]=tour[tour.length-1-i];
-                	tour[tour.length-1-i]=temp;
-                }
-         
-            TTPSolution ppSol = Optimisation.ppGreedyRegardTour(instance, tour, instance.createIndividual(tour),2);
-            //TTPSolution ppSol = Optimisation.ppGreedyDisregardTour(instance, tour, instance.createIndividual(tour),1);
+            TTPSolution newSolution=null;
+            switch (algorithm){
+            	case 1: //Hill-Climber (Provided)
+            		newSolution=Optimisation.hillClimber(instance, tour, 2, durationWithoutImprovement, maxRuntime);
+            		resultTitle = instance.file.getName() + ".hillClimber." + startTime;
+            		break;
+            	case 2: //Simple Heuristic (From Research)
+            		newSolution=Optimisation.simpleHeuristic(instance, tour, maxRuntime);
+            		resultTitle = instance.file.getName() + ".simpleHeuristic." + startTime;
+            		break;
+            	case 3: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
+            		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);
+            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_J1." + startTime;
+            		break;
+            	case 4: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
+            		newSolution=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan
+            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_Flip_J1." + startTime;
+            		break;
+            	case 5: //Exercise 3 : Algorithm 2 : Continuous tour building, flipping, and PP assignment
+            		newSolution=Optimisation.randomLinkernTours(instance, maxRuntime);
+            		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_Flip." + startTime;
+            		break;
+            	case 6: //Exercise 3 : Algorithm 3 : A1 + insertion
+            		TTPSolution ppSol=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan.
+                    TTPSolution trSol=null;
+                    instance.evaluate(ppSol);
 
-            //TTPSolution solution3 = Optimisation.inversion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,1);
-            TTPSolution solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
-            //TTPSolution solution3=ppSol;
+                    double ob=Double.MIN_VALUE;
+                    while(ppSol.ob>ob){
+                    	ob=ppSol.ob;
+                        //trSol = Optimisation.inversion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime);
+                    	trSol = Optimisation.insertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime);
+                    	ppSol = Optimisation.ppGreedyRegardTour(instance, trSol.tspTour);                    	
+                    }
             
-            //ppSol = Optimisation.ppGreedyRegardTour(instance, solution3.tspTour, instance.createIndividual(tour),2);
-            //solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
-            //ppSol = Optimisation.ppGreedyRegardTour(instance, solution3.tspTour, instance.createIndividual(tour),2);
-            //solution3 = Optimisation.singleInsertion(instance, ppSol.tspTour, ppSol.packingPlan, maxRuntime,2);
+            		newSolution=ppSol;
+            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_Flip_Insertion." + startTime;
+            		break;
+            }
+
+
             
-            Individual i = instance.createIndividual(solution3.tspTour,solution3.packingPlan);
+            /*Individual i = instance.createIndividual(ppSol.tspTour,ppSol.packingPlan);
             System.out.println(i.startingCity.cityId+"\t"+i.startingCity.location.getX()+"\t"+i.startingCity.location.getY());
             for(int k = 0; k<tour.length-2; k++){
-            	if(i.tour[k].getWeight()>0)
+            	//if(i.tour[k].getWeight()>0)
                 System.out.println(i.tour[k].cityId+"\t"+i.tour[k].location.getX()+"\t"+i.tour[k].location.getY());
-            }
-            //solution3.printFull();
-            solution3.altPrint();
-            resultTitle = instance.file.getName() + ".ppGreedyRegardTour_1_flip_insertion." + startTime;
-            solution3.writeResult(resultTitle);
-
-            // do the optimisation
-            
-            //System.out.println("HILL CLIMBER SOLUTION --------------------------------------");
-            //TTPSolution solution = Optimisation.hillClimber(instance, tour, algorithm,durationWithoutImprovement, maxRuntime);
-           
-           //solution.println();
-         	//solution.altPrint();
-           //solution.printFull();
-
-            //solution2.altPrint();
-
-            // print to file
-            //resultTitle = instance.file.getName() + ".SimpleHeuristic." + startTime;
-            //solution2.writeResult(resultTitle);
+            }*/
             
             /*
             System.out.println("E2-A1 (Hayden's) -------------------------------------");
@@ -132,21 +134,6 @@ public class Driver {
             */
 
             
-            
-            //solution.altPrint();
-
-
-            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 5, maxRuntime);
-            //solution3.printFull();
-            //solution3.altPrint();
-            //TTPSolution solution3 = Optimisation.exerciseTwoSolutionTwo(instance, tour, 10, maxRuntime);
-            //solution3.printFull();
-            //solution3.altPrint();
-            //resultTitle = instance.file.getName() + ".exerciseTwoSolutionTwo." + startTime;
-            //solution3.writeResult(resultTitle);
-            
-            
-            
             // General form of result output
             // test	: obAVG	: timeAVG :	# of times run
             
@@ -160,12 +147,13 @@ public class Driver {
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime);
-            TTPSolution solution = Optimisation.exerciseThreeSolutionFour(instance, tour, 10, maxRuntime);
+            //TTPSolution solution = Optimisation.exerciseThreeSolutionFour(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime);
             //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime);
             
-            solution.altPrint();
-            solution.printFull();
+            newSolution.writeResult(resultTitle);
+            newSolution.altPrint();
+
         }
     }
     

@@ -131,7 +131,7 @@ public class Optimisation {
 		
 		//build initial PP solution
 		//could use SH
-		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual), individual,H,10);
+		TTPSolution s = ppGreedyRegardTour(instance, instance.getTour(individual));
 		packingPlanRet=s.packingPlan;
 		s.altPrint();
 		Individual individualNew=instance.createIndividual(instance.getTour(individual), packingPlanRet);
@@ -601,7 +601,7 @@ public class Optimisation {
 		return solution;
     }
     
-    public static TTPSolution excerciseThreeRandomLinkernTours(TTPInstance instance, long maxRunTime) {
+    public static TTPSolution randomLinkernTours(TTPInstance instance, long maxRunTime) {
     	ttp.Utils.Utils.startTiming();
     	long startTime = System.currentTimeMillis();
     	int numIterations = 0;
@@ -612,10 +612,10 @@ public class Optimisation {
     	do {
     		// Generate a new linkern tour
         	int[] linTour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
-        	
+    		//int[] linTour = linkernTour(instance);
         	// Generate a packing plan
         	int itemsPerCity = instance.numberOfItems / (instance.numberOfNodes - 1);
-        	TTPSolution sol = ppGreedyRegardTour(instance, linTour, instance.createIndividual(linTour),itemsPerCity,1);
+        	TTPSolution sol = flipTourCheck(instance, linTour);
         	instance.evaluate(sol);    	    
         	
         	if (sol.ob > bestObj) {
@@ -807,7 +807,7 @@ public class Optimisation {
     	}
     	System.out.println("COMBINED TOUR: " + Arrays.toString(combinedTour));
     	
-    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour, instance.createIndividual(combinedTour),2,1);
+    	TTPSolution sol = ppGreedyRegardTour(instance, combinedTour);
     	instance.evaluate(sol);    	    	
         long duration = ttp.Utils.Utils.stopTiming();
         sol.computationTime = duration;
@@ -1613,6 +1613,36 @@ public class Optimisation {
     	return null;
     }
     
+    public static TTPSolution flipTourCheck(TTPInstance instance, int[] tour) {
+        ttp.Utils.Utils.startTiming();
+        
+        int[] tourOrig= new int[tour.length];
+        tourOrig=tour.clone();
+        TTPSolution newSolution = null;
+        
+    	for(int i = 1; i<tour.length/2;i++){ //perform the flip of a tour
+        	int temp = tour[i];
+        	tour[i]=tour[tour.length-1-i];
+        	tour[tour.length-1-i]=temp;
+    	}
+        
+    	//apply packing plan and apply result
+    	TTPSolution origSolution = Optimisation.ppGreedyRegardTour(instance, tourOrig);
+    	instance.evaluate(origSolution);
+    	TTPSolution flipSolution = Optimisation.ppGreedyRegardTour(instance, tour);
+    	instance.evaluate(flipSolution);
+    	if(origSolution.ob>flipSolution.ob){
+    		newSolution=origSolution;
+    	}else{
+    		newSolution=flipSolution;
+    	}
+    	    	
+        long duration = ttp.Utils.Utils.stopTiming();
+        newSolution.computationTime = duration;
+        instance.evaluate(newSolution);
+        return newSolution;
+    }
+    
     /**
      * Greedy Heuristic based packing plan builder, with no regard to tour
      * 
@@ -1622,7 +1652,7 @@ public class Optimisation {
      * @param H
      * @return TTPSolution
      */
-    public static TTPSolution ppGreedyDisregardTour(TTPInstance instance, int[] tour, Individual individual, int H) {
+    public static TTPSolution ppGreedyDisregardTour(TTPInstance instance, int[] tour) {
         ttp.Utils.Utils.startTiming();
 
         int[] packingPlan = new int[instance.numberOfItems];
@@ -1726,9 +1756,11 @@ public class Optimisation {
      * @param jump 
      * @return TTPSolution
      */
-    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour, Individual individual, int H,double jump) {
+    public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour) {
         ttp.Utils.Utils.startTiming();
 
+        double jump = 1;
+        
         int[] packingPlan = new int[instance.numberOfItems];
         int[] cityIndex = new int[instance.numberOfNodes];
         int[] cityTourIndex = new int[instance.numberOfItems];
@@ -1776,7 +1808,7 @@ public class Optimisation {
 		}
 		
 		for(int i = 0; i < instance.numberOfItems; i++){//this is the important weightings
-			if(H==1){
+			if(itemsPerCity==1){
 				values[i]=Math.pow(profitVSweight[i],4)+profitsRatio[i]-weightsRatio[i]*instance.rentingRatio*(dToGo[cityTourIndex[i]]);//best for 01s
 			}else{
 				values[i]=Math.pow(profitVSweight[i]*profits[i],1)/Math.pow(instance.rentingRatio*(dToGo[cityTourIndex[i]]/dToGo[0]),1);//best for 05s
@@ -1859,8 +1891,7 @@ public class Optimisation {
 			        	packingPlanOld=packingPlan.clone();
 			        	//System.out.println("BETTER: "+jump+" .. "+s.ob+" .. "+index+" .. "+noImprovement);
 					}	
-				}
-					        
+				}					        
 			}
 			index++;			
 		}
@@ -1873,7 +1904,7 @@ public class Optimisation {
         return newSolution;
     }
     
-    public static TTPSolution insertion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime,int H){
+    public static TTPSolution insertion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime){
     	ttp.Utils.Utils.startTiming();
 
     	Individual individual = instance.createIndividual(tour);
@@ -2025,7 +2056,7 @@ public class Optimisation {
         return newSolution;
     }
     
-    public static TTPSolution inversion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime,int H){
+    public static TTPSolution inversion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime){
     	ttp.Utils.Utils.startTiming();
    	
     	Individual individual = instance.createIndividual(tour);
@@ -2127,45 +2158,7 @@ public class Optimisation {
         instance.evaluate(newSolution);
         return newSolution;
     }
-    /*
-    public static TTPSolution backFourth(TTPInstance instance, int[] tour, int maxRuntime,int H){
-    	ttp.Utils.Utils.startTiming();
-    	long startingTimeForRuntimeLimit = System.currentTimeMillis()-200;
-    	
-    	int[] bestTour= new int[tour.length];
-    	int[] bestPP = new int[instance.numberOfItems];
 
-    	double pastOb = Double.NEGATIVE_INFINITY;
-    	int iteration=0;
-    	while(iteration==0){
-    		iteration++;
-    		if(iteration==10)break;
-            if (iteration%10==0 && (System.currentTimeMillis()-startingTimeForRuntimeLimit)>=maxRuntime){
-                break;
-            }
-            
-            TTPSolution ts = singleInsertion(instance, tour, 100000,H);
-            tour=ts.tspTour;
-            TTPSolution newSolution = new TTPSolution(tour, ts.packingPlan);
-            instance.evaluate(newSolution);
-            
-            System.out.println(iteration+" ... OLD ob: "+pastOb+" ... NEW ob: "+newSolution.ob);
-            
-            if(newSolution.ob>pastOb){
-            	System.out.println("better!!!");
-            	pastOb=newSolution.ob;
-            	bestTour=newSolution.tspTour;
-            	bestPP=newSolution.packingPlan;
-            }
-    	}
-            
-    	long duration = ttp.Utils.Utils.stopTiming();
-    
-    	TTPSolution newSolution = new TTPSolution(bestTour, bestPP);
-    	newSolution.computationTime = duration;
-    	instance.evaluate(newSolution);
-    	return newSolution;
-    }*/
     /**
      * Currently this is a purely stochastic crossover alg
      * It crosses either the full tour or the full packing plan
@@ -2534,7 +2527,7 @@ public class Optimisation {
   
         try {
             List<String> command = new ArrayList<String>();
-            command.add("./linkern");
+            command.add("./linkern.exe");
             command.add("-o");
             command.add(tspresultfilename);
             command.add(tspfilename);
