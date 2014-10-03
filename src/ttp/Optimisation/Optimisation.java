@@ -2537,6 +2537,7 @@ public class Optimisation {
         String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour.alt";
         if (debugPrint) System.out.println("LINKERN: "+tspfilename);
   
+        
         try {
             List<String> command = new ArrayList<String>();
             command.add("./linkern");

@@ -39,6 +39,7 @@ public class RunTests {
 			}
 		}
 		
+		
 		// Combine results
 		/*
 		for (int algNum = 0; algNum < ALGORITHMS.length; algNum++) {
