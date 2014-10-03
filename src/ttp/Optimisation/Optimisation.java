@@ -1755,7 +1755,7 @@ public class Optimisation {
     public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour) {
         ttp.Utils.Utils.startTiming();
 
-        double jump = 1;
+        double jump = instance.numberOfItems/100;
         
         int[] packingPlan = new int[instance.numberOfItems];
         int[] cityIndex = new int[instance.numberOfNodes];
