@@ -2527,7 +2527,7 @@ public class Optimisation {
   
         try {
             List<String> command = new ArrayList<String>();
-            command.add("./linkern.exe");
+            command.add("./linkern");
             command.add("-o");
             command.add(tspresultfilename);
             command.add(tspfilename);
