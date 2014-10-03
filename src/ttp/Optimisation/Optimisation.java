@@ -1916,7 +1916,8 @@ public class Optimisation {
     
     public static TTPSolution insertion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime){
     	ttp.Utils.Utils.startTiming();
-
+    	long startTime = System.currentTimeMillis();
+    	long elapsedTime=0;
     	Individual individual = instance.createIndividual(tour);
         individual = instance.createIndividual(tour, packingPlan);
         
@@ -2053,15 +2054,16 @@ public class Optimisation {
     		}else{
     			individual=old;
     		}
-    		
+    		elapsedTime = System.currentTimeMillis() - startTime;
+    		if (elapsedTime>maxRuntime){
+    			break;
+    		}
     		
     	}
     	// IF NEW PLACEMENT IS BETTER, REARRANGE TOUR (DOUBLE CHECK IT HELPS BEFORE OVERWRITING?)
-    	System.out.println(betterMoves+" better moves");
-        long duration = ttp.Utils.Utils.stopTiming();
         //System.out.println("TIME TAKEN: "+duration+" .. Total Weight: "+totalWeight);
         TTPSolution newSolution = new TTPSolution(instance.getTour(individual), instance.getPackingPlan(individual));
-        newSolution.computationTime = duration;
+        newSolution.computationTime = elapsedTime;
         instance.evaluate(newSolution);
         return newSolution;
     }
