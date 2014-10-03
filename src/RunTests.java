@@ -16,18 +16,25 @@ public class RunTests {
 		"pla33810_n338090_uncorr_10"
 	};
 	public static String[] ALGORITHMS = {
-		"alg1",
-		"alg2"
+		"3",
+		"5"
+	};
+	public static String[] ALGORITHM_NAMES = {
+		"ppGreedyRegardTour",
+		"randomLinkernTours_ppGreedyRegardTour_flip"
 	};
 	public static void main(String[] args) {
 		int numIterations = 3;
-		int numTimeSaves = 3;
 		// Run all tests
 		for (int algNum = 0; algNum < ALGORITHMS.length; algNum++) {
+			System.out.println("Algorithm: " + ALGORITHM_NAMES[algNum]);
 			for (int testNum = 0; testNum < TEST_FILES.length; testNum++) {
+				System.out.println("Test File: " + TEST_FILES[testNum]);
 				for (int iteration = 0; iteration < numIterations; iteration++) {
-					//Driver.main(new String[] {							
-					//"instances/",TEST_FILES[testNum], Integer.);
+					System.out.println("Iteration: " + iteration);
+					Driver.main(new String[] {							
+						"instances/",TEST_FILES[testNum], ALGORITHMS[algNum], "5", "600000"
+					});
 				}
 			}
 		}

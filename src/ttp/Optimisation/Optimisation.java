@@ -606,9 +606,11 @@ public class Optimisation {
     	long startTime = System.currentTimeMillis();
     	int numIterations = 0;
     	long elapsedTime = 0;
-    	long averageIterationTime;
     	TTPSolution bestSol = null;
     	double bestObj = Double.NEGATIVE_INFINITY;
+    	boolean two = false;
+    	boolean five = false;
+    	boolean ten = false;
     	do {
     		// Generate a new linkern tour
         	int[] linTour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
@@ -618,16 +620,28 @@ public class Optimisation {
         	TTPSolution sol = flipTourCheck(instance, linTour);
         	instance.evaluate(sol);    	    
         	
+    		elapsedTime = System.currentTimeMillis() - startTime;
+    		if (elapsedTime >= 60000*2 && !two) {
+    			System.out.println("Two Min: " + bestObj);
+    			two = true;
+    		}
+    		if (elapsedTime >= 60000*5 && !five) {
+    			System.out.println("Five Min: " + bestObj);
+    			five = true;
+    		}
+    		if (elapsedTime >= 60000*10 && !ten) {
+    			System.out.println("Ten Min: " + bestObj);
+    			ten = true;
+    		}
+        	
         	if (sol.ob > bestObj) {
         		bestSol = sol;
         		bestObj = sol.ob;
         	}
-    		System.out.printf("BestObj: %f, NewObj: %f\n",bestObj, sol.ob);
+    		//System.out.printf("BestObj: %f, NewObj: %f\n",bestObj, sol.ob);
     		numIterations++;
-    		elapsedTime = System.currentTimeMillis() - startTime;
-    		averageIterationTime = elapsedTime / numIterations;
-    	} while (elapsedTime <= (maxRunTime - averageIterationTime*1.3));
-    	bestSol.computationTime = ttp.Utils.Utils.stopTiming();
+    	} while (elapsedTime <= maxRunTime);
+    	bestSol.computationTime = elapsedTime;
     	return bestSol;
     }
     
@@ -2518,7 +2532,7 @@ public class Optimisation {
         int index = temp.indexOf("_");
         String tspfilename = temp;
         if (index==-1) index = tspfilename.indexOf(".");
-        String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour";
+        String tspresultfilename = System.getProperty("user.dir") + "/" + temp.substring(0,index)+".linkern.tour.alt";
         if (debugPrint) System.out.println("LINKERN: "+tspfilename);
   
         try {

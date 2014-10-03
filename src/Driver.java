@@ -40,11 +40,11 @@ public class Driver {
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
-        	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
+        	args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
-        	args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "3", "5", "60000"};
+        	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
+            "6", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
