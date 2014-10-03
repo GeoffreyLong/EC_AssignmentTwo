@@ -44,7 +44,7 @@ public class Driver {
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "6", "5", "60000"};
+            "3", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -84,11 +84,11 @@ public class Driver {
             		break;
             	case 3: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
             		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);
-            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_J1." + startTime;
+            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour." + startTime;
             		break;
             	case 4: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
             		newSolution=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan
-            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_flip_J1." + startTime;
+            		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_flip." + startTime;
             		break;
             	case 5: //Exercise 3 : Algorithm 2 : Continuous tour building, flipping, and PP assignment
             		newSolution=Optimisation.randomLinkernTours(instance, maxRuntime);
@@ -97,7 +97,7 @@ public class Driver {
             	case 6: //Exercise 3 : Algorithm 3 : A1 + insertion
             		TTPSolution tmpSolution=Optimisation.randomLinkernTours(instance, maxRuntime-(int)(instance.numberOfItems*.01));
             		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.01));
-            		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip." + startTime;
+            		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip_insert." + startTime;
             		break;
             }
 
