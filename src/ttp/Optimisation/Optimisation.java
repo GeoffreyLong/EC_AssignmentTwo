@@ -1,6 +1,5 @@
 package ttp.Optimisation;
 
-
 import ga.Crossover;
 import ga.Mutation;
 import ga.Population;
@@ -18,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
@@ -44,7 +44,7 @@ import ttp.newrep.Item;
  */
 public class Optimisation {
     
-	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime,int H) {
+	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime, int H) {
 		ttp.Utils.Utils.startTiming();
 		Config config = Config.getInstance();
 		config.setTtpInstance(instance);
@@ -1653,6 +1653,70 @@ public class Optimisation {
         return newSolution;
     }
     
+    public static TTPSolution[] instantiatePop(TTPInstance instance, int[] tour, int pop_size, boolean diffTours, int maxRuntime){
+    	long startTime = System.currentTimeMillis();
+    	int count=0;
+    	Random rand = new Random();
+    	
+    	TTPSolution[] population = new TTPSolution[pop_size];
+    	while(count<pop_size && System.currentTimeMillis()-startTime<maxRuntime){
+    		System.out.println(count);
+    		if(tour.length==0 || diffTours){
+    			tour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
+    			population[count]=flipTourCheck(instance, tour);
+    		}else{
+    			TTPSolution t = Optimisation.ppGreedyRegardTour(instance, tour);
+    			population[count]=bitFlip(instance, t, (int)(maxRuntime/(pop_size*.5)), rand.nextDouble());
+    		}
+    		count++;
+    	}
+    	int uniqCount=count;
+    	System.out.println(count+":"+pop_size);
+    	while(count<pop_size){//ran out of time to fill pop with linkern tours, just duplicated tours already got 
+    		for(int i=0; i<uniqCount; i++){
+    			if(count==pop_size)break;
+    			population[count]=new TTPSolution(population[i].tspTour,population[i].packingPlan);
+    			count++;
+    		}
+    	}
+    	return population;
+    }
+    public static TTPSolution bitFlip(TTPInstance instance, TTPSolution newSolution, int maxRuntime, double startPos) {
+        long startTime = System.currentTimeMillis();
+
+        int[] ppTmp=newSolution.packingPlan.clone();
+        int startIndex=(int)Math.floor(startPos*instance.numberOfItems);
+        for(int i=startIndex; i<ppTmp.length; i++){
+        	ppTmp[i]=Math.abs(newSolution.packingPlan[i]-1);
+        	TTPSolution tempSolution = new TTPSolution(newSolution.tspTour, ppTmp);
+        	instance.evaluate(newSolution);
+        	instance.evaluate(tempSolution);
+
+        	if(tempSolution.ob>newSolution.ob && tempSolution.wend>0){
+        		//System.out.println("flip .. old: "+newSolution.ob+" .. new: "+tempSolution.ob);
+        		//System.out.println(i+"\t"+tempSolution.ob);
+        		newSolution.packingPlan[i]=Math.abs(newSolution.packingPlan[i]-1);
+        	}else{
+        		//System.out.println(i);
+        		ppTmp[i]=newSolution.packingPlan[i];
+        	}
+        	
+        	//if((System.currentTimeMillis()-startTime)>120000 && (System.currentTimeMillis()-startTime)<120050)
+        	//	newSolution.altPrint();
+        	
+        	//if((System.currentTimeMillis()-startTime)>300000 && (System.currentTimeMillis()-startTime)<300050)
+        	//	newSolution.altPrint();
+        	
+        	if((System.currentTimeMillis()-startTime)>(maxRuntime-1)){
+        		//System.out.println("did: "+i);
+        		break;
+        	}
+        }
+
+        newSolution.computationTime = System.currentTimeMillis()-startTime;
+        instance.evaluate(newSolution);
+        return newSolution;
+    }
     /**
      * Greedy Heuristic based packing plan builder, with no regard to tour
      * 
@@ -1915,7 +1979,6 @@ public class Optimisation {
     }
     
     public static TTPSolution insertion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime){
-    	ttp.Utils.Utils.startTiming();
     	long startTime = System.currentTimeMillis();
     	long elapsedTime=0;
     	Individual individual = instance.createIndividual(tour);
@@ -2049,7 +2112,7 @@ public class Optimisation {
             double newOB = newSolution.ob;
             
     		if(newOB>oldOB){
-    			System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
+    			//System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
     			betterMoves+=1;
     		}else{
     			individual=old;
