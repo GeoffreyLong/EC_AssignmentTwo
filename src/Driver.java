@@ -45,7 +45,7 @@ public class Driver {
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "10", "5", "600000"};
+            "5", "5", "600000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);

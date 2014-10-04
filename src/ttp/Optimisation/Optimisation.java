@@ -1702,8 +1702,7 @@ public class Optimisation {
         	}
         	
         	//if((System.currentTimeMillis()-startTime)>120000 && (System.currentTimeMillis()-startTime)<120050)
-        	//	newSolution.altPrint();
-        	
+        	//	newSolution.altPrint();        	
         	//if((System.currentTimeMillis()-startTime)>300000 && (System.currentTimeMillis()-startTime)<300050)
         	//	newSolution.altPrint();
         	
