@@ -1,0 +1,334 @@
+Algorithm: randomLinkernTours_ppGreedyRegardTour_flip
+Test File: a280_n279_bounded-strongly-corr_01
+Iteration: 0
+Two Min: 17510.254628619346
+Five Min: 17540.129735831317
+Ten Min: 17540.129735831317
+
+Leftover Knapsack Capacity    = 121.00
+Total weight of items         = 25815.00
+Total Profit                  = 37915.00
+ftRaw                         = 2613
+ft                            = 3631.88
+ob                            = 17540.13
+Computation time              = 600066
+Iteration: 1
+Two Min: 17516.06756330292
+Five Min: 17516.06756330292
+Ten Min: 17538.651806686423
+
+Leftover Knapsack Capacity    = 121.00
+Total weight of items         = 25815.00
+Total Profit                  = 37915.00
+ftRaw                         = 2613
+ft                            = 3632.15
+ob                            = 17538.65
+Computation time              = 600148
+Iteration: 2
+Two Min: 17497.63184623842
+Five Min: 17522.68913356065
+Ten Min: 17522.68913356065
+
+Leftover Knapsack Capacity    = 92.00
+Total weight of items         = 25844.00
+Total Profit                  = 37944.00
+ftRaw                         = 2613
+ft                            = 3640.16
+ob                            = 17522.69
+Computation time              = 600015
+Test File: a280_n1395_uncorr-similar-weights_05
+Iteration: 0
+Two Min: 108584.48541348986
+Five Min: 108726.54500289547
+Ten Min: 108726.54500289547
+
+Leftover Knapsack Capacity    = 73409.00
+Total weight of items         = 563601.00
+Total Profit                  = 414327.00
+ftRaw                         = 2613
+ft                            = 4203.58
+ob                            = 108726.55
+Computation time              = 600050
+Iteration: 1
+Two Min: 108695.06236279878
+Five Min: 108741.87927434943
+Ten Min: 108741.87927434943
+
+Leftover Knapsack Capacity    = 73409.00
+Total weight of items         = 563601.00
+Total Profit                  = 414327.00
+ftRaw                         = 2613
+ft                            = 4203.37
+ob                            = 108741.88
+Computation time              = 600074
+Iteration: 2
+Two Min: 108707.95832527487
+Five Min: 108707.95832527487
+Ten Min: 108707.95832527487
+
+Leftover Knapsack Capacity    = 73409.00
+Total weight of items         = 563601.00
+Total Profit                  = 414327.00
+ftRaw                         = 2613
+ft                            = 4203.84
+ob                            = 108707.96
+Computation time              = 600077
+Test File: a280_n2790_uncorr_10
+Iteration: 0
+Two Min: 421662.76806368376
+Five Min: 421662.76806368376
+Ten Min: 421662.76806368376
+
+Leftover Knapsack Capacity    = 395061.00
+Total weight of items         = 866961.00
+Total Profit                  = 1215065.00
+ftRaw                         = 2613
+ft                            = 3804.74
+ob                            = 421662.77
+Computation time              = 600045
+Iteration: 1
+Two Min: 421507.6234469594
+Five Min: 421524.070836814
+Ten Min: 421662.12605975743
+
+Leftover Knapsack Capacity    = 395061.00
+Total weight of items         = 866961.00
+Total Profit                  = 1215065.00
+ftRaw                         = 2613
+ft                            = 3804.74
+ob                            = 421662.13
+Computation time              = 600027
+Iteration: 2
+Two Min: 421643.9847836712
+Five Min: 421643.9847836712
+Ten Min: 421643.9847836712
+
+Leftover Knapsack Capacity    = 391287.00
+Total weight of items         = 870735.00
+Total Profit                  = 1217720.00
+ftRaw                         = 2613
+ft                            = 3817.56
+ob                            = 421643.98
+Computation time              = 600042
+Test File: fnl4461_n4460_bounded-strongly-corr_01
+Iteration: 0
+Two Min: 255227.83906783076
+Five Min: 255227.83906783076
+Ten Min: 255695.88553466368
+
+Leftover Knapsack Capacity    = 38.00
+Total weight of items         = 387112.00
+Total Profit                  = 582112.00
+ftRaw                         = 185712
+ft                            = 233154.37
+ob                            = 255695.89
+Computation time              = 602933
+Iteration: 1
+Two Min: 254312.58341700456
+Five Min: 254657.8580429589
+Ten Min: 256021.58300920605
+
+Leftover Knapsack Capacity    = 83.00
+Total weight of items         = 387067.00
+Total Profit                  = 584767.00
+ftRaw                         = 185684
+ft                            = 234818.15
+ob                            = 256021.58
+Computation time              = 603096
+Iteration: 2
+Two Min: 255716.1255343564
+Five Min: 255716.1255343564
+Ten Min: 256688.0179411946
+
+Leftover Knapsack Capacity    = 91.00
+Total weight of items         = 387059.00
+Total Profit                  = 583559.00
+ftRaw                         = 185568
+ft                            = 233479.27
+ob                            = 256688.02
+Computation time              = 603080
+Test File: fnl4461_n22300_uncorr-similar-weights_05
+Iteration: 0
+Two Min: 1598928.478284087
+Five Min: 1608999.8652122682
+Ten Min: 1608999.8652122682
+
+Leftover Knapsack Capacity    = 1221076.00
+Total weight of items         = 8960979.00
+Total Profit                  = 6599413.00
+ftRaw                         = 185603
+ft                            = 289131.70
+ob                            = 1608999.87
+Computation time              = 610086
+Iteration: 1
+Two Min: 1594467.6408997169
+Five Min: 1605993.6481593633
+Ten Min: 1606472.927961492
+
+Leftover Knapsack Capacity    = 1221178.00
+Total weight of items         = 8960877.00
+Total Profit                  = 6608720.00
+ftRaw                         = 185548
+ft                            = 289817.33
+ob                            = 1606472.93
+Computation time              = 610253
+Iteration: 2
+Two Min: 1601967.9122274648
+Five Min: 1604519.9346969407
+Ten Min: 1604600.3002031464
+
+Leftover Knapsack Capacity    = 1216972.00
+Total weight of items         = 8965083.00
+Total Profit                  = 6609827.00
+ftRaw                         = 185649
+ft                            = 289989.96
+ob                            = 1604600.30
+Computation time              = 606524
+Test File: fnl4461_n44600_uncorr_10
+Iteration: 0
+Two Min: 6426473.624597024
+Five Min: 6436288.247827491
+Ten Min: 6437917.195781248
+
+Leftover Knapsack Capacity    = 6276971.00
+Total weight of items         = 13967188.00
+Total Profit                  = 19541898.00
+ftRaw                         = 185703
+ft                            = 268854.76
+ob                            = 6437917.20
+Computation time              = 610048
+Iteration: 1
+Two Min: 6419966.91039549
+Five Min: 6419966.91039549
+Ten Min: 6441581.970535582
+
+Leftover Knapsack Capacity    = 6287552.00
+Total weight of items         = 13956607.00
+Total Profit                  = 19533434.00
+ftRaw                         = 185655
+ft                            = 268605.91
+ob                            = 6441581.97
+Computation time              = 609666
+Iteration: 2
+Two Min: 6425180.10609219
+Five Min: 6436391.4055380635
+Ten Min: 6438004.349106269
+
+Leftover Knapsack Capacity    = 6284123.00
+Total weight of items         = 13960036.00
+Total Profit                  = 19534939.00
+ftRaw                         = 185580
+ft                            = 268710.19
+ob                            = 6438004.35
+Computation time              = 610262
+Test File: pla33810_n33809_bounded-strongly-corr_01
+Iteration: 0
+Two Min: 1774293.3262595423
+Five Min: 1805630.9423157922
+Ten Min: 1805630.9423157922
+
+Leftover Knapsack Capacity    = 102.00
+Total weight of items         = 2915113.00
+Total Profit                  = 4425413.00
+ftRaw                         = 66408932
+ft                            = 87148012.41
+ob                            = 1810972.63
+Computation time              = 601391
+Iteration: 1
+Two Min: 1754418.7147321054
+Five Min: 1824905.926973111
+Ten Min: 1824905.926973111
+
+Leftover Knapsack Capacity    = 64.00
+Total weight of items         = 2915151.00
+Total Profit                  = 4409251.00
+ftRaw                         = 66344315
+ft                            = 86144835.77
+ob                            = 1824905.93
+Computation time              = 708297
+Iteration: 2
+Two Min: 1781323.252917992
+Five Min: 1781323.252917992
+Ten Min: 1830887.1365003814
+
+Leftover Knapsack Capacity    = 129.00
+Total weight of items         = 2915086.00
+Total Profit                  = 4416286.00
+ftRaw                         = 66236457
+ft                            = 86179962.12
+ob                            = 1830887.14
+Computation time              = 702886
+Test File: pla33810_n169045_uncorr-similar-weights_05
+Iteration: 0
+Two Min: 1.5290400369099215E7
+Five Min: 1.5290400369099215E7
+Ten Min: 1.5356689540105224E7
+
+Leftover Knapsack Capacity    = 9195143.00
+Total weight of items         = 67989651.00
+Total Profit                  = 50492058.00
+ftRaw                         = 66301506
+ft                            = 106470813.51
+ob                            = 15356689.54
+Computation time              = 721253
+Iteration: 1
+Two Min: -Infinity
+Five Min: 1.5335257044255912E7
+Ten Min: 1.5335257044255912E7
+
+Leftover Knapsack Capacity    = 9280134.00
+Total weight of items         = 67904660.00
+Total Profit                  = 50501902.00
+ftRaw                         = 66374266
+ft                            = 106565590.77
+ob                            = 15335257.04
+Computation time              = 601410
+Iteration: 2
+Two Min: 1.4695386923764713E7
+Five Min: 1.5184934001350306E7
+Ten Min: 1.5475981191844292E7
+
+Leftover Knapsack Capacity    = 8711223.00
+Total weight of items         = 68473571.00
+Total Profit                  = 50796272.00
+ftRaw                         = 66353922
+ft                            = 107031184.27
+ob                            = 15475981.19
+Computation time              = 608285
+Test File: pla33810_n338090_uncorr_10
+Iteration: 0
+Two Min: -Infinity
+Five Min: 5.6790881772112966E7
+Ten Min: 5.681458617208378E7
+
+Leftover Knapsack Capacity    = 46486164.00
+Total weight of items         = 107473885.00
+Total Profit                  = 149217048.00
+ftRaw                         = 66321451
+ft                            = 98300491.31
+ob                            = 56814586.17
+Computation time              = 606134
+Iteration: 1
+Two Min: -Infinity
+Five Min: 5.64460956105071E7
+Ten Min: 5.673829558578889E7
+
+Leftover Knapsack Capacity    = 46927604.00
+Total weight of items         = 107032445.00
+Total Profit                  = 148877504.00
+ftRaw                         = 66272723
+ft                            = 98020434.48
+ob                            = 56738295.59
+Computation time              = 609602
+Iteration: 2
+Two Min: 5.683367212082055E7
+Five Min: 5.731803278930628E7
+Ten Min: 5.731803278930628E7
+
+Leftover Knapsack Capacity    = 46447200.00
+Total weight of items         = 107512849.00
+Total Profit                  = 149251179.00
+ftRaw                         = 66304783
+ft                            = 97801219.37
+ob                            = 57318032.79
+Computation time              = 606728
