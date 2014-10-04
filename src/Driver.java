@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,13 +65,13 @@ public class Driver {
         
         for (File f:files) {
             // read the TSP instance
-            TTPInstance instance = new TTPInstance(f);
-            //System.out.println((int)(instance.numberOfItems*.01));
-            long startTime = System.currentTimeMillis();
-            String resultTitle="";        
+            TTPInstance instance = new TTPInstance(f);   
             
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
+            
+            long startTime = System.currentTimeMillis();
+            String resultTitle="";  
 
             TTPSolution newSolution=null;
             switch (algorithm){
@@ -83,8 +84,13 @@ public class Driver {
             		resultTitle = instance.file.getName() + ".simpleHeuristic." + startTime;
             		break;
             	case 3: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
-            		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);
+            		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);            		
             		resultTitle = instance.file.getName() + ".ppGreedyRegardTour." + startTime;
+            		break;
+            	case 10: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
+            		TTPSolution temp=Optimisation.ppGreedyRegardTour(instance, tour);
+            		newSolution=Optimisation.bitFlip(instance, temp,(int)(maxRuntime-(System.currentTimeMillis()-startTime+10)),0);            		
+            		resultTitle = instance.file.getName() + "ppGreedyRegardTour.bitFlip." + startTime;
             		break;
             	case 4: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
             		newSolution=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan
@@ -99,8 +105,47 @@ public class Driver {
             		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.001));
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip_insert." + startTime;
             		break;
+            	case 11://EA VERSION
+                    int gen =1;
+                    int MAX_GENS=10;
+                    int POP_SIZE=100;
+                    boolean diffTours=false;//EX 2 = false, EX 3 = true
+                    
+                    TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/10.0));//use linkern
+                    
+                    TTPSolution[] newPopulation = new TTPSolution[population.length];
+                    while (gen<=MAX_GENS && (System.currentTimeMillis() - startTime)<maxRuntime){
+                    	Random rand = new Random();
+                    	//clone solutions
+                    	for(int i=0; i<population.length; i++){
+                    		newPopulation[i]=new TTPSolution(population[i].tspTour,population[i].packingPlan);
+                    	}
+                    	if(!diffTours){
+                    		//mutate only PP (EX 2)
+                    		for(int i=0; i<population.length; i++){
+                    			Optimisation.bitFlip(instance, newPopulation[i], (int)(maxRuntime/MAX_GENS*POP_SIZE), rand.nextDouble());
+                    		}
+                    	}else{
+                    		//mutate entire TTP (EX 3)
+                    		for(int i=0; i<population.length; i++){
+                    			Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
+                    		}
+                    	}
+                    	
+                    	//crossover (EX 4)
+                    	
+                    	
+                    	//select pop size best from combined both
+                    	//merge sort and cut arrays based on OB
+                    }
+                    //take top of the array above as solution
+                    
+                    break;
             }
-           
+            
+            
+            
+            newSolution.computationTime = System.currentTimeMillis() - startTime;
             newSolution.writeResult(resultTitle);
             newSolution.altPrint();
         }
