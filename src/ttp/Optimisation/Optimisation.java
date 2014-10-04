@@ -1160,47 +1160,45 @@ public class Optimisation {
     		}
     		
 			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
-	    		for (int i = 0; i < 5; i++){
-	    			int[] tourNew = tour.clone();
-	    			int[] packingPlanNew = packingPlan.clone();
-	    			
-	    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
-	    			double randSwap = Math.random();
-	    			if (randSwap <= 0.1){
-	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
-	    				tempInd.tour[randNodeIndex - 1] = tempInd.tour[randNodeIndex];
-	    				tempInd.tour[randNodeIndex] = cityTemp;
+    			int[] tourNew = tour.clone();
+    			int[] packingPlanNew = packingPlan.clone();
+    			
+    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
+    			double randSwap = Math.random();
+    			if (randSwap <= 0.1){
+    				City cityTemp = tempInd.tour[randNodeIndex - 1];
+    				tempInd.tour[randNodeIndex - 1] = tempInd.tour[randNodeIndex];
+    				tempInd.tour[randNodeIndex] = cityTemp;
+    			}
+    			
+    			double packingSwap = Math.random();
+    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
+	    			if (packingSwap <= 0.1){
+	    				if (item.isSelected) item.isSelected = false;
+	    				else item.isSelected = true;
 	    			}
-	    			
-	    			double packingSwap = Math.random();
-	    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
+    			}
+    			for (Item item : tempInd.tour[randNodeIndex].items){
+	    			if (packingSwap <= 0.1){
+	    				if (item.isSelected) item.isSelected = false;
+	    				else item.isSelected = true;
 	    			}
-	    			for (Item item : tempInd.tour[randNodeIndex].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
-	    			}
-	    			
-	    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
-	    	        instance.evaluate(newSolution);
-	    	        // 1000 is a random parameter, but it seems to work well
-	    	        if (tempCount >= 1000){
-	    	        	System.out.println("revamp");
-	    	        	packingPlan = new int[packingPlan.length];
-	    	        	tempCount = 0;
-	    	        	didNotImprove ++;
-	    	        	break;
-	    	        }
-	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
-	    				tour = instance.getTour(tempInd).clone();
-	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
-	    			}
-	    		}
+    			}
+    			
+    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
+    	        instance.evaluate(newSolution);
+    	        // 1000 is a random parameter, but it seems to work well
+    	        if (tempCount >= 1000){
+    	        	System.out.println("revamp");
+    	        	packingPlan = new int[packingPlan.length];
+    	        	tempCount = 0;
+    	        	didNotImprove ++;
+    	        	break;
+    	        }
+    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
+    				tour = instance.getTour(tempInd).clone();
+    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
+    			}
 			}
         }
         solution = new TTPSolution(bestTour, bestPlan);

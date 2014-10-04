@@ -134,8 +134,8 @@ public class Driver {
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime,false); String csvFilename = "Z_ex2sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 10, maxRuntime,false); String csvFilename = "Z_ex2sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
-	                TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
+	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
+	                //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
 	    			
 	                
 	    			List<String[]> data = new ArrayList<String[]>();
