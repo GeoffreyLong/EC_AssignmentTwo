@@ -35,20 +35,20 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-        	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
         	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
-        	args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
+        	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "6", "5", "60000"};
+            "1", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
-        doBatch(args);
-        //testAllInst();
+        //doBatch(args);
+        testAllInst();
     }
     
     // note: doBatch can process several files sequentially
@@ -134,13 +134,8 @@ public class Driver {
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime,false); String csvFilename = "Z_ex2sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 10, maxRuntime,false); String csvFilename = "Z_ex2sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol1iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Niter1.csv";
-	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol3iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3solHiter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
+	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
+	                TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
 	    			
 	                
 	    			List<String[]> data = new ArrayList<String[]>();
