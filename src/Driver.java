@@ -37,10 +37,10 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-        	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
@@ -108,8 +108,8 @@ public class Driver {
             		break;
             	case 11://EA VERSION
                     int gen =1;
-                    int MAX_GENS=10;
-                    int POP_SIZE=20;
+                    int MAX_GENS=20;
+                    int POP_SIZE=100;
                     boolean diffTours=true;//EX 2 = false, EX 3 = true
                     
                     TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/5.0));//use linkern
