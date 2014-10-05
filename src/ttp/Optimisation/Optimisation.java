@@ -1242,7 +1242,7 @@ public class Optimisation {
     	
     	TTPSolution[] population = new TTPSolution[pop_size];
     	while(count<pop_size && System.currentTimeMillis()-startTime<maxRuntime){
-    		System.out.println(count);
+    		//System.out.println(count);
     		if(tour.length==0 || diffTours){
     			tour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
     			population[count]=flipTourCheck(instance, tour);
@@ -1253,7 +1253,7 @@ public class Optimisation {
     		count++;
     	}
     	int uniqCount=count;
-    	System.out.println(count+":"+pop_size);
+    	
     	while(count<pop_size){//ran out of time to fill pop with linkern tours, just duplicated tours already got 
     		for(int i=0; i<uniqCount; i++){
     			if(count==pop_size)break;

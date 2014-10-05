@@ -6,6 +6,7 @@ import ttp.Optimisation.Optimisation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -36,20 +37,20 @@ public class Driver {
     public static void main(String[] args) {
        
         if (args.length==0) 
-        	args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
+        	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "1", "5", "60000"};
+            "11", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
-        //doBatch(args);
-        testAllInst();
+        doBatch(args);
+        //testAllInst();
     }
     
     // note: doBatch can process several files sequentially
@@ -108,8 +109,8 @@ public class Driver {
             	case 11://EA VERSION
                     int gen =1;
                     int MAX_GENS=10;
-                    int POP_SIZE=100;
-                    boolean diffTours=false;//EX 2 = false, EX 3 = true
+                    int POP_SIZE=20;
+                    boolean diffTours=true;//EX 2 = false, EX 3 = true
                     
                     TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/10.0));//use linkern
                     
@@ -127,24 +128,46 @@ public class Driver {
                     		}
                     	}else{
                     		//mutate entire TTP (EX 3)
-                    		for(int i=0; i<population.length; i++){
-                    			Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
-                    		}
+                    		//for(int i=0; i<population.length; i++){
+                    		//	Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
+                    		//}
                     	}
                     	
                     	//crossover (EX 4)
-                    	
-                    	
+                    	if(diffTours){
+                    	for(int i=0; i<POP_SIZE/2; i++){
+                    		TTPSolution[] tmp = Optimisation.crossoverSubTours(instance, newPopulation[i*2], newPopulation[i*2+1]);
+                    		newPopulation[i*2]=tmp[0];
+                    		newPopulation[i*2+1]=tmp[1];
+                    	}
+                    	}
                     	//select pop size best from combined both
                     	//merge sort and cut arrays based on OB
+                    	TTPSolution[] merged = new TTPSolution[POP_SIZE*2];
+                    	for(int i=0; i<POP_SIZE*2; i++){
+                    		if(i<POP_SIZE){
+                    			merged[i]=population[i];
+                    		}else{
+                    			merged[i]=newPopulation[i-POP_SIZE];
+                    		}
+                    		instance.evaluate(merged[i]);
+                    	}
+                    	Arrays.sort(merged, new Comparator<TTPSolution>() {
+                    	    public int compare(TTPSolution ttp1, TTPSolution ttp2) {
+                    	        return Double.compare(ttp2.ob,ttp1.ob);
+                    	    }
+                    	});
+                    	
+                    	//update population
+                    	for(int i=0; i<POP_SIZE; i++){
+                    		population[i]=merged[i];
+                    	}
                     }
                     //take top of the array above as solution
-                    
+                    newSolution=population[0];
                     break;
             }
-            
-            
-            
+                    
             newSolution.computationTime = System.currentTimeMillis() - startTime;
             newSolution.writeResult(resultTitle);
             newSolution.altPrint();
