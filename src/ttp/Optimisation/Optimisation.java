@@ -14,9 +14,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
@@ -1404,10 +1406,6 @@ public class Optimisation {
      * 
      * @param instance
      * @param tour
-     * @param individual
-     * @param H
-     * @param jump 
-     * @return TTPSolution
      */
     public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour) {
         ttp.Utils.Utils.startTiming();
@@ -1922,7 +1920,125 @@ public class Optimisation {
     	return bestSol;
     }
 
+    // swaps subtours between two parents, and attempts to reapply packing plan in changed subtours
+    public static TTPSolution[] crossoverSubTours(TTPInstance instance,TTPSolution a, TTPSolution b){
 
+    	//b=new TTPSolution(new int[] {0,1,2,3,4,5,6,7,8,9,0},new int[] {0,0,0,0,0,0,0,0,0});
+    	//a=new TTPSolution(new int[] {0,2,1,3,4,6,7,8,5,9,0},new int[] {0,0,0,0,0,0,0,0,0});   	
+    	
+    	Map<Integer, Integer[]> aMap = new HashMap<Integer, Integer[]>();    	
+    	Map<Integer, Integer[]> bMap = new HashMap<Integer, Integer[]>();
+    	aMap.put(0,new Integer[] {0,a.tspTour[1],a.tspTour[a.tspTour.length-2]});
+    	bMap.put(0,new Integer[] {0,b.tspTour[1],b.tspTour[b.tspTour.length-2]});
+    	
+    	for(int i = 1; i<a.tspTour.length-1; i++){
+    		aMap.put(a.tspTour[i],new Integer[] {i,a.tspTour[i-1],a.tspTour[i+1]});
+    		bMap.put(b.tspTour[i],new Integer[] {i,b.tspTour[i-1],b.tspTour[i+1]});
+    		//System.out.println("A: "+a.tspTour[i]+" .. at: "+i+" .. NL: "+a.tspTour[i-1]+" NR: "+a.tspTour[i+1]);
+    		//System.out.println("B: "+b.tspTour[i]+" .. at: "+i+" .. NL: "+b.tspTour[i-1]+" NR: "+b.tspTour[i+1]);
+    	}
+    	
+    	List<int[]> breakIndexs = new ArrayList<int[]>();
+    	List<int[]> aSubTours = new ArrayList<int[]>();
+    	List<int[]> bSubTours = new ArrayList<int[]>();
+
+		Map<Integer, Integer> aInds = new HashMap<Integer, Integer>();  
+		Map<Integer, Integer> bInds = new HashMap<Integer, Integer>(); 
+    	for(int i = 1; i<a.tspTour.length-1; i++){
+    		if((aMap.get(i)[2].intValue()!=bMap.get(i)[2].intValue())||aMap.get(i)[2].intValue()==0||bMap.get(i)[2].intValue()==0){
+    			breakIndexs.add(new int[] {i,aMap.get(i)[0],bMap.get(i)[0]});
+    			aInds.put(aMap.get(i)[0], i);
+    			bInds.put(bMap.get(i)[0], i);
+    			//System.out.println(i+" : "+aMap.get(i)[0]+" : "+bMap.get(i)[0]);
+    		}
+    	}
+
+    	int startA=1;
+    	int startB=1;
+		Map<Integer, Integer[]> aInds2 = new HashMap<Integer, Integer[]>();  
+		Map<Integer, Integer[]> bInds2 = new HashMap<Integer, Integer[]>();
+    	for(int i = 1; i<a.tspTour.length; i++){
+    		if(aInds.containsKey(i)){
+    			aSubTours.add(new int[] {aInds.get(i),startA,i});
+    			aInds2.put(aInds.get(i), new Integer[] {startA,i});
+    			startA=i+1;
+    		}
+    		if(bInds.containsKey(i)){
+    			bSubTours.add(new int[] {bInds.get(i),startB,i});
+    			bInds2.put(bInds.get(i), new Integer[] {startB,i});
+    			startB=i+1;
+    		}
+    	}
+    	
+    	// reorder subtours with probability of using subtours from both parents
+    	int[] aParts = new int[aSubTours.size()];
+    	int[] bParts = new int[aSubTours.size()];
+
+		Map<Integer, Integer[]> aVals = new HashMap<Integer, Integer[]>();  
+		Map<Integer, Integer[]> bVals = new HashMap<Integer, Integer[]>();
+		
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		Random r = new Random();
+    		if(r.nextBoolean()){
+    			aParts[i]=aSubTours.get(i)[0];
+    			aVals.put(aSubTours.get(i)[0], new Integer[] {aSubTours.get(i)[1],aSubTours.get(i)[2]});
+    			bParts[i]=bSubTours.get(i)[0];
+    			bVals.put(bSubTours.get(i)[0], new Integer[] {bSubTours.get(i)[1],bSubTours.get(i)[2]});
+    		}else{
+    			aParts[i]=-1;
+    			bParts[i]=-1;	
+    		}
+    	}
+
+    	// get subtours from other parent
+    	int ca = 0;
+    	int cb = 0;
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		if(aParts[i]==-1){
+    			for(int j = ca; j<aSubTours.size(); j++){    				
+    				if(!aVals.containsKey(bSubTours.get(j)[0])){
+    					aParts[i]=bSubTours.get(j)[0];
+    					aVals.put(bSubTours.get(j)[0], new Integer[] {bSubTours.get(j)[1],bSubTours.get(j)[2]});
+    	    			ca=j;
+    	    			break;
+    				}
+    			}
+    		}
+    		if(bParts[i]==-1){
+    			for(int j = cb; j<bSubTours.size(); j++){
+    				if(!bVals.containsKey(aSubTours.get(j)[0])){
+    					bParts[i]=aSubTours.get(j)[0];
+    					bVals.put(aSubTours.get(j)[0], new Integer[] {aSubTours.get(j)[1],aSubTours.get(j)[2]});
+    		    		cb=j;
+    		    		break;
+    				}
+    			}
+    		}
+    	}   	
+
+    	//fill new tours
+    	int[] aTmp = new int[a.tspTour.length];
+    	aTmp[0]=0;aTmp[a.tspTour.length-1]=0;
+    	int[] bTmp = new int[a.tspTour.length];
+    	bTmp[0]=0;bTmp[b.tspTour.length-1]=0;
+    	int count=1;
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		for(int j=0; j<(aInds2.get(aParts[i])[1]-aInds2.get(aParts[i])[0]+1); j++){
+    			aTmp[count]=a.tspTour[aInds2.get(aParts[i])[0]+j];
+    			count++;
+    		}
+    	}
+    	count=1;
+    	for(int i = 0; i<bSubTours.size(); i++){
+    		for(int j=0; j<(bInds2.get(bParts[i])[1]-bInds2.get(bParts[i])[0]+1); j++){
+    			bTmp[count]=b.tspTour[bInds2.get(bParts[i])[0]+j];
+    			count++;
+    		}
+    	}
+
+    	return new TTPSolution[] {ppGreedyRegardTour(instance, aTmp),ppGreedyRegardTour(instance, bTmp)};
+    }
+    
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
             int mode, 
             int durationWithoutImprovement, int maxRuntime) {
