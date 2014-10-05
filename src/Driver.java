@@ -112,7 +112,7 @@ public class Driver {
                     int POP_SIZE=20;
                     boolean diffTours=true;//EX 2 = false, EX 3 = true
                     
-                    TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/20.0));//use linkern
+                    TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/5.0));//use linkern
                     
                     TTPSolution[] newPopulation = new TTPSolution[population.length];
                     while (gen<=MAX_GENS && (System.currentTimeMillis() - startTime)<maxRuntime){
