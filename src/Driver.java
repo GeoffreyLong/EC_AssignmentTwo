@@ -46,7 +46,7 @@ public class Driver {
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "11", "5", "600000"};
+            "6", "5", "600000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -88,29 +88,31 @@ public class Driver {
             		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);            		
             		resultTitle = instance.file.getName() + ".ppGreedyRegardTour." + startTime;
             		break;
-            	case 10: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
+            	case 4: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change with bitflip            		
             		TTPSolution temp=Optimisation.ppGreedyRegardTour(instance, tour);
             		newSolution=Optimisation.bitFlip(instance, temp,(int)(maxRuntime-(System.currentTimeMillis()-startTime+10)),0);            		
             		resultTitle = instance.file.getName() + "ppGreedyRegardTour.bitFlip." + startTime;
             		break;
-            	case 4: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
+            	case 5: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
             		newSolution=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan
             		resultTitle = instance.file.getName() + ".ppGreedyRegardTour_flip." + startTime;
             		break;
-            	case 5: //Exercise 3 : Algorithm 2 : Continuous tour building, flipping, and PP assignment
+            	case 6: //Exercise 3 : Algorithm 2 : Continuous tour building, flipping, and PP assignment
             		newSolution=Optimisation.randomLinkernTours(instance, maxRuntime);
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip." + startTime;
             		break;
-            	case 6: //Exercise 3 : Algorithm 3 : A2 + insertion
+            	case 7: //Exercise 3 : Algorithm 3 : A2 + insertion
             		TTPSolution tmpSolution=Optimisation.randomLinkernTours(instance, maxRuntime-(int)(instance.numberOfItems*.001));
             		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.001));
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip_insert." + startTime;
             		break;
-            	case 11://EA VERSION
+            	case 8://EA VERSION
                     int gen =1;
                     int MAX_GENS=20;
                     int POP_SIZE=100;
                     boolean diffTours=true;//EX 2 = false, EX 3 = true
+                    resultTitle = instance.file.getName() + ".EA_crossover_G"+MAX_GENS+"_Ps"+POP_SIZE+"." + startTime;
+            		
                     
                     TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/5.0));//use linkern
                     
@@ -128,9 +130,9 @@ public class Driver {
                     		}
                     	}else{
                     		//mutate entire TTP (EX 3)
-                    		//for(int i=0; i<population.length; i++){
-                    		//	Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
-                    		//}
+                    		for(int i=0; i<population.length; i++){
+                    			Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
+                    		}
                     	}
                     	
                     	//crossover (EX 4)
