@@ -16,11 +16,9 @@ public class RunTests {
 		"pla33810_n338090_uncorr_10"
 	};
 	public static String[] ALGORITHMS = {
-		"3",
 		"5"
 	};
 	public static String[] ALGORITHM_NAMES = {
-		"ppGreedyRegardTour",
 		"randomLinkernTours_ppGreedyRegardTour_flip"
 	};
 	public static void main(String[] args) {
