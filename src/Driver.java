@@ -159,8 +159,10 @@ public class Driver {
                     	});
                     	
                     	//update population
+                    	System.out.println("GEN: "+gen);
                     	for(int i=0; i<POP_SIZE; i++){
                     		population[i]=merged[i];
+                    		System.out.println(population[i].ob);
                     	}
                     }
                     //take top of the array above as solution
