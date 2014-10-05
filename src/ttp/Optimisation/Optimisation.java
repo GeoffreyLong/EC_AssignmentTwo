@@ -1246,7 +1246,6 @@ public class Optimisation {
     		if(tour.length==0 || diffTours){
     			tour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
     			population[count]=flipTourCheck(instance, tour);
-    			population[count].printFull();
     		}else{
     			TTPSolution t = Optimisation.ppGreedyRegardTour(instance, tour);
     			population[count]=bitFlip(instance, t, (int)(maxRuntime/(pop_size*.5)), rand.nextDouble());
@@ -1264,6 +1263,7 @@ public class Optimisation {
     	}
     	return population;
     }
+    
     public static TTPSolution bitFlip(TTPInstance instance, TTPSolution newSolution, int maxRuntime, double startPos) {
         long startTime = System.currentTimeMillis();
 
