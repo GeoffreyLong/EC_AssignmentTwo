@@ -1,6 +1,5 @@
 package ttp.Optimisation;
 
-
 import ga.Crossover;
 import ga.Mutation;
 import ga.Population;
@@ -15,9 +14,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
@@ -44,7 +46,7 @@ import ttp.newrep.Item;
  */
 public class Optimisation {
     
-	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime,int H) {
+	public static TTPSolution cosolver(TTPInstance instance, int[] tour, int maxRuntime, int H) {
 		ttp.Utils.Utils.startTiming();
 		Config config = Config.getInstance();
 		config.setTtpInstance(instance);
@@ -1104,236 +1106,8 @@ public class Optimisation {
 
     	return null;
     }
-    
-    
-    /**
-     * At each instance recalculate the profit of the item - the future profit loss if the item is picked up
-     * Grab the biggest ratio
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseTwoSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
 
-    	
-    	return null;
-    }
-    
-    /**
-     * Swaps random two random nodes and mutates the packing plans on these nodes stochastically
-     * If the fitness of the new tour and plan is better than the last, this tour/plan will be used in future mutations
-     * 
-     * Usually converges super low, not a very good algorithm
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseThreeSolutionOne(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
-        instance.evaluate(newSolution);
-    	
-        double lastSolutionOb = -Double.MAX_VALUE;
-        int didNotImprove = 0;
-		
-        while(didNotImprove <= durationWithoutImprovement){
-    		if (lastSolutionOb == newSolution.ob){
-    		}
-    		else{
-    			didNotImprove = 0;
-    		}
-    		
-    		lastSolutionOb = newSolution.ob;
-    		System.out.println(newSolution.ob);
-    		
-    		int randNodeIndexOne = (int) (Math.random() * tour.length);
-			int randNodeIndexTwo = (int) (Math.random() * tour.length);
-			if (randNodeIndexOne != 0 && randNodeIndexOne != tour.length-1 && randNodeIndexTwo != 0 && randNodeIndexTwo != tour.length-1){
-				int itemsPerCity = instance.numberOfItems / (tour.length - 2);
-				int[] packingListIndices = new int[2*itemsPerCity];
-				
-	    		for (int i = 0; i < 5; i++){
-	    			int[] tourClone = tour.clone();
-	    			int[] packingPlanClone = packingPlan.clone();
-	    			double randSwap = Math.random();
-	    			if (randSwap <= 0.1){
-	    				tourClone[randNodeIndexOne] = tour[randNodeIndexTwo];
-	    				tourClone[randNodeIndexTwo] = tour[randNodeIndexOne];
-	    			}
-	    			if (tourClone[randNodeIndexOne] != 0 && tourClone[randNodeIndexTwo] != 0){
-		    			for (int j = 0; j < itemsPerCity; j++){
-		    				double planMutate = Math.random();
-		    				int itemIndex = 0;
-		    				if (packingListIndices.length / (j+1) == 2){
-		    					itemIndex = (tour.length-2) * j/2 + tourClone[randNodeIndexOne]-1;
-		    				}
-		    				else{
-		    					itemIndex = (tour.length-2) * j + tourClone[randNodeIndexTwo]-1;
-		    				}
-		    				if (planMutate <= 0.1){
-		    					if (packingPlanClone[itemIndex] == 1) packingPlanClone[itemIndex] = 0;
-		    					else packingPlanClone[itemIndex] = 1;
-		    				}
-		    			}
-	    			}
-	    			TTPSolution tempSol = new TTPSolution(tourClone, packingPlanClone);
-	    	        instance.evaluate(tempSol);
-	    	        
-	    			if (tempSol.ob > lastSolutionOb){
-	    				lastSolutionOb = tempSol.ob;
-	    				packingPlan = packingPlanClone.clone();
-	    				tour = tourClone.clone();
-	    			}
-	    		}
-			}
-	    	newSolution = new TTPSolution(tour, packingPlan);
-    		instance.evaluate(newSolution);
-        }
-        
-    	return newSolution;
-    }
-    
-    /**
-     * Same as the last algorithm, except it uses only adjacent nodes
-     * This one is actually even worse than the last solution
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseThreeSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	TTPSolution newSolution = new TTPSolution(tour, packingPlan);
-        instance.evaluate(newSolution);
-    	
-        double lastSolutionOb = -Double.MAX_VALUE;
-        int didNotImprove = 0;
-		
-        while(didNotImprove <= durationWithoutImprovement){
-    		if (lastSolutionOb == newSolution.ob){
-    		}
-    		else{
-    			didNotImprove = 0;
-    		}
-    		
-    		lastSolutionOb = newSolution.ob;
-    		System.out.println(newSolution.ob);
-    		
-    		int randNodeIndex = (int) (Math.random() * tour.length);
-			if (randNodeIndex > 1 && randNodeIndex < tour.length-1){
-				int itemsPerCity = instance.numberOfItems / (tour.length - 2);
-				
-	    		for (int i = 0; i < 5; i++){
-	    			int[] tourClone = tour.clone();
-	    			int[] packingPlanClone = packingPlan.clone();
-	    			double randSwap = Math.random();
-	    			if (randSwap <= 0){
-	    				tourClone[randNodeIndex] = tour[randNodeIndex -1];
-	    				tourClone[randNodeIndex - 1] = tour[randNodeIndex];
-	    			}
-    				for (int j = 0; j < itemsPerCity; j++){
-	    				double planMutate = Math.random();
-	    				int itemIndex = (int)(Math.random() * itemsPerCity) + tourClone[randNodeIndex] - 1;
-	    				itemIndex -= (int) (Math.random() + 0.5);
-	    				if (planMutate <= 0.5){
-	    					if (packingPlanClone[itemIndex] == 1) packingPlanClone[itemIndex] = 0;
-	    					else packingPlanClone[itemIndex] = 1;
-	    				}
-	    			}
- 
-	    			TTPSolution tempSol = new TTPSolution(tourClone, packingPlanClone);
-	    	        instance.evaluate(tempSol);
-	    	        
-	    			if (tempSol.ob > lastSolutionOb){
-	    				lastSolutionOb = tempSol.ob;
-	    				packingPlan = packingPlanClone.clone();
-	    				tour = tourClone.clone();
-	    			}
-	    		}
-			}
-	    	newSolution = new TTPSolution(tour, packingPlan);
-    		instance.evaluate(newSolution);
-        }
-        
-    	return newSolution;
-    } 
-    
-    /**
-     * Same as last algorithm, but uses the object oriented approach
-     * This one does not work out too well, but works better than the last two with durationWithoutImprovement = 1000
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseThreeSolutionTwoNew(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-        Individual individual = instance.createIndividual(tour);
-        int didNotImprove = 0;
-        TTPSolution solution = null;
-        int[] packingPlan = new int[instance.numberOfItems];
-		
-        while(didNotImprove <= durationWithoutImprovement){
-    		int randNodeIndex = (int) (Math.random() * individual.tour.length);
-    		
-    		solution = new TTPSolution(tour, packingPlan);
-    		instance.evaluate(solution);
-    		
-			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
-	    		for (int i = 0; i < 5; i++){
-	    			int[] tourNew = tour.clone();
-	    			int[] packingPlanNew = packingPlan.clone();
-	    			
-	    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
-	    			double randSwap = Math.random();
-	    			if (randSwap <= 0.1){
-	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
-	    				tempInd.tour[randNodeIndex - 1] = individual.tour[randNodeIndex];
-	    				tempInd.tour[randNodeIndex] = cityTemp;
-	    			}
-	    			
-	    			double packingSwap = Math.random();
-	    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
-	    			}
-	    			for (Item item : tempInd.tour[randNodeIndex].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
-	    			}
-	    			
-	    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
-	    	        instance.evaluate(newSolution);
-	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
-	    	    		//System.out.println(solution.ob);
-	    	    		tour = instance.getTour(tempInd).clone();
-	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
-	    	    		didNotImprove = 0;
-	    			}
-	    			else{
-	    				didNotImprove ++;
-	    			}
-	    		}
-			}
-        }
-        
-    	return solution;
-    } 
-    
-    /**
+     /**
      * Might actually be the same as Two New, but it uses a resetter for the packing plan... 
 
      * @param instance
@@ -1342,7 +1116,7 @@ public class Optimisation {
      * @param maxRuntime
      * @return
      */
-    public static TTPSolution exerciseThreeSolutionTwoAlt(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
+    public static TTPSolution exerciseThreeSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
     	ttp.Utils.Utils.startTiming();
     	long startingTimeForRunLimit = System.currentTimeMillis();
     	Individual individual = instance.createIndividual(tour);
@@ -1388,47 +1162,45 @@ public class Optimisation {
     		}
     		
 			if (randNodeIndex > 1 && randNodeIndex < individual.tour.length){
-	    		for (int i = 0; i < 5; i++){
-	    			int[] tourNew = tour.clone();
-	    			int[] packingPlanNew = packingPlan.clone();
-	    			
-	    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
-	    			double randSwap = Math.random();
-	    			if (randSwap <= 0.1){
-	    				City cityTemp = tempInd.tour[randNodeIndex - 1];
-	    				tempInd.tour[randNodeIndex - 1] = tempInd.tour[randNodeIndex];
-	    				tempInd.tour[randNodeIndex] = cityTemp;
+    			int[] tourNew = tour.clone();
+    			int[] packingPlanNew = packingPlan.clone();
+    			
+    			Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
+    			double randSwap = Math.random();
+    			if (randSwap <= 0.1){
+    				City cityTemp = tempInd.tour[randNodeIndex - 1];
+    				tempInd.tour[randNodeIndex - 1] = tempInd.tour[randNodeIndex];
+    				tempInd.tour[randNodeIndex] = cityTemp;
+    			}
+    			
+    			double packingSwap = Math.random();
+    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
+	    			if (packingSwap <= 0.1){
+	    				if (item.isSelected) item.isSelected = false;
+	    				else item.isSelected = true;
 	    			}
-	    			
-	    			double packingSwap = Math.random();
-	    			for (Item item : tempInd.tour[randNodeIndex - 1].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
+    			}
+    			for (Item item : tempInd.tour[randNodeIndex].items){
+	    			if (packingSwap <= 0.1){
+	    				if (item.isSelected) item.isSelected = false;
+	    				else item.isSelected = true;
 	    			}
-	    			for (Item item : tempInd.tour[randNodeIndex].items){
-		    			if (packingSwap <= 0.1){
-		    				if (item.isSelected) item.isSelected = false;
-		    				else item.isSelected = true;
-		    			}
-	    			}
-	    			
-	    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
-	    	        instance.evaluate(newSolution);
-	    	        // 1000 is a random parameter, but it seems to work well
-	    	        if (tempCount >= 1000){
-	    	        	System.out.println("revamp");
-	    	        	packingPlan = new int[packingPlan.length];
-	    	        	tempCount = 0;
-	    	        	didNotImprove ++;
-	    	        	break;
-	    	        }
-	    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
-	    				tour = instance.getTour(tempInd).clone();
-	    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
-	    			}
-	    		}
+    			}
+    			
+    			TTPSolution newSolution = new TTPSolution(instance.getTour(tempInd), instance.getPackingPlan(tempInd));
+    	        instance.evaluate(newSolution);
+    	        // 1000 is a random parameter, but it seems to work well
+    	        if (tempCount >= 1000){
+    	        	System.out.println("revamp");
+    	        	packingPlan = new int[packingPlan.length];
+    	        	tempCount = 0;
+    	        	didNotImprove ++;
+    	        	break;
+    	        }
+    			if (newSolution.ob > solution.ob && newSolution.wend >= 0){
+    				tour = instance.getTour(tempInd).clone();
+    	    		packingPlan = instance.getPackingPlan(tempInd).clone();
+    			}
 			}
         }
         solution = new TTPSolution(bestTour, bestPlan);
@@ -1436,197 +1208,7 @@ public class Optimisation {
         solution.computationTime = ttp.Utils.Utils.stopTiming();
     	return solution;
     } 
-    
-    
-    /**
-     * Unfinished Algorithm.  Will use crossover to mutate the tours
-     * 	Then it will use hill climber to evaluate the new tour
-     * 	if the result of this hill climber is greater than the previous, this tour is the new one
-     * 	else re-iterate
-     * 
-     * This version will have 10 individuals per iteration
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseThreeSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-        Individual individual = instance.createIndividual(tour);
-        int didNotImprove = 0;
-        TTPSolution solution = null;
-        int[] packingPlan = new int[instance.numberOfItems];
-        double oldFitness = hillClimber(instance, tour, 2,1000, 60000).ob;
-		
-        while(didNotImprove <= durationWithoutImprovement){
-    		
-    		solution = new TTPSolution(tour, packingPlan);
-    		instance.evaluate(solution);
-    		
-    		Individual[] individuals = new Individual[10];
-    		for (int i = 0; i < 10; i++){
-				int[] tourNew = tour.clone();
-				int[] packingPlanNew = packingPlan.clone();
-				Individual tempInd = instance.createIndividual(tourNew, packingPlanNew);
-				
-				
-				int randNodeIndex = (int) (Math.random() * individual.tour.length);
-				int randNodeIndexTwo = (int) (Math.random() * individual.tour.length);
-	
-				int j=0;
-				while(true) {
-					int indexA = (randNodeIndex+1+j) % individual.tour.length;
-					int indexB = (randNodeIndexTwo-j + individual.tour.length) % individual.tour.length; 
-	
-					City temp = tempInd.tour[indexA];//store temp
-					tempInd.tour[indexA] = tempInd.tour[indexB];
-					tempInd.tour[indexB] = temp;
-					if (Math.abs(indexA-indexB) <= 1 || Math.abs(indexA-indexB) >= individual.tour.length-1) break;
-					
-					j++;
-				}
-				
-				individuals[i] = tempInd;
-    		}
-    		int bestIndex = -1;
-			for (int i = 0; i<individuals.length; i++){
-				Individual tempInd = individuals[i];
-				TTPSolution hillSol = hillClimber(instance, instance.getTour(tempInd), 2,10000, 60000);
-				System.out.println(hillSol.ob + " " + oldFitness);
-				if (hillSol.ob > oldFitness){
-					oldFitness = hillSol.ob;
-					bestIndex = i;
-				}
-				i++;
-			}
-			System.out.println();
-			if (bestIndex != -1) tour = instance.getTour(individuals[bestIndex]).clone();
-        }
         
-    	return solution;
-    } 
-    
-    
-    /**
-     * 
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseThreeSolutionFour(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-        ttp.Utils.Utils.startTiming();
-    	
-        int didNotImprove = 0;
-
-    	double lastOb = -Double.MAX_VALUE;
-    	int[] newTour = tour.clone();
-    	int[] packingPlan = new int[instance.numberOfItems];
-    	
-    	for(int j = 1; j<=10; j++){
-    		Individual ind = instance.createIndividual(tour);
-    		Point2D lastPoint = ind.startingCity.location;
-    		double distance = 0;
-    		
-
-    		double lastProfit = Double.MAX_VALUE;
-    		for (int i = ind.tour.length-1; i >= 0; i--){
-	    		City city = ind.tour[i];
-	    		distance += Math.ceil(lastPoint.distance(city.location));
-	    		for(Item item : city.items){
-	    			//System.out.println("weight= " + city.weightToCity);
-	    			
-    				double wend = instance.capacityOfKnapsack / j;
-    				
-    				double cost = 1/(instance.maxSpeed - ((item.weight + wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
-	    			cost -= 1/(instance.maxSpeed - ((wend) * (instance.maxSpeed - instance.minSpeed) / instance.capacityOfKnapsack));
-	    			cost *= instance.rentingRatio * distance;
-	    			double profit = item.profit - cost;
-	    			
-	    			if (profit > lastProfit && i != 0){
-	    				City cityTemp = ind.tour[i - 1];
-	    				ind.tour[i - 1] = ind.tour[i];
-	    				ind.tour[i] = cityTemp;
-	    			}
-	    			
-	    			lastProfit = profit;
-	    		}
-	    		lastPoint = city.location;
-	    	}
-    		/*
-    		TTPSolution temp = Optimisation.exerciseTwoSolutionTwoAlt(instance, instance.getTour(ind), durationWithoutImprovement, maxRuntime, false);
-    		System.out.println(temp.ob);
-    		*/
-	    	double ob = instance.evaluate(ind);
-	    	//System.out.println(ob);
-	    	if (ob > lastOb){
-	    		newTour = instance.getTour(ind).clone();
-	    		packingPlan = instance.getPackingPlan(ind).clone();
-	    	}
-	    	lastOb = ob;
-    	}
-        
-    	TTPSolution solution = new TTPSolution(newTour, packingPlan);
-    	instance.evaluate(solution);
-    	
-    	return solution;
-    } 
-    
-
-    /**
-     * This is purely a packing plan crossover
-     * Steps
-     * 	Get two parents randomly
-     * 	Find the items that are selected in the other individual and only select these in the current
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseFourSolutionThree(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int popSize = 10;
-    	int noImprove = 0;
-    	Individual[] population = new Individual[popSize];
-    	
-    	while(noImprove < durationWithoutImprovement){
-    		
-    	}
-    	
-    	return null;
-    }
-
-    
-
-    /**
-     * This is purely a packing plan crossover
-     * Steps
-     * 	Get two parents randomly
-     * 	Find the index of the cities with items selected in the tour
-     * 	Turn these items on in the other, turn all other items off
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseFourSolutionTwo(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int popSize = 10;
-    	int noImprove = 0;
-    	Individual[] population = new Individual[popSize];
-    	
-    	while(noImprove < durationWithoutImprovement){
-    		
-    	}
-    	
-    	return null;
-    }
-    
     public static TTPSolution flipTourCheck(TTPInstance instance, int[] tour) {
         int[] tourOrig= new int[tour.length];
         tourOrig=tour.clone();
@@ -1653,6 +1235,69 @@ public class Optimisation {
         return newSolution;
     }
     
+    public static TTPSolution[] instantiatePop(TTPInstance instance, int[] tour, int pop_size, boolean diffTours, int maxRuntime){
+    	long startTime = System.currentTimeMillis();
+    	int count=0;
+    	Random rand = new Random();
+    	
+    	TTPSolution[] population = new TTPSolution[pop_size];
+    	while(count<pop_size && System.currentTimeMillis()-startTime<maxRuntime){
+    		//System.out.println(count);
+    		if(tour.length==0 || diffTours){
+    			tour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
+    			population[count]=flipTourCheck(instance, tour);
+    		}else{
+    			TTPSolution t = Optimisation.ppGreedyRegardTour(instance, tour);
+    			population[count]=bitFlip(instance, t, (int)(maxRuntime/(pop_size*.5)), rand.nextDouble());
+    		}
+    		count++;
+    	}
+    	int uniqCount=count;
+    	
+    	while(count<pop_size){//ran out of time to fill pop with linkern tours, just duplicated tours already got 
+    		for(int i=0; i<uniqCount; i++){
+    			if(count==pop_size)break;
+    			population[count]=new TTPSolution(population[i].tspTour,population[i].packingPlan);
+    			count++;
+    		}
+    	}
+    	return population;
+    }
+    public static TTPSolution bitFlip(TTPInstance instance, TTPSolution newSolution, int maxRuntime, double startPos) {
+        long startTime = System.currentTimeMillis();
+
+        int[] ppTmp=newSolution.packingPlan.clone();
+        int startIndex=(int)Math.floor(startPos*instance.numberOfItems);
+        for(int i=startIndex; i<ppTmp.length; i++){
+        	ppTmp[i]=Math.abs(newSolution.packingPlan[i]-1);
+        	TTPSolution tempSolution = new TTPSolution(newSolution.tspTour, ppTmp);
+        	instance.evaluate(newSolution);
+        	instance.evaluate(tempSolution);
+
+        	if(tempSolution.ob>newSolution.ob && tempSolution.wend>0){
+        		//System.out.println("flip .. old: "+newSolution.ob+" .. new: "+tempSolution.ob);
+        		//System.out.println(i+"\t"+tempSolution.ob);
+        		newSolution.packingPlan[i]=Math.abs(newSolution.packingPlan[i]-1);
+        	}else{
+        		//System.out.println(i);
+        		ppTmp[i]=newSolution.packingPlan[i];
+        	}
+        	
+        	//if((System.currentTimeMillis()-startTime)>120000 && (System.currentTimeMillis()-startTime)<120050)
+        	//	newSolution.altPrint();        	
+        	//if((System.currentTimeMillis()-startTime)>300000 && (System.currentTimeMillis()-startTime)<300050)
+        	//	newSolution.altPrint();
+        	
+        	if((System.currentTimeMillis()-startTime)>(maxRuntime-1)){
+        		//System.out.println("did: "+i);
+        		break;
+        	}
+        }
+
+        newSolution.computationTime = System.currentTimeMillis()-startTime;
+        instance.evaluate(newSolution);
+        return newSolution;
+    }
     /**
      * Greedy Heuristic based packing plan builder, with no regard to tour
      * 
@@ -1761,10 +1406,6 @@ public class Optimisation {
      * 
      * @param instance
      * @param tour
-     * @param individual
-     * @param H
-     * @param jump 
-     * @return TTPSolution
      */
     public static TTPSolution ppGreedyRegardTour(TTPInstance instance, int[] tour) {
         ttp.Utils.Utils.startTiming();
@@ -1915,7 +1556,6 @@ public class Optimisation {
     }
     
     public static TTPSolution insertion(TTPInstance instance, int[] tour, int[] packingPlan, int maxRuntime){
-    	ttp.Utils.Utils.startTiming();
     	long startTime = System.currentTimeMillis();
     	long elapsedTime=0;
     	Individual individual = instance.createIndividual(tour);
@@ -2049,7 +1689,7 @@ public class Optimisation {
             double newOB = newSolution.ob;
             
     		if(newOB>oldOB){
-    			System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
+    			//System.out.println(j+" ...: "+bestIndex+" .. "+bestValue+" .. "+oldOB+" .. "+newOB);
     			betterMoves+=1;
     		}else{
     			individual=old;
@@ -2205,6 +1845,7 @@ public class Optimisation {
     		population[i] = new Individual(instance.nodes, instance.items, tour, itemsPerCity);
     	}
     	
+    	TTPSolution bestSol = null;
     	double bestOb = -Double.MAX_VALUE;
     	double lastOb = 0;
     	
@@ -2213,7 +1854,6 @@ public class Optimisation {
     			noImprove ++;
     		}
     		else{
-    			System.out.println(bestOb);
     			lastOb = bestOb;
     			noImprove = 0;
     		}
@@ -2252,18 +1892,6 @@ public class Optimisation {
 	    			}
         		}
         		
-    			
-    			/*
-    			Individual childOne = instance.createIndividual(instance.getTour(indOne), instance.getPackingPlan(indTwo));
-    			Individual childTwo = instance.createIndividual(instance.getTour(indOne), instance.getPackingPlan(indTwo));
-    			
-    			for (int cityIndex = 0; cityIndex < tour.length; cityIndex ++){
-    				for (int itemIndex = 0; itemIndex < itemsPerCity; itemIndex ++){
-    					childOne.tour[cityIndex].items.get(itemIndex).isSelected = indTwo.tour[cityIndex].items.get(itemIndex).isSelected;
-    					childTwo.tour[cityIndex].items.get(itemIndex).isSelected = indOne.tour[cityIndex].items.get(itemIndex).isSelected;
-					}
-    			}
-    			*/
         		double oddSol = -Double.MAX_VALUE;
         		double evenSol = -Double.MAX_VALUE;
 				for(int j = 0; j < allInds.length; j++){
@@ -2281,6 +1909,7 @@ public class Optimisation {
 			    				population[indIndexTwo] = instance.createIndividual(instance.getTour(allInds[j]), instance.getPackingPlan(allInds[k]));
 			    			}
 			    			if (sol.ob > bestOb){
+			    				bestSol = sol;
 			    				bestOb = sol.ob;
 			    			}
 		    			}
@@ -2288,81 +1917,128 @@ public class Optimisation {
         		}
     		}
     	}
-    	
-    	return null;
+    	return bestSol;
     }
-    
-    /**
-     * Get all nodes where the "getWeightCut" is positive (or greatest)
-     * Swap these nodes (preferably preserving the order / position)
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseFourSolutionFour(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int popSize = 10;
-    	int noImprove = 0;
-    	Individual[] population = new Individual[popSize];
-    	
-    	while(noImprove < durationWithoutImprovement){
-    		
-    	}
-    	
-    	return null;
-    }
-    
-    
-    /**
-     * Calculate the ob functions for each element, if the ob is better than not having the elm
-     * Swap the node so that it is in the same index and has the same selections
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseFourSolutionFive(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int popSize = 10;
-    	int noImprove = 0;
-    	Individual[] population = new Individual[popSize];
-    	
-    	while(noImprove < durationWithoutImprovement){
-    		
-    	}
-    	
-    	return null;
-    }
-    
-    /**
-     * Do the same as five but instead of copying it to the same index in the new individual
-     * Copy it such that it has either the same weight added before it or the same distance after it
-     * Probably would want to decide this 
-     * 	based on the knapsack capacity and / or the renting ratio and / or the difference between max and min speed
-     * 
-     * @param instance
-     * @param tour
-     * @param durationWithoutImprovement
-     * @param maxRuntime
-     * @return
-     */
-    public static TTPSolution exerciseFourSolutionSix(TTPInstance instance, int[] tour, int durationWithoutImprovement, int maxRuntime){
-    	int popSize = 10;
-    	int noImprove = 0;
-    	Individual[] population = new Individual[popSize];
-    	
-    	while(noImprove < durationWithoutImprovement){
-    		
-    	}
-    	
-    	return null;
-    }
-    
-    
 
+    // swaps subtours between two parents, and attempts to reapply packing plan in changed subtours
+    public static TTPSolution[] crossoverSubTours(TTPInstance instance,TTPSolution a, TTPSolution b){
+
+    	//b=new TTPSolution(new int[] {0,1,2,3,4,5,6,7,8,9,0},new int[] {0,0,0,0,0,0,0,0,0});
+    	//a=new TTPSolution(new int[] {0,2,1,3,4,6,7,8,5,9,0},new int[] {0,0,0,0,0,0,0,0,0});   	
+    	
+    	Map<Integer, Integer[]> aMap = new HashMap<Integer, Integer[]>();    	
+    	Map<Integer, Integer[]> bMap = new HashMap<Integer, Integer[]>();
+    	aMap.put(0,new Integer[] {0,a.tspTour[1],a.tspTour[a.tspTour.length-2]});
+    	bMap.put(0,new Integer[] {0,b.tspTour[1],b.tspTour[b.tspTour.length-2]});
+    	
+    	for(int i = 1; i<a.tspTour.length-1; i++){
+    		aMap.put(a.tspTour[i],new Integer[] {i,a.tspTour[i-1],a.tspTour[i+1]});
+    		bMap.put(b.tspTour[i],new Integer[] {i,b.tspTour[i-1],b.tspTour[i+1]});
+    		//System.out.println("A: "+a.tspTour[i]+" .. at: "+i+" .. NL: "+a.tspTour[i-1]+" NR: "+a.tspTour[i+1]);
+    		//System.out.println("B: "+b.tspTour[i]+" .. at: "+i+" .. NL: "+b.tspTour[i-1]+" NR: "+b.tspTour[i+1]);
+    	}
+    	
+    	List<int[]> breakIndexs = new ArrayList<int[]>();
+    	List<int[]> aSubTours = new ArrayList<int[]>();
+    	List<int[]> bSubTours = new ArrayList<int[]>();
+
+		Map<Integer, Integer> aInds = new HashMap<Integer, Integer>();  
+		Map<Integer, Integer> bInds = new HashMap<Integer, Integer>(); 
+    	for(int i = 1; i<a.tspTour.length-1; i++){
+    		if((aMap.get(i)[2].intValue()!=bMap.get(i)[2].intValue())||aMap.get(i)[2].intValue()==0||bMap.get(i)[2].intValue()==0){
+    			breakIndexs.add(new int[] {i,aMap.get(i)[0],bMap.get(i)[0]});
+    			aInds.put(aMap.get(i)[0], i);
+    			bInds.put(bMap.get(i)[0], i);
+    			//System.out.println(i+" : "+aMap.get(i)[0]+" : "+bMap.get(i)[0]);
+    		}
+    	}
+
+    	int startA=1;
+    	int startB=1;
+		Map<Integer, Integer[]> aInds2 = new HashMap<Integer, Integer[]>();  
+		Map<Integer, Integer[]> bInds2 = new HashMap<Integer, Integer[]>();
+    	for(int i = 1; i<a.tspTour.length; i++){
+    		if(aInds.containsKey(i)){
+    			aSubTours.add(new int[] {aInds.get(i),startA,i});
+    			aInds2.put(aInds.get(i), new Integer[] {startA,i});
+    			startA=i+1;
+    		}
+    		if(bInds.containsKey(i)){
+    			bSubTours.add(new int[] {bInds.get(i),startB,i});
+    			bInds2.put(bInds.get(i), new Integer[] {startB,i});
+    			startB=i+1;
+    		}
+    	}
+    	
+    	// reorder subtours with probability of using subtours from both parents
+    	int[] aParts = new int[aSubTours.size()];
+    	int[] bParts = new int[aSubTours.size()];
+
+		Map<Integer, Integer[]> aVals = new HashMap<Integer, Integer[]>();  
+		Map<Integer, Integer[]> bVals = new HashMap<Integer, Integer[]>();
+		
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		Random r = new Random();
+    		if(r.nextBoolean()){
+    			aParts[i]=aSubTours.get(i)[0];
+    			aVals.put(aSubTours.get(i)[0], new Integer[] {aSubTours.get(i)[1],aSubTours.get(i)[2]});
+    			bParts[i]=bSubTours.get(i)[0];
+    			bVals.put(bSubTours.get(i)[0], new Integer[] {bSubTours.get(i)[1],bSubTours.get(i)[2]});
+    		}else{
+    			aParts[i]=-1;
+    			bParts[i]=-1;	
+    		}
+    	}
+
+    	// get subtours from other parent
+    	int ca = 0;
+    	int cb = 0;
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		if(aParts[i]==-1){
+    			for(int j = ca; j<aSubTours.size(); j++){    				
+    				if(!aVals.containsKey(bSubTours.get(j)[0])){
+    					aParts[i]=bSubTours.get(j)[0];
+    					aVals.put(bSubTours.get(j)[0], new Integer[] {bSubTours.get(j)[1],bSubTours.get(j)[2]});
+    	    			ca=j;
+    	    			break;
+    				}
+    			}
+    		}
+    		if(bParts[i]==-1){
+    			for(int j = cb; j<bSubTours.size(); j++){
+    				if(!bVals.containsKey(aSubTours.get(j)[0])){
+    					bParts[i]=aSubTours.get(j)[0];
+    					bVals.put(aSubTours.get(j)[0], new Integer[] {aSubTours.get(j)[1],aSubTours.get(j)[2]});
+    		    		cb=j;
+    		    		break;
+    				}
+    			}
+    		}
+    	}   	
+
+    	//fill new tours
+    	int[] aTmp = new int[a.tspTour.length];
+    	aTmp[0]=0;aTmp[a.tspTour.length-1]=0;
+    	int[] bTmp = new int[a.tspTour.length];
+    	bTmp[0]=0;bTmp[b.tspTour.length-1]=0;
+    	int count=1;
+    	for(int i = 0; i<aSubTours.size(); i++){
+    		for(int j=0; j<(aInds2.get(aParts[i])[1]-aInds2.get(aParts[i])[0]+1); j++){
+    			aTmp[count]=a.tspTour[aInds2.get(aParts[i])[0]+j];
+    			count++;
+    		}
+    	}
+    	count=1;
+    	for(int i = 0; i<bSubTours.size(); i++){
+    		for(int j=0; j<(bInds2.get(bParts[i])[1]-bInds2.get(bParts[i])[0]+1); j++){
+    			bTmp[count]=b.tspTour[bInds2.get(bParts[i])[0]+j];
+    			count++;
+    		}
+    	}
+
+    	return new TTPSolution[] {ppGreedyRegardTour(instance, aTmp),ppGreedyRegardTour(instance, bTmp)};
+    }
+    
     public static TTPSolution hillClimber(TTPInstance instance, int[] tour, 
             int mode, 
             int durationWithoutImprovement, int maxRuntime) {

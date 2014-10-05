@@ -6,8 +6,10 @@ import ttp.Optimisation.Optimisation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,13 +40,13 @@ public class Driver {
         	//args = new String[]{"instances", "a280_n279_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "a280_n1395_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "a280_n2790_uncorr_10",
-        	//args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
+        	args = new String[]{"instances", "fnl4461_n4460_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "fnl4461_n22300_uncorr-similar-weights_05",
-        	args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
+        	//args = new String[]{"instances", "fnl4461_n44600_uncorr_10",
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "6", "5", "60000"};
+            "11", "5", "60000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -64,13 +66,13 @@ public class Driver {
         
         for (File f:files) {
             // read the TSP instance
-            TTPInstance instance = new TTPInstance(f);
-            //System.out.println((int)(instance.numberOfItems*.01));
-            long startTime = System.currentTimeMillis();
-            String resultTitle="";        
+            TTPInstance instance = new TTPInstance(f);   
             
             // generate a Linkern tour (or read it if it already exists)
             int[] tour = Optimisation.linkernTour(instance);
+            
+            long startTime = System.currentTimeMillis();
+            String resultTitle="";  
 
             TTPSolution newSolution=null;
             switch (algorithm){
@@ -83,8 +85,13 @@ public class Driver {
             		resultTitle = instance.file.getName() + ".simpleHeuristic." + startTime;
             		break;
             	case 3: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
-            		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);
+            		newSolution=Optimisation.ppGreedyRegardTour(instance, tour);            		
             		resultTitle = instance.file.getName() + ".ppGreedyRegardTour." + startTime;
+            		break;
+            	case 10: //Exercise 2 : Algorithm 1 : Greedy Heuristic Packing Plan Change            		
+            		TTPSolution temp=Optimisation.ppGreedyRegardTour(instance, tour);
+            		newSolution=Optimisation.bitFlip(instance, temp,(int)(maxRuntime-(System.currentTimeMillis()-startTime+10)),0);            		
+            		resultTitle = instance.file.getName() + "ppGreedyRegardTour.bitFlip." + startTime;
             		break;
             	case 4: //Exercise 3 : Algorithm 1 : Greedy Heuristic Packing Plan with Tour Flip Potential 
             		newSolution=Optimisation.flipTourCheck(instance,tour);//check whether should flip and apply original PPlan
@@ -99,8 +106,71 @@ public class Driver {
             		newSolution = Optimisation.insertion(instance, tmpSolution.tspTour, tmpSolution.packingPlan, (int)(instance.numberOfItems*.001));
             		resultTitle = instance.file.getName() + ".randomLinkernTours_ppGreedyRegardTour_flip_insert." + startTime;
             		break;
+            	case 11://EA VERSION
+                    int gen =1;
+                    int MAX_GENS=10;
+                    int POP_SIZE=20;
+                    boolean diffTours=true;//EX 2 = false, EX 3 = true
+                    
+                    TTPSolution[] population = Optimisation.instantiatePop(instance,tour,POP_SIZE,diffTours,(int)(maxRuntime/10.0));//use linkern
+                    
+                    TTPSolution[] newPopulation = new TTPSolution[population.length];
+                    while (gen<=MAX_GENS && (System.currentTimeMillis() - startTime)<maxRuntime){
+                    	Random rand = new Random();
+                    	//clone solutions
+                    	for(int i=0; i<population.length; i++){
+                    		newPopulation[i]=new TTPSolution(population[i].tspTour,population[i].packingPlan);
+                    	}
+                    	if(!diffTours){
+                    		//mutate only PP (EX 2)
+                    		for(int i=0; i<population.length; i++){
+                    			Optimisation.bitFlip(instance, newPopulation[i], (int)(maxRuntime/MAX_GENS*POP_SIZE), rand.nextDouble());
+                    		}
+                    	}else{
+                    		//mutate entire TTP (EX 3)
+                    		//for(int i=0; i<population.length; i++){
+                    		//	Optimisation.insertion(instance, newPopulation[i].tspTour, newPopulation[i].packingPlan, (int)(maxRuntime/MAX_GENS*POP_SIZE));
+                    		//}
+                    	}
+                    	
+                    	//crossover (EX 4)
+                    	if(diffTours){
+                    	for(int i=0; i<POP_SIZE/2; i++){
+                    		TTPSolution[] tmp = Optimisation.crossoverSubTours(instance, newPopulation[i*2], newPopulation[i*2+1]);
+                    		newPopulation[i*2]=tmp[0];
+                    		newPopulation[i*2+1]=tmp[1];
+                    	}
+                    	}
+                    	//select pop size best from combined both
+                    	//merge sort and cut arrays based on OB
+                    	TTPSolution[] merged = new TTPSolution[POP_SIZE*2];
+                    	for(int i=0; i<POP_SIZE*2; i++){
+                    		if(i<POP_SIZE){
+                    			merged[i]=population[i];
+                    		}else{
+                    			merged[i]=newPopulation[i-POP_SIZE];
+                    		}
+                    		instance.evaluate(merged[i]);
+                    	}
+                    	Arrays.sort(merged, new Comparator<TTPSolution>() {
+                    	    public int compare(TTPSolution ttp1, TTPSolution ttp2) {
+                    	        return Double.compare(ttp2.ob,ttp1.ob);
+                    	    }
+                    	});
+                    	
+                    	//update population
+                    	System.out.println("GEN: "+gen);
+                    	for(int i=0; i<POP_SIZE; i++){
+                    		population[i]=merged[i];
+                    		System.out.println(population[i].ob);
+                    	}
+                    }
+                    //take top of the array above as solution
+                    newSolution=population[0];
+                    break;
             }
-           
+                    
+            newSolution.computationTime = System.currentTimeMillis() - startTime;
             newSolution.writeResult(resultTitle);
             newSolution.altPrint();
         }
@@ -134,12 +204,7 @@ public class Driver {
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwo(instance, tour, 2, maxRuntime,false); String csvFilename = "Z_ex2sol2iter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAlt(instance, tour, 10, maxRuntime,false); String csvFilename = "Z_ex2sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseTwoSolutionTwoAltTwo(instance, tour, 2, maxRuntime, false); String csvFilename = "Z_ex2sol2Biter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol1iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionTwoNew(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol2Niter1.csv";
-	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwoAlt(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionThree(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3sol3iter1.csv";
-	                //TTPSolution solution = Optimisation.exerciseThreeSolutionH(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex3solHiter1.csv";
+	                TTPSolution solution = Optimisation.exerciseThreeSolutionTwo(instance, tour, 5, maxRuntime); String csvFilename = "Z_ex3sol2Aiter1.csv";
 	                //TTPSolution solution = Optimisation.exerciseFourSolutionOne(instance, tour, 10, maxRuntime); String csvFilename = "Z_ex4sol1iter1.csv";
 	    			
 	                
