@@ -1242,10 +1242,11 @@ public class Optimisation {
     	
     	TTPSolution[] population = new TTPSolution[pop_size];
     	while(count<pop_size && System.currentTimeMillis()-startTime<maxRuntime){
-    		//System.out.println(count);
+    		System.out.println(count);
     		if(tour.length==0 || diffTours){
     			tour = linkernTour(instance.file.getPath(), instance.numberOfNodes+1);
     			population[count]=flipTourCheck(instance, tour);
+    			population[count].printFull();
     		}else{
     			TTPSolution t = Optimisation.ppGreedyRegardTour(instance, tour);
     			population[count]=bitFlip(instance, t, (int)(maxRuntime/(pop_size*.5)), rand.nextDouble());
