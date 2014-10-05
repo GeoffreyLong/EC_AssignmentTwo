@@ -46,7 +46,7 @@ public class Driver {
         	//args = new String[]{"instances", "pla33810_n33809_bounded-strongly-corr_01",
         	//args = new String[]{"instances", "pla33810_n169045_uncorr-similar-weights_05",
         	//args = new String[]{"instances", "pla33810_n338090_uncorr_10",
-            "6", "5", "600000"};
+            "5", "5", "600000"};
 //        ttp.Optimisation.Optimisation.doAllLinkernTours();
 //        runSomeTests();
         doBatch(args);
@@ -111,6 +111,10 @@ public class Driver {
                     int MAX_GENS=20;
                     int POP_SIZE=100;
                     boolean diffTours=true;//EX 2 = false, EX 3 = true
+                    boolean two = false;
+                    boolean five = false;
+                    boolean ten = false;
+                    
                     resultTitle = instance.file.getName() + ".EA_crossover_G"+MAX_GENS+"_Ps"+POP_SIZE+"." + startTime;
             		
                     
@@ -164,9 +168,23 @@ public class Driver {
                     	System.out.println("GEN: "+gen);
                     	for(int i=0; i<POP_SIZE; i++){
                     		population[i]=merged[i];
-                    		System.out.println(population[i].ob);
+                    		//System.out.println(population[i].ob);
                     	}
                     	gen++;
+                    	
+                    	long elapsedTime = System.currentTimeMillis() - startTime;
+                		if (elapsedTime >= 60000*2 && !two) {
+                			System.out.println("Two Min: " + population[0].ob);
+                			two = true;
+                		}
+                		if (elapsedTime >= 60000*5 && !five) {
+                			System.out.println("Five Min: " + population[0].ob);
+                			five = true;
+                		}
+                		if (elapsedTime >= 60000*10 && !ten) {
+                			System.out.println("Ten Min: " + population[0].ob);
+                			ten = true;
+                		}
                     }
                     //take top of the array above as solution
                     newSolution=population[0];
